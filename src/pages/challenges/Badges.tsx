@@ -1,5 +1,6 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Award } from "lucide-react";
 
 type Badge = {
@@ -38,13 +39,13 @@ const BadgesTab: React.FC<BadgesTabProps> = ({ badges }) => (
             <span className="text-sm font-medium">{badge.points} points</span>
           </div>
           {badge.isEarned ? (
-            <div className="text-green-600 text-sm font-medium">
+            <Badge variant="default" className="text-green-600 bg-green-100 hover:bg-green-100 text-sm font-medium">
               ✓ Earned {badge.earnedDate && `on ${new Date(badge.earnedDate).toLocaleDateString()}`}
-            </div>
+            </Badge>
           ) : (
-            <div className="text-muted-foreground text-sm">
+            <Badge variant="secondary" className="text-muted-foreground text-sm">
               Not earned yet
-            </div>
+            </Badge>
           )}
         </Card>
       ))}

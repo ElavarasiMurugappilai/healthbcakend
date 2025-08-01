@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import "./App.css";
 import { AnimatePresence, motion } from "framer-motion";
+
+// Import shadcn components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 // Import modular components
 import Header from "./layout/Header";
@@ -232,335 +241,322 @@ export default function App() {
           </div>
         )}
 
-        {/* Login Modal */}
-        <AnimatePresence>
-        {showLoginModal && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-          >
-            <motion.form
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[320px] w-full max-w-xs border flex flex-col gap-3"
-              onSubmit={handleLogin}
-            >
-              <div className="font-bold text-lg mb-2 text-center">Login Required</div>
-              <input
-                type="text"
-                placeholder="Profile Name"
-                className="border rounded px-2 py-2"
-                value={loginForm.name}
-                onChange={e => setLoginForm(f => ({ ...f, name: e.target.value }))}
-                required
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                className="border rounded px-2 py-2"
-                value={loginForm.email}
-                onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                className="border rounded px-2 py-2"
-                value={loginForm.password}
-                onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
-                required
-              />
-              <button type="submit" className="bg-black text-white py-2 rounded">Login</button>
-              <button type="button" className="bg-gray-100 py-2 rounded" onClick={() => setShowLoginModal(false)}>Close</button>
-            </motion.form>
-          </motion.div>
-        )}
-        </AnimatePresence>
-
-        {/* Profile Modal */}
-        {showProfileModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[320px] w-full max-w-xs border">
-              <div className="flex flex-col items-center">
-                <img
-                  src={editingProfile ? editAvatar : user.avatar || `https://ui-avatars.com/api/?name=${user.name || 'User'}`}
-                  alt={user.name}
-                  className="w-20 h-20 rounded-full object-cover mb-2"
+        {/* Login Modal - Using shadcn Dialog */}
+        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Login Required</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Profile Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Profile Name"
+                  value={loginForm.name}
+                  onChange={e => setLoginForm(f => ({ ...f, name: e.target.value }))}
+                  required
                 />
-                {!editingProfile ? (
-                  <>
-                    <div className="font-bold text-lg mb-1">{user.name || 'Guest'}</div>
-                    <div className="text-sm text-muted-foreground mb-4">{user.email || 'Not logged in'}</div>
-                    <div className="flex flex-col gap-2 w-full mt-2">
-                      {user.name ? (
-                        <>
-                          <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90" onClick={() => setEditingProfile(true)}>Edit Profile</button>
-                          <button className="w-full px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80" onClick={handleLogout}>Logout</button>
-                        </>
-                      ) : (
-                        <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90" onClick={() => setShowLoginModal(true)}>Login</button>
-                      )}
-                      <button className="w-full px-4 py-2 bg-muted text-muted-foreground rounded hover:bg-muted/80 mt-2" onClick={() => setShowProfileModal(false)}>Close</button>
-                    </div>
-                  </>
-                ) : (
-                  <form
-                    className="flex flex-col gap-3 w-full mt-2"
-                    onSubmit={e => {
-                      e.preventDefault();
-                      setUser(u => ({ ...u, name: editForm.name, email: editForm.email, avatar: editAvatar }));
-                      setEditingProfile(false);
-                      setToast('Profile updated successfully!');
-                      setTimeout(() => setToast(''), 2000);
-                    }}
-                  >
-                   <label className="flex flex-col text-sm items-center">
-                     <span className="mb-1">Avatar</span>
-                     <input
-                       type="file"
-                       accept="image/*"
-                       className="mb-2"
-                       onChange={e => {
-                         const file = e.target.files && e.target.files[0];
-                         if (file) {
-                           const reader = new FileReader();
-                           reader.onload = ev => {
-                             setEditAvatar(ev.target?.result as string);
-                           };
-                           reader.readAsDataURL(file);
-                         }
-                       }}
-                     />
-                   </label>
-                    <label className="flex flex-col text-sm">
-                      Name
-                      <input
-                        type="text"
-                        className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                        value={editForm.name}
-                        onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                        required
-                      />
-                    </label>
-                    <label className="flex flex-col text-sm">
-                      Email
-                      <input
-                        type="email"
-                        className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                        value={editForm.email}
-                        onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
-                        required
-                      />
-                    </label>
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        type="button"
-                        className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80"
-                        onClick={() => setEditingProfile(false)}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </form>
-                )}
               </div>
-            </div>
-          </div>
-        )}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Email"
+                  value={loginForm.email}
+                  onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  value={loginForm.password}
+                  onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
+                  required
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowLoginModal(false)}>
+                  Close
+                </Button>
+                <Button type="submit">Login</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-        {/* Customize Dashboard Modal */}
-        {showCustomizeModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[320px] w-full max-w-xs border">
-              <div className="font-bold text-lg mb-2">Customize Dashboard</div>
-              <div className="flex flex-col gap-3">
-                <label className="flex items-center gap-2 cursor-pointer">
+        {/* Profile Modal - Using shadcn Dialog */}
+        <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Profile</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center space-y-4">
+              <Avatar className="w-20 h-20">
+                <AvatarImage src={editingProfile ? editAvatar : user.avatar || `https://ui-avatars.com/api/?name=${user.name || 'User'}`} />
+                <AvatarFallback>{user.name || 'User'}</AvatarFallback>
+              </Avatar>
+              
+              {!editingProfile ? (
+                <>
+                  <div className="text-center">
+                    <div className="font-bold text-lg">{user.name || 'Guest'}</div>
+                    <div className="text-sm text-muted-foreground">{user.email || 'Not logged in'}</div>
+                  </div>
+                  <div className="flex flex-col gap-2 w-full">
+                    {user.name ? (
+                      <>
+                        <Button onClick={() => setEditingProfile(true)}>Edit Profile</Button>
+                        <Button variant="outline" onClick={handleLogout}>Logout</Button>
+                      </>
+                    ) : (
+                      <Button onClick={() => setShowLoginModal(true)}>Login</Button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <form
+                  className="flex flex-col gap-4 w-full"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    setUser(u => ({ ...u, name: editForm.name, email: editForm.email, avatar: editAvatar }));
+                    setEditingProfile(false);
+                    setToast('Profile updated successfully!');
+                    setTimeout(() => setToast(''), 2000);
+                  }}
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="avatar">Avatar</Label>
+                    <Input
+                      id="avatar"
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        const file = e.target.files && e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = ev => {
+                            setEditAvatar(ev.target?.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editName">Name</Label>
+                    <Input
+                      id="editName"
+                      type="text"
+                      value={editForm.name}
+                      onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="editEmail">Email</Label>
+                    <Input
+                      id="editEmail"
+                      type="email"
+                      value={editForm.email}
+                      onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setEditingProfile(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">Save</Button>
+                  </DialogFooter>
+                </form>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Customize Dashboard Modal - Using shadcn Dialog */}
+        <Dialog open={showCustomizeModal} onOpenChange={setShowCustomizeModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Customize Dashboard</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
+                    id="fitnessGoals"
                     checked={visibleSections.fitnessGoals}
                     onChange={() => handleSectionToggle('fitnessGoals')}
+                    className="rounded"
                   />
-                  Fitness Goals
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                  <Label htmlFor="fitnessGoals">Fitness Goals</Label>
+                </div>
+                <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
+                    id="glucoseTrends"
                     checked={visibleSections.glucoseTrends}
                     onChange={() => handleSectionToggle('glucoseTrends')}
+                    className="rounded"
                   />
-                  Blood Glucose Trends
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                  <Label htmlFor="glucoseTrends">Blood Glucose Trends</Label>
+                </div>
+                <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
+                    id="careTeam"
                     checked={visibleSections.careTeam}
                     onChange={() => handleSectionToggle('careTeam')}
+                    className="rounded"
                   />
-                  My Care Team
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                  <Label htmlFor="careTeam">My Care Team</Label>
+                </div>
+                <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
+                    id="medicationSchedule"
                     checked={visibleSections.medicationSchedule}
                     onChange={() => handleSectionToggle('medicationSchedule')}
+                    className="rounded"
                   />
-                  Medication Schedule
-                </label>
-                <div className="flex gap-2 mt-4">
-                  <button
-                    type="button"
-                    className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80"
-                    onClick={() => setShowCustomizeModal(false)}
-                  >
-                    Close
-                  </button>
+                  <Label htmlFor="medicationSchedule">Medication Schedule</Label>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          </DialogContent>
+        </Dialog>
 
-        {/* Schedule Visit Modal */}
-        {showScheduleModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[320px] w-full max-w-xs border">
-              <div className="font-bold text-lg mb-2">Schedule a Visit</div>
-              <form onSubmit={handleScheduleSubmit} className="flex flex-col gap-3">
-                <label className="flex flex-col text-sm">
-                  Date
-                  <input
-                    type="date"
-                    className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                    value={scheduleForm.date}
-                    onChange={e => setScheduleForm(f => ({ ...f, date: e.target.value }))}
-                    required
-                  />
-                </label>
-                <label className="flex flex-col text-sm">
-                  Time
-                  <input
-                    type="time"
-                    className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                    value={scheduleForm.time}
-                    onChange={e => setScheduleForm(f => ({ ...f, time: e.target.value }))}
-                    required
-                  />
-                </label>
-                <label className="flex flex-col text-sm">
-                  Reason
-                  <input
-                    type="text"
-                    className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                    placeholder="Reason for visit"
-                    value={scheduleForm.reason}
-                    onChange={e => setScheduleForm(f => ({ ...f, reason: e.target.value }))}
-                    required
-                  />
-                </label>
-                <div className="flex gap-2 mt-2">
-                  <button
-                    type="button"
-                    className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80"
-                    onClick={() => setShowScheduleModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
-                  >
-                    Schedule
-                  </button>
+        {/* Schedule Visit Modal - Using shadcn Dialog */}
+        <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Schedule a Visit</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleScheduleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={scheduleForm.date}
+                  onChange={e => setScheduleForm(f => ({ ...f, date: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="time">Time</Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={scheduleForm.time}
+                  onChange={e => setScheduleForm(f => ({ ...f, time: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reason">Reason</Label>
+                <Input
+                  id="reason"
+                  type="text"
+                  placeholder="Reason for visit"
+                  value={scheduleForm.reason}
+                  onChange={e => setScheduleForm(f => ({ ...f, reason: e.target.value }))}
+                  required
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowScheduleModal(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-orange-500 hover:bg-orange-600">Schedule</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Care Team Member Modal - Using shadcn Dialog */}
+        <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Care Team Member</DialogTitle>
+            </DialogHeader>
+            {selectedMember && (
+              <div className="flex flex-col items-center space-y-4">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={selectedMember.img} />
+                  <AvatarFallback>{selectedMember.name}</AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <div className="font-bold text-lg">{selectedMember.name}</div>
+                  <div className="text-sm text-muted-foreground">{selectedMember.role}</div>
                 </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Care Team Member Modal */}
-        {selectedMember && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[300px] border">
-              <div className="flex flex-col items-center">
-                {selectedMember.img && <img src={selectedMember.img} alt={selectedMember.name || ''} className="w-16 h-16 rounded-full mb-2" />}
-                <div className="font-bold text-lg mb-1">{selectedMember.name || ''}</div>
-                <div className="text-sm text-gray-500 mb-4">{selectedMember.role || ''}</div>
-                {selectedMember.badge && <span className="bg-blue-100 text-blue-600 text-xs rounded-full px-2 py-0.5 mb-2">{selectedMember.badge}</span>}
+                {selectedMember.badge && (
+                  <Badge variant="secondary">{selectedMember.badge}</Badge>
+                )}
                 {selectedMember.messages && (
-                  <div className="w-full mt-2">
+                  <div className="w-full space-y-2">
                     {selectedMember.messages.map((msg: string, idx: number) => (
-                      <div key={idx} className="bg-accent text-accent-foreground rounded px-3 py-2 mb-2 text-sm">
-                        {msg}
-                      </div>
+                      <Card key={idx}>
+                        <CardContent className="p-3">
+                          <p className="text-sm">{msg}</p>
+                        </CardContent>
+                      </Card>
                     ))}
                   </div>
                 )}
-                <button
-                  className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-                  onClick={() => setSelectedMember(null)}
-                >
-                  Close
-                </button>
               </div>
-            </div>
-          </div>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
 
-        {showFitnessModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[320px] border">
-              <div className="font-bold text-lg mb-2">Fitness Progress</div>
-              <div className="mb-4">You have completed 4 out of 5 workouts this week! Keep it up!</div>
-              <button
-                className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-                onClick={() => setShowFitnessModal(false)}
-              >
-                Close
-              </button>
+        {/* Fitness Modal - Using shadcn Dialog */}
+        <Dialog open={showFitnessModal} onOpenChange={setShowFitnessModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Fitness Progress</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p>You have completed 4 out of 5 workouts this week! Keep it up!</p>
             </div>
-          </div>
-        )}
+          </DialogContent>
+        </Dialog>
 
-        {/* Date Picker Modal */}
-        {showDateModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[320px] w-full max-w-xs flex flex-col items-center border">
-              <div className="font-bold text-lg mb-2">Select Date</div>
-              <input
-                type="date"
-                className="border rounded px-3 py-2 mb-4 bg-background text-foreground"
-                value={selectedDate}
-                onChange={e => setSelectedDate(e.target.value)}
-                max={new Date().toISOString().slice(0, 10)}
-              />
-              <div className="flex gap-2 w-full">
-                <button
-                  className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80"
-                  onClick={() => setShowDateModal(false)}
-                >
+        {/* Date Picker Modal - Using shadcn Dialog */}
+        <Dialog open={showDateModal} onOpenChange={setShowDateModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Select Date</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="selectedDate">Date</Label>
+                <Input
+                  id="selectedDate"
+                  type="date"
+                  value={selectedDate}
+                  onChange={e => setSelectedDate(e.target.value)}
+                  max={new Date().toISOString().slice(0, 10)}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowDateModal(false)}>
                   Cancel
-                </button>
-                <button
-                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-                  onClick={() => setShowDateModal(false)}
-                >
+                </Button>
+                <Button onClick={() => setShowDateModal(false)}>
                   Select
-                </button>
-              </div>
+                </Button>
+              </DialogFooter>
             </div>
-          </div>
-        )}
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   );

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, AlertCircle, Clock, Pill, Calendar, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, Clock, Pill, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface HistoryProps {
   medicationLogs: any[];
@@ -237,13 +240,16 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
                       style={{ willChange: "transform" }}
                     >
                       {getEnhancedStatusIcon(log.status)}
-                      <span className={`text-xs font-medium ${
-                        log.status === 'taken' ? 'text-green-600 dark:text-green-400' :
-                        log.status === 'missed' ? 'text-red-600 dark:text-red-400' :
-                        'text-yellow-600 dark:text-yellow-400'
-                      }`}>
+                      <Badge
+                        variant={
+                          log.status === 'taken' ? 'default' :
+                          log.status === 'missed' ? 'destructive' :
+                          'secondary'
+                        }
+                        className="text-xs"
+                      >
                         {getStatusText(log.status)}
-                      </span>
+                      </Badge>
                     </motion.div>
                   </div>
                 </motion.div>
@@ -281,122 +287,158 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
     <Card className="p-3 sm:p-4 md:p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl w-full max-w-xs sm:max-w-md md:max-w-lg mx-auto">
       {/* Month/Year Navigation */}
       <div className="flex items-center justify-between mb-3 sm:mb-4">
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => handleMonthChange('prev')}
           className="p-1 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
         >
           <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-        </button>
+        </Button>
         <div className="flex items-center space-x-1 sm:space-x-2">
-          <select
-            value={currentMonth}
-            onChange={(e) => setCurrentMonth(parseInt(e.target.value))}
-            className="text-xs sm:text-sm font-medium bg-transparent border-none outline-none cursor-pointer text-gray-700 dark:text-gray-300"
-          >
-            {Array.from({ length: 12 }, (_, i) => (
-              <option key={i} value={i}>
-                {new Date(2024, i).toLocaleDateString('en-US', { month: 'short' })}
-              </option>
-            ))}
-          </select>
-          <select
-            value={currentYear}
-            onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-            className="text-xs sm:text-sm font-medium bg-transparent border-none outline-none cursor-pointer text-gray-700 dark:text-gray-300"
-          >
-            {Array.from({ length: 10 }, (_, i) => 2020 + i).map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
+          <Select value={currentMonth.toString()} onValueChange={(value) => setCurrentMonth(parseInt(value))}>
+            <SelectTrigger className="text-xs sm:text-sm font-medium bg-transparent border-none outline-none cursor-pointer text-gray-700 dark:text-gray-300 w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 12 }, (_, i) => (
+                <SelectItem key={i} value={i.toString()}>
+                  {new Date(2024, i).toLocaleDateString('en-US', { month: 'short' })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={currentYear.toString()} onValueChange={(value) => setCurrentYear(parseInt(value))}>
+            <SelectTrigger className="text-xs sm:text-sm font-medium bg-transparent border-none outline-none cursor-pointer text-gray-700 dark:text-gray-300 w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 5 }, (_, i) => {
+                const year = new Date().getFullYear() - 2 + i;
+                return (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => handleMonthChange('next')}
           className="p-1 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
         >
           <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
-        </button>
+        </Button>
       </div>
-      
+
       {/* Calendar Grid */}
-      <div className="space-y-2 sm:space-y-3">
-        {/* Day Headers */}
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-            <div key={day} className="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300 py-1 sm:py-2">
-                {day}
-              </div>
-            ))}
-        </div>
-        {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2">
-            {getCalendarDays().map((date, index) => (
-              <button
-                key={index}
-                onClick={() => date && setSelectedDate(date.toISOString().slice(0, 10))}
-              className={`aspect-square w-full min-w-0 flex flex-col items-center justify-center rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium ${
-                date ? 'hover:bg-gray-100 dark:hover:bg-gray-700' : ''
-                } ${
-                  date && date.toISOString().slice(0, 10) === selectedDate 
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-lg ring-2 ring-blue-300 dark:ring-blue-400' 
-                  : date ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' : 'bg-transparent'
-                }`}
-              >
-              <span className="pt-0.5 sm:pt-1">{date ? date.getDate() : ''}</span>
-                {date && (
-                <span className={`mt-0.5 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full block ${
-                    getDateStatus(date) === 'all-taken' ? 'bg-green-500 shadow-sm' :
-                    getDateStatus(date) === 'missed' ? 'bg-red-500 shadow-sm' :
-                    getDateStatus(date) === 'partial' ? 'bg-yellow-500 shadow-sm' :
-                    'bg-transparent'
-                  }`}></span>
-                )}
-              </button>
-            ))}
-        </div>
+      <div className="grid grid-cols-7 gap-1 mb-3">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+          <div key={day} className="text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-1">
+            {day}
+          </div>
+        ))}
+        {getCalendarDays().map((day, index) => (
+          <button
+            key={index}
+            onClick={() => day && setSelectedDate(day.toISOString().slice(0, 10))}
+            disabled={!day}
+                         className={`relative p-2 text-xs sm:text-sm rounded-lg transition-all duration-200 ${
+               day
+                 ? getDateStatus(day) === 'all-taken'
+                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50'
+                   : getDateStatus(day) === 'missed'
+                   ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
+                   : getDateStatus(day) === 'partial'
+                   ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
+                   : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                 : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+             } ${
+               day && selectedDate === day.toISOString().slice(0, 10)
+                 ? 'ring-2 ring-blue-500 dark:ring-blue-400'
+                 : ''
+             }`}
+          >
+            {day?.getDate()}
+            {day && getDateStatus(day) !== 'none' && (
+              <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-current opacity-75"></div>
+            )}
+          </button>
+        ))}
       </div>
-      
-      {/* Calendar Legend */}
-      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-600">
-       
+
+      {/* Quick Date Navigation */}
+      <div className="flex flex-wrap gap-1 sm:gap-2">
+        {['Today', 'Yesterday', 'Last Week', 'Last Month'].map((period, index) => {
+          let date = new Date();
+          switch (period) {
+            case 'Yesterday':
+              date.setDate(date.getDate() - 1);
+              break;
+            case 'Last Week':
+              date.setDate(date.getDate() - 7);
+              break;
+            case 'Last Month':
+              date.setMonth(date.getMonth() - 1);
+              break;
+            default:
+              break;
+          }
+          return (
+            <Button
+              key={period}
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedDate(date.toISOString().slice(0, 10))}
+              className="text-xs px-2 py-1 h-auto"
+            >
+              {period}
+            </Button>
+          );
+        })}
       </div>
     </Card>
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6 bg-gray-50 dark:bg-gray-900 min-h-[500px] p-3 sm:p-4 md:p-6 text-gray-900 dark:text-white" style={{ scrollBehavior: "smooth" }}>
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-row items-center justify-center gap-2 sm:gap-3">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Medications History</h2>
-       
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Medication History</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Track your medication adherence over time</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Badge variant="outline" className="text-xs">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Taken
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            <XCircle className="w-3 h-3 mr-1" />
+            Missed
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Skipped
+          </Badge>
+        </div>
       </div>
 
-                        {/* Main Content */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {/* Calendar Section - First on small screens */}
-                    <div className="lg:col-span-1 order-1 lg:order-2">
-                      <div className="h-auto sm:h-[400px]">
-                        <EditableCalendarWidget />
-                      </div>
-                    </div>
-                    
-                    {/* Timeline Section - Second on small screens */}
-                    <div className="lg:col-span-2 order-2 lg:order-1">
-                      <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700 h-[400px] sm:h-[436px] overflow-hidden">
-                        <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">
-  Timeline for {(() => {
-    const d = new Date(selectedDate);
-    d.setDate(d.getDate() + 1); // Add one day
-    return d.getDate().toString().padStart(2, '0') + '/' +
-           (d.getMonth() + 1).toString().padStart(2, '0') + '/' +
-           d.getFullYear();
-  })()}
-</h3>
-                        <div>
-                          <CompactTimelineView />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+      {/* Calendar and Timeline */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Calendar Widget */}
+        <div className="lg:col-span-1">
+          <EditableCalendarWidget />
+        </div>
+
+        {/* Timeline View */}
+        <div className="lg:col-span-2">
+          <CompactTimelineView />
+        </div>
+      </div>
     </div>
   );
 };

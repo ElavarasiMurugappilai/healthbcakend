@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Health from "./healthinsights/Health";
 import Blood from "./healthinsights/Blood";
 import HeartRate from "./healthinsights/HeartRate";
@@ -7,29 +7,25 @@ import Steps from "./healthinsights/Steps";
 import AI from "./healthinsights/AI";
 import { motion } from "framer-motion";
 
-// Responsive window width hook
-function useWindowWidth() {
-  const [width, setWidth] = React.useState(window.innerWidth);
-  React.useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  return width;
-}
-
 interface HealthInsightsPageProps {
   searchValue: string;
 }
 
 const HealthInsightsPage: React.FC<HealthInsightsPageProps> = ({ searchValue }) => {
-  const width = useWindowWidth();
+  const [width, setWidth] = useState(window.innerWidth);
+  const [compare, setCompare] = useState("today");
+  const [dateRange, setDateRange] = useState({ from: "", to: "" });
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   let barSize = 16;
   if (width < 500) barSize = 8;
   else if (width < 900) barSize = 12;
   const lineStroke = width < 600 ? 1 : width < 900 ? 2 : 3;
-  const [compare, setCompare] = useState("today");
-  const [dateRange, setDateRange] = useState({ from: "", to: "" });
 
   const glucoseData = [
     { label: "6am", today: 90, yesterday: 85 },

@@ -1,5 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 type LeaderboardEntry = {
   id: string;
@@ -22,10 +24,13 @@ const LeaderboardTab: React.FC<LeaderboardTabProps> = ({ leaderboard }) => (
         {leaderboard.map((entry) => (
           <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-accent transition-colors">
             <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+              <Badge variant="outline" className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
                 {entry.rank}
-              </div>
-              <img src={entry.avatar} alt={entry.name} className="w-10 h-10 rounded-full" />
+              </Badge>
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={entry.avatar} alt={entry.name} />
+                <AvatarFallback>{entry.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              </Avatar>
               <div>
                 <div className="font-medium text-foreground text-left">{entry.name}</div>
                 <div className="text-sm text-muted-foreground text-left">

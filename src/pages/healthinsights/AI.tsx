@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 
 const insights = [
@@ -63,7 +64,7 @@ const FlipCard = ({ icon, title, summary, details, gradient, flipped, setFlipped
         </span>
         <div className="font-bold text-lg mb-1">{title}</div>
         <div className="text-sm text-gray-700 dark:text-gray-200 text-center">{summary}</div>
-        <div className="mt-4 text-xs text-black dark:text-black-200">Click to see more</div>
+        <Badge variant="secondary" className="mt-4 text-xs text-black dark:text-black-200">Click to see more</Badge>
       </Card>
       {/* Back */}
       <Card
@@ -72,7 +73,7 @@ const FlipCard = ({ icon, title, summary, details, gradient, flipped, setFlipped
       >
         <div className="font-bold text-lg mb-2">{title} Details</div>
         <div className="text-base text-center px-2 text-black dark:text-gray-200">{details}</div>
-        <div className="mt-4 text-xs text-black dark:text-black-800">Click to flip back</div>
+        <Badge variant="secondary" className="mt-4 text-xs text-black dark:text-black-800">Click to flip back</Badge>
       </Card>
     </motion.div>
   </motion.div>

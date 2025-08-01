@@ -3,6 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface Medication {
   name: string;
@@ -41,16 +43,17 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
           <div className="flex items-center justify-between w-full">
             <CardTitle className="text-sm sm:text-base md:text-lg lg:text-xl break-words">Medication Schedule</CardTitle>
             <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => onStatusChange(e.target.value)}
-                className="text-xs p-2 pr-8 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-md cursor-pointer outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-              >
-                <option value="any">Any status</option>
-                <option value="Missed">Missed</option>
-                <option value="Taken">Taken</option>
-                <option value="Upcoming">Upcoming</option>
-              </select>
+              <Select value={statusFilter} onValueChange={onStatusChange}>
+                <SelectTrigger className="w-[140px] h-8 text-xs">
+                  <SelectValue placeholder="Any status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any status</SelectItem>
+                  <SelectItem value="Missed">Missed</SelectItem>
+                  <SelectItem value="Taken">Taken</SelectItem>
+                  <SelectItem value="Upcoming">Upcoming</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -92,17 +95,18 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
                       <td className="py-3 px-1 text-center text-xs">{med.qty}</td>
                       <td className="py-3 px-1 text-left text-xs">{med.dosage}</td>
                       <td className="py-3 px-1 text-left hidden sm:table-cell">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
+                        <Badge
+                          variant={
                             med.status === "Missed"
-                              ? "bg-red-100 text-red-600"
+                              ? "destructive"
                               : med.status === "Taken"
-                              ? "bg-green-100 text-green-600"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
+                              ? "default"
+                              : "secondary"
+                          }
+                          className="text-xs"
                         >
                           {med.status}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="py-3 px-1 text-center">
                         {med.status === "Upcoming" ? (
@@ -115,7 +119,8 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
                         {med.status === "Taken" ? (
                           <Button
                             size="sm"
-                            className="rounded-full bg-gray-300 text-gray-500 cursor-not-allowed text-xs px-3 py-1 w-full sm:w-auto"
+                            variant="secondary"
+                            className="rounded-full text-xs px-3 py-1 w-full sm:w-auto"
                             disabled
                           >
                             Taken

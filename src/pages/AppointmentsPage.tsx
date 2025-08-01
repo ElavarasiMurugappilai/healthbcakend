@@ -2,9 +2,11 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarPlus } from "lucide-react";
-
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -249,38 +251,39 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
           >
             {/* Doctor Name Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="doctor" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Doctor Name *
-              </label>
-              <select 
-                value={form.doctor} 
-                onChange={e => setForm(f => ({ ...f, doctor: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
-              >
-                <option value="">Select a doctor</option>
-                <option value="Dr. Smith">Dr. Smith - General Physician</option>
-                <option value="Dr. Lee">Dr. Lee - Cardiologist</option>
-                <option value="Dr. Patel">Dr. Patel - Endocrinologist</option>
-                <option value="Dr. Gomez">Dr. Gomez - Neurologist</option>
-                <option value="Dr. Brown">Dr. Brown - Dermatologist</option>
-                <option value="Dr. Green">Dr. Green - Orthopedist</option>
-                <option value="Dr. White">Dr. White - Psychiatrist</option>
-                <option value="Dr. Nancy">Dr. Nancy - Pediatrician</option>
-                <option value="Dr. Mike">Dr. Mike - Oncologist</option>
-                <option value="Dr. Suba">Dr. Suba - Gastroenterologist</option>
-                <option value="Dr. Raayan">Dr. Raayan - Urologist</option>
-                <option value="Dr. Kavya">Dr. Kavya - Gynecologist</option>
-                <option value="Dr. Nisanth">Dr. Nisanth - Ophthalmologist</option>
-                <option value="Dr. Ramana">Dr. Ramana - Pulmonologist</option>
-              </select>
+              </Label>
+              <Select value={form.doctor} onValueChange={(value) => setForm(f => ({ ...f, doctor: value }))}>
+                <SelectTrigger className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                  <SelectValue placeholder="Select a doctor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dr. Smith">Dr. Smith - General Physician</SelectItem>
+                  <SelectItem value="Dr. Lee">Dr. Lee - Cardiologist</SelectItem>
+                  <SelectItem value="Dr. Patel">Dr. Patel - Endocrinologist</SelectItem>
+                  <SelectItem value="Dr. Gomez">Dr. Gomez - Neurologist</SelectItem>
+                  <SelectItem value="Dr. Brown">Dr. Brown - Dermatologist</SelectItem>
+                  <SelectItem value="Dr. Green">Dr. Green - Orthopedist</SelectItem>
+                  <SelectItem value="Dr. White">Dr. White - Psychiatrist</SelectItem>
+                  <SelectItem value="Dr. Nancy">Dr. Nancy - Pediatrician</SelectItem>
+                  <SelectItem value="Dr. Mike">Dr. Mike - Oncologist</SelectItem>
+                  <SelectItem value="Dr. Suba">Dr. Suba - Gastroenterologist</SelectItem>
+                  <SelectItem value="Dr. Raayan">Dr. Raayan - Urologist</SelectItem>
+                  <SelectItem value="Dr. Kavya">Dr. Kavya - Gynecologist</SelectItem>
+                  <SelectItem value="Dr. Nisanth">Dr. Nisanth - Ophthalmologist</SelectItem>
+                  <SelectItem value="Dr. Ramana">Dr. Ramana - Pulmonologist</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Date Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Appointment Date *
-              </label>
+              </Label>
               <Input 
+                id="date"
                 type="date" 
                 value={form.date} 
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
@@ -290,10 +293,11 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
 
             {/* Time Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Appointment Time *
-              </label>
+              </Label>
               <Input 
+                id="time"
                 type="time" 
                 value={form.time} 
                 onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
@@ -303,27 +307,22 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
 
             {/* Mode Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="mode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Appointment Type
-              </label>
-              <select 
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
-                value={form.mode} 
-                onChange={e => setForm(f => ({ ...f, mode: e.target.value }))}
-              >
-                <option value="In-person">In-person</option>
-                <option value="Telehealth">Telehealth</option>
-            </select>
+              </Label>
+              <Select value={form.mode} onValueChange={(value) => setForm(f => ({ ...f, mode: value }))}>
+                <SelectTrigger className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="In-person">In-person</SelectItem>
+                  <SelectItem value="Telehealth">Telehealth</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Action Buttons */}
-            <motion.div 
-              className="flex gap-3 pt-2"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.3, ease: "easeOut" }}
-              style={{ willChange: "transform, opacity" }}
-            >
+            <DialogFooter className="pt-2">
               <Button 
                 onClick={onClose} 
                 variant="outline" 
@@ -341,7 +340,7 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
               >
                 Book Appointment
               </Button>
-            </motion.div>
+            </DialogFooter>
           </motion.div>
         </motion.div>
       </DialogContent>
@@ -422,9 +421,9 @@ function RescheduleModal({
                     {appointment.mode}
                   </div>
                 </div>
-                <div className="text-xs font-mono text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-500 px-1.5 py-0.5 rounded-md">
+                <Badge variant="secondary" className="text-xs font-mono text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-500 px-1.5 py-0.5 rounded-md">
                   {appointment.time}
-                </div>
+                </Badge>
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {appointment.date}
@@ -442,38 +441,39 @@ function RescheduleModal({
           >
             {/* Doctor Name Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="reschedule-doctor" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Doctor Name *
-              </label>
-              <select 
-                value={form.doctor} 
-                onChange={e => setForm(f => ({ ...f, doctor: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
-              >
-                <option value="">Select a doctor</option>
-                <option value="Dr. Smith">Dr. Smith - General Physician</option>
-                <option value="Dr. Lee">Dr. Lee - Cardiologist</option>
-                <option value="Dr. Patel">Dr. Patel - Endocrinologist</option>
-                <option value="Dr. Gomez">Dr. Gomez - Neurologist</option>
-                <option value="Dr. Brown">Dr. Brown - Dermatologist</option>
-                <option value="Dr. Green">Dr. Green - Orthopedist</option>
-                <option value="Dr. White">Dr. White - Psychiatrist</option>
-                <option value="Dr. Nancy">Dr. Nancy - Pediatrician</option>
-                <option value="Dr. Mike">Dr. Mike - Oncologist</option>
-                <option value="Dr. Suba">Dr. Suba - Gastroenterologist</option>
-                <option value="Dr. Raayan">Dr. Raayan - Urologist</option>
-                <option value="Dr. Kavya">Dr. Kavya - Gynecologist</option>
-                <option value="Dr. Nisanth">Dr. Nisanth - Ophthalmologist</option>
-                <option value="Dr. Ramana">Dr. Ramana - Pulmonologist</option>
-              </select>
+              </Label>
+              <Select value={form.doctor} onValueChange={(value) => setForm(f => ({ ...f, doctor: value }))}>
+                <SelectTrigger className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                  <SelectValue placeholder="Select a doctor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Dr. Smith">Dr. Smith - General Physician</SelectItem>
+                  <SelectItem value="Dr. Lee">Dr. Lee - Cardiologist</SelectItem>
+                  <SelectItem value="Dr. Patel">Dr. Patel - Endocrinologist</SelectItem>
+                  <SelectItem value="Dr. Gomez">Dr. Gomez - Neurologist</SelectItem>
+                  <SelectItem value="Dr. Brown">Dr. Brown - Dermatologist</SelectItem>
+                  <SelectItem value="Dr. Green">Dr. Green - Orthopedist</SelectItem>
+                  <SelectItem value="Dr. White">Dr. White - Psychiatrist</SelectItem>
+                  <SelectItem value="Dr. Nancy">Dr. Nancy - Pediatrician</SelectItem>
+                  <SelectItem value="Dr. Mike">Dr. Mike - Oncologist</SelectItem>
+                  <SelectItem value="Dr. Suba">Dr. Suba - Gastroenterologist</SelectItem>
+                  <SelectItem value="Dr. Raayan">Dr. Raayan - Urologist</SelectItem>
+                  <SelectItem value="Dr. Kavya">Dr. Kavya - Gynecologist</SelectItem>
+                  <SelectItem value="Dr. Nisanth">Dr. Nisanth - Ophthalmologist</SelectItem>
+                  <SelectItem value="Dr. Ramana">Dr. Ramana - Pulmonologist</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Date Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="reschedule-date" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 New Appointment Date *
-              </label>
+              </Label>
               <Input 
+                id="reschedule-date"
                 type="date" 
                 value={form.date} 
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
@@ -483,10 +483,11 @@ function RescheduleModal({
 
             {/* Time Field */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="reschedule-time" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 New Appointment Time *
-              </label>
+              </Label>
               <Input 
+                id="reschedule-time"
                 type="time" 
                 value={form.time} 
                 onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
@@ -496,27 +497,22 @@ function RescheduleModal({
 
             {/* Mode Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Label htmlFor="reschedule-mode" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Appointment Type
-              </label>
-              <select 
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700"
-                value={form.mode} 
-                onChange={e => setForm(f => ({ ...f, mode: e.target.value }))}
-              >
-                <option value="In-person">In-person</option>
-                <option value="Telehealth">Telehealth</option>
-              </select>
+              </Label>
+              <Select value={form.mode} onValueChange={(value) => setForm(f => ({ ...f, mode: value }))}>
+                <SelectTrigger className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="In-person">In-person</SelectItem>
+                  <SelectItem value="Telehealth">Telehealth</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Action Buttons */}
-            <motion.div 
-              className="flex gap-2 sm:gap-3 pt-1 sm:pt-2"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.3, ease: "easeOut" }}
-              style={{ willChange: "transform, opacity" }}
-            >
+            <DialogFooter className="pt-1 sm:pt-2">
               <Button 
                 onClick={onClose} 
                 variant="outline" 
@@ -533,7 +529,7 @@ function RescheduleModal({
               >
                 Reschedule
               </Button>
-            </motion.div>
+            </DialogFooter>
           </motion.div>
         </motion.div>
       </DialogContent>
@@ -565,14 +561,16 @@ function HistoryModal({ open, onClose, history }: { open: boolean; onClose: () =
               <DialogTitle className="text-lg sm:text-xl font-bold text-white m-0">
                 Appointment History
               </DialogTitle>
-              <button
+              <Button
                 onClick={onClose}
+                variant="ghost"
+                size="sm"
                 className="text-white hover:text-gray-200 transition-colors p-1 rounded-full hover:bg-white/10"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </Button>
             </div>
           </motion.div>
 
@@ -625,13 +623,16 @@ function HistoryModal({ open, onClose, history }: { open: boolean; onClose: () =
                           {a.date} • {a.mode}
                         </div>
                       </div>
-                      <div className={`text-xs sm:text-sm font-bold px-2 py-1 rounded-full ${
-                        a.status === "Completed" ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" : 
-                        a.status === "No-Show" ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300" : 
-                        "bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300"
-                      }`}>
+                      <Badge 
+                        variant={
+                          a.status === "Completed" ? "default" :
+                          a.status === "No-Show" ? "destructive" :
+                          "secondary"
+                        }
+                        className="text-xs sm:text-sm font-bold"
+                      >
                         {a.status}
-                      </div>
+                      </Badge>
                   </div>
                 </motion.div>
               ))

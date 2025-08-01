@@ -1,8 +1,11 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Home,
   Pill,
@@ -15,6 +18,7 @@ import {
   CalendarDays,
   Sun,
   Moon,
+  X,
 } from "lucide-react";
 
 const sidebarIcons = [
@@ -47,7 +51,7 @@ const UserProfile = ({
 }) => {
   const isGuest = !user.name && !user.email && !user.avatar;
   return (
-    <div
+    <Card
       className="flex items-center gap-3 p-4 rounded-xl bg-sidebar-accent mt-auto cursor-pointer hover:shadow"
       onClick={() => isGuest ? setShowLoginModal(true) : setShowProfileModal(true)}
       title={isGuest ? "Login" : "Profile"}
@@ -56,16 +60,20 @@ const UserProfile = ({
       aria-label={isGuest ? "Login" : "Profile"}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") (isGuest ? setShowLoginModal(true) : setShowProfileModal(true)); }}
     >
-      <img
-        src={isGuest ? 'https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555' : user.avatar || `https://ui-avatars.com/api/?name=${user.name}`}
-        alt={isGuest ? 'Guest' : user.name}
-        className="w-10 h-10 rounded-full object-cover"
-      />
-      <div className="text-left">
-        <div className="font-semibold text-sm text-sidebar-foreground">{isGuest ? 'Guest' : user.name}</div>
-        <div className="text-xs text-muted-foreground">{isGuest ? 'Not logged in' : user.email}</div>
-      </div>
-    </div>
+      <CardContent className="p-0 flex items-center gap-3 w-full">
+        <Avatar className="w-10 h-10">
+          <AvatarImage 
+            src={isGuest ? 'https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555' : user.avatar || `https://ui-avatars.com/api/?name=${user.name}`} 
+            alt={isGuest ? 'Guest' : user.name} 
+          />
+          <AvatarFallback>{isGuest ? 'Guest' : user.name}</AvatarFallback>
+        </Avatar>
+        <div className="text-left">
+          <div className="font-semibold text-sm text-sidebar-foreground">{isGuest ? 'Guest' : user.name}</div>
+          <div className="text-xs text-muted-foreground">{isGuest ? 'Not logged in' : user.email}</div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -119,14 +127,15 @@ const Sidebar: React.FC<SidebarProps> = ({
             <span className="bg-orange-500 rounded-full w-6 h-6 inline-block" />
             <span className="font-bold text-xl">ARMED</span>
           </div>
-          <button
-            className="absolute top-4 right-4 text-3xl text-black dark:text-white bg-transparent border-none focus:outline-none"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-4 right-4 text-3xl text-black dark:text-white bg-transparent border-none focus:outline-none p-0 h-auto"
             onClick={handleSidebarClose}
             aria-label="Close sidebar"
-            type="button"
           >
-            &times;
-          </button>
+            <X size={24} />
+          </Button>
         </div>
         <div className="relative h-full flex flex-col px-6 pt-6 md:pt-0">
           {/* Sidebar content below */}
@@ -151,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </ul>
             {/* Utility items: only show on mobile */}
             <div className="block md:hidden">
-              <hr className="my-4 border-gray-300 dark:border-zinc-800" />
+              <Separator className="my-4" />
               {/* Search bar with icon inside and clear button */}
               <div className="relative mb-2">
                 <Input
@@ -168,14 +177,15 @@ const Sidebar: React.FC<SidebarProps> = ({
                 />
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
                 {searchValue && (
-                  <button
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0 h-auto"
                     onClick={() => setSearchValue("")}
                     aria-label="Clear search"
-                    type="button"
                   >
-                    &#10005;
-                  </button>
+                    <X size={16} />
+                  </Button>
                 )}
               </div>
               {/* Customize Dashboard (only on /dashboard) */}

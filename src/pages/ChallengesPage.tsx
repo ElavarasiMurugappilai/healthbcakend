@@ -5,8 +5,12 @@ import LeaderboardTab from "./challenges/Leaderboard";
 import { Target, Award, Users, Activity, Zap, Heart, Star, Trophy, Calendar, Lightbulb, X, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AnimatePresence, motion } from "framer-motion";
 
 type Challenge = {
@@ -97,12 +101,12 @@ const ChallengeCard: React.FC<{
             {challenge.icon}
           </div>
           <div className="flex flex-col gap-2">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTypeColor(challenge.type)}`}>
+            <Badge className={`text-xs font-semibold ${getTypeColor(challenge.type)}`}>
               {challenge.type}
-            </span>
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getDifficultyColor(challenge.difficulty)}`}>
+            </Badge>
+            <Badge className={`text-xs font-semibold ${getDifficultyColor(challenge.difficulty)}`}>
               {challenge.difficulty}
-            </span>
+            </Badge>
           </div>
         </div>
 
@@ -275,8 +279,9 @@ const ChallengeModal: React.FC<{
               </div>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="text-sm text-muted-foreground mb-2 block">Progress Value</label>
+                  <Label htmlFor="progress" className="text-sm text-muted-foreground mb-2 block">Progress Value</Label>
                   <Input
+                    id="progress"
                     type="number"
                     value={progress}
                     onChange={(e) => setProgress(Number(e.target.value))}
@@ -286,8 +291,9 @@ const ChallengeModal: React.FC<{
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="text-sm text-muted-foreground mb-2 block">Slider</label>
+                  <Label htmlFor="slider" className="text-sm text-muted-foreground mb-2 block">Slider</Label>
                   <input
+                    id="slider"
                     type="range"
                     min={0}
                     max={challenge.target}
@@ -608,101 +614,64 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       <Goals userPoints={userPoints} activeCount={challenges.filter(c => c.isActive).length} />
         </div>
         
-      {/* Tabs */}
-        <div className="flex space-x-1 bg-white dark:bg-gray-800 p-1 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8">
-        <button
-          onClick={() => setActiveTab('challenges')}
-            className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              activeTab === 'challenges' 
-                ? 'bg-blue-600 text-white shadow-lg' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            <div className="flex flex-col items-center gap-1">
-              <Target className="w-5 h-5" />
-              <span>Challenges</span>
-            </div>
-        </button>
-        <button
-          onClick={() => setActiveTab('badges')}
-            className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              activeTab === 'badges' 
-                ? 'bg-blue-600 text-white shadow-lg' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            <div className="flex flex-col items-center gap-1">
-              <Award className="w-5 h-5" />
-              <span>Badges</span>
-            </div>
-        </button>
-        <button
-          onClick={() => setActiveTab('leaderboard')}
-            className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              activeTab === 'leaderboard' 
-                ? 'bg-blue-600 text-white shadow-lg' 
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            <div className="flex flex-col items-center gap-1">
-              <Users className="w-5 h-5" />
-              <span>Leaderboard</span>
-            </div>
-        </button>
-      </div>
-
-      {/* Content */}
-      <AnimatePresence mode="wait">
-        {activeTab === 'challenges' && (
-          <motion.div
-            key="challenges"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-              {/* Challenges Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <AnimatePresence>
-                  {filteredChallenges.map((challenge) => (
-                    <ChallengeCard
-                      key={challenge.id}
-                      challenge={challenge}
-                      onJoin={handleJoinChallenge}
-                      onLeave={handleLeaveChallenge}
-                      onUpdateProgress={handleUpdateProgress}
-                      onCardClick={handleCardClick}
-                    />
-                  ))}
-                </AnimatePresence>
+      {/* Tabs - Using shadcn Tabs with Compact Responsive Design */}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'challenges' | 'badges' | 'leaderboard')} className="w-full mb-8">
+          <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 p-1 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 h-auto min-h-[50px] sm:min-h-[55px] md:min-h-[60px]">
+            <TabsTrigger 
+              value="challenges"
+              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+            >
+              <div className="flex flex-col items-center gap-1">
+                <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Challenges</span>
               </div>
-          </motion.div>
-        )}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="badges"
+              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+            >
+              <div className="flex flex-col items-center gap-1">
+                <Award className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Badges</span>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="leaderboard"
+              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+            >
+              <div className="flex flex-col items-center gap-1">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Leaderboard</span>
+              </div>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="challenges" className="space-y-6">
+            {/* Challenges Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <AnimatePresence>
+                {filteredChallenges.map((challenge) => (
+                  <ChallengeCard
+                    key={challenge.id}
+                    challenge={challenge}
+                    onJoin={handleJoinChallenge}
+                    onLeave={handleLeaveChallenge}
+                    onUpdateProgress={handleUpdateProgress}
+                    onCardClick={handleCardClick}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          </TabsContent>
           
-        {activeTab === 'badges' && (
-          <motion.div
-            key="badges"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
+          <TabsContent value="badges" className="space-y-6">
             <BadgesTab badges={filteredBadges} />
-          </motion.div>
-        )}
+          </TabsContent>
           
-        {activeTab === 'leaderboard' && (
-          <motion.div
-            key="leaderboard"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
+          <TabsContent value="leaderboard" className="space-y-6">
             <LeaderboardTab leaderboard={filteredLeaderboard} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </TabsContent>
+        </Tabs>
 
         {/* Challenge Modal */}
         <ChallengeModal
@@ -715,20 +684,20 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
           onUpdateProgress={handleUpdateProgress}
         />
 
-      {/* Toast notification */}
+        {/* Toast notification */}
         <AnimatePresence>
-      {toast && (
+          {toast && (
             <motion.div
               initial={{ opacity: 0, y: 50, scale: 0.3 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.3 }}
               className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50"
             >
-          {toast}
+              {toast}
             </motion.div>
           )}
         </AnimatePresence>
-        </div>
+      </div>
     </div>
   );
 };

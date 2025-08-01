@@ -1,4 +1,4 @@
-  import React, { useState } from "react";
+import React, { useState } from "react";
 import { useDateStore } from "@/store/useDateStore";
 import Welcome from "./dashboard/Welcome";
 import Fitness from "./dashboard/Fitness";
@@ -8,30 +8,43 @@ import MedicationSchedule from "./dashboard/MedicationSchedule";
 import { Cloud } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
+// Import shadcn components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-// Custom Tooltip for Recharts
+// Shadcn-styled Tooltip for Recharts
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-3 border border-gray-200">
-        <div className="font-semibold text-gray-800 mb-1">Time: {label}:00</div>
-        <div className="flex flex-col gap-1">
-          <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-orange-500" />
-            <span className="text-gray-700">Today: <span className="font-bold">{payload[0].value}</span></span>
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-blue-200" />
-            <span className="text-gray-700">Yesterday: <span className="font-bold">{payload[1].value}</span></span>
-          </span>
-        </div>
-      </div>
+      <Card className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+        <CardContent className="p-3">
+          <div className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Time: {label}:00</div>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="w-3 h-3 rounded-full bg-orange-500 p-0" />
+              <span className="text-gray-700 dark:text-gray-300 text-sm">
+                Today: <span className="font-bold">{payload[0].value}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="w-3 h-3 rounded-full bg-blue-200 p-0" />
+              <span className="text-gray-700 dark:text-gray-300 text-sm">
+                Yesterday: <span className="font-bold">{payload[1].value}</span>
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
   return null;
 };
 
-// Custom bar shape with cloud icon for selected bars
+// Shadcn-styled bar shape with cloud icon for selected bars
 const CustomBar = (props: any) => {
   const { x, y, width, height, payload, fill } = props;
   const barRadius = width / 2; // fully rounded
@@ -45,6 +58,7 @@ const CustomBar = (props: any) => {
   const cloudIconSize = isSmallScreen ? 12 : isMediumScreen ? 16 : 20;
   const cloudYOffset = isSmallScreen ? 6 : isMediumScreen ? 10 : 14;
   const cloudY = y - 32;
+  
   return (
     <g>
       <rect x={x} y={y} width={width} height={height} rx={barRadius} fill={fill} />
@@ -78,6 +92,7 @@ interface DashboardPageProps {
   width: number;
   showScheduleModal: boolean;
 }
+
 const DashboardPage: React.FC<DashboardPageProps> = (props) => {
   // Remove any local user state
   // const [user, setUser] = useState({ name: '', email: '', avatar: '' });
@@ -202,75 +217,57 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
       </section>
       {/* Bottom spacing to ensure page is fully visible */}
       <div className="h-4"></div>
-      <AnimatePresence>
-        {showScheduleModal && (
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-card text-card-foreground rounded-lg p-6 shadow-lg min-w-[320px] w-full max-w-xs border"
-            >
-              <div className="font-bold text-lg mb-2">Schedule a Visit</div>
-              <form onSubmit={handleScheduleSubmit} className="flex flex-col gap-3">
-                <label className="flex flex-col text-sm">
-                  Date
-                  <input
-                    type="date"
-                    className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                    value={scheduleForm.date}
-                    onChange={e => setScheduleForm(f => ({ ...f, date: e.target.value }))}
-                    required
-                  />
-                </label>
-                <label className="flex flex-col text-sm">
-                  Time
-                  <input
-                    type="time"
-                    className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                    value={scheduleForm.time}
-                    onChange={e => setScheduleForm(f => ({ ...f, time: e.target.value }))}
-                    required
-                  />
-                </label>
-                <label className="flex flex-col text-sm">
-                  Reason
-                  <input
-                    type="text"
-                    className="mt-1 border rounded px-2 py-1 bg-background text-foreground"
-                    placeholder="Reason for visit"
-                    value={scheduleForm.reason}
-                    onChange={e => setScheduleForm(f => ({ ...f, reason: e.target.value }))}
-                    required
-                  />
-                </label>
-                <div className="flex gap-2 mt-2">
-                  <button
-                    type="button"
-                    className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground rounded hover:bg-secondary/80"
-                    onClick={() => setShowScheduleModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 hover:-translate-y-1 transition-all duration-200"
-                  >
-                    Schedule
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+      {/* Schedule Visit Modal - Using shadcn Dialog */}
+      <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Schedule a Visit</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleScheduleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={scheduleForm.date}
+                onChange={e => setScheduleForm(f => ({ ...f, date: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="time">Time</Label>
+              <Input
+                id="time"
+                type="time"
+                value={scheduleForm.time}
+                onChange={e => setScheduleForm(f => ({ ...f, time: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reason">Reason</Label>
+              <Input
+                id="reason"
+                type="text"
+                placeholder="Reason for visit"
+                value={scheduleForm.reason}
+                onChange={e => setScheduleForm(f => ({ ...f, reason: e.target.value }))}
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowScheduleModal(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-orange-500 hover:bg-orange-600 hover:-translate-y-1 transition-all duration-200">
+                Schedule
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Toast message */}
       {toast && (
         <div className="fixed bottom-6 right-6 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 transition">
