@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
 interface SleepProps {
@@ -22,17 +22,15 @@ const Sleep: React.FC<SleepProps> = ({ sleepData, lineStroke }) => {
         <CardTitle>Sleep</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex items-center w-full min-w-0">
-        <ResponsiveContainer width="100%" height="90%">
-          <ChartContainer config={chartConfig}>
-            <LineChart data={sleepData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" />
-              <YAxis />
-              <ChartTooltip />
-              <Line type="monotone" dataKey="hours" stroke="#7c3aed" name="Hours" strokeWidth={lineStroke} />
-            </LineChart>
-          </ChartContainer>
-        </ResponsiveContainer>
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <LineChart data={sleepData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" />
+            <YAxis />
+            <ChartTooltip />
+            <Line type="monotone" dataKey="hours" stroke="#7c3aed" name="Hours" strokeWidth={lineStroke} />
+          </LineChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

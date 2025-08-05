@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartLegend } from "@/components/ui/chart";
 
 interface BloodProps {
@@ -26,19 +26,17 @@ const Blood: React.FC<BloodProps> = ({ glucoseData, barSize }) => {
         <CardTitle className="mt-4">Blood Glucose</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex items-stretch w-full min-w-0 h-full p-0 m-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <ChartContainer config={chartConfig}>
-            <BarChart data={glucoseData} barSize={barSize} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" />
-              <YAxis />
-              <ChartTooltip />
-              <ChartLegend />
-              <Bar dataKey="today" fill="#ff5722" name="Today" barSize={barSize} />
-              <Bar dataKey="yesterday" fill="#b0c4de" name="Yesterday" barSize={barSize} />
-            </BarChart>
-          </ChartContainer>
-        </ResponsiveContainer>
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <BarChart data={glucoseData} barSize={barSize} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" />
+            <YAxis />
+            <ChartTooltip />
+            <ChartLegend />
+            <Bar dataKey="today" fill="#ff5722" name="Today" barSize={barSize} />
+            <Bar dataKey="yesterday" fill="#b0c4de" name="Yesterday" barSize={barSize} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

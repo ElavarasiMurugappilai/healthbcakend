@@ -19,7 +19,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { LineChart, Line, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
 const Logo = () => (

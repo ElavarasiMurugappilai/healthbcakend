@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
 interface StepsProps {
@@ -22,17 +22,15 @@ const Steps: React.FC<StepsProps> = ({ stepsData, barSize }) => {
         <CardTitle>Steps</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex items-center w-full min-w-0">
-        <ResponsiveContainer width="100%" height="90%">
-          <ChartContainer config={chartConfig}>
-            <BarChart data={stepsData} barSize={barSize}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" />
-              <YAxis />
-              <ChartTooltip />
-              <Bar dataKey="steps" fill="#22c55e" name="Steps" barSize={barSize} />
-            </BarChart>
-          </ChartContainer>
-        </ResponsiveContainer>
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <BarChart data={stepsData} barSize={barSize}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" />
+            <YAxis />
+            <ChartTooltip />
+            <Bar dataKey="steps" fill="#22c55e" name="Steps" barSize={barSize} />
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

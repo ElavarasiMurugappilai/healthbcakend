@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
 interface HeartRateProps {
@@ -22,17 +22,15 @@ const HeartRate: React.FC<HeartRateProps> = ({ heartRateData, lineStroke }) => {
         <CardTitle>Heart Rate</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 flex items-center w-full min-w-0 dark:bg-gradient-to-r from-gray-800 to-zinc-800">
-        <ResponsiveContainer width="100%" height="90%">
-          <ChartContainer config={chartConfig}>
-            <LineChart data={heartRateData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" />
-              <YAxis />
-              <ChartTooltip />
-              <Line type="monotone" dataKey="avg" stroke="#4f8cff" name="Avg BPM" strokeWidth={lineStroke} />
-            </LineChart>
-          </ChartContainer>
-        </ResponsiveContainer>
+        <ChartContainer config={chartConfig} className="h-full w-full">
+          <LineChart data={heartRateData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" />
+            <YAxis />
+            <ChartTooltip />
+            <Line type="monotone" dataKey="avg" stroke="#4f8cff" name="Avg BPM" strokeWidth={lineStroke} />
+          </LineChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
