@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 
 type Medication = {
   id: string;
@@ -62,7 +62,7 @@ const Medication: React.FC<MedicationHeaderProps> = ({ onAddMedication }) => {
           <p className="text-muted-foreground">Track daily medicines and dosage</p>
         </div>
         <Button onClick={() => setShowAddModal(true)} variant="default" className="w-full mt-4 sm:w-auto sm:mt-0">
-          <Plus className="w-4 h-4 mr-2" />
+                      <Icons.plus className="w-4 h-4 mr-2" />
           Add Medication
         </Button>
       </div>

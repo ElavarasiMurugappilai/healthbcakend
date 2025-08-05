@@ -6,9 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 interface FitnessProps {
   setShowFitnessModal: (show: boolean) => void;
+  isFullWidth?: boolean;
 }
 
-const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal }) => {
+const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = false }) => {
   // Animation state
   const [progress, setProgress] = useState(0);
   const totalLength = 251; // Circumference for r=40
@@ -47,7 +48,7 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal }) => {
   }, [completed, showModal]);
   
   return (
-    <div className="flex-1 min-w-0 mb-2 lg:mb-0">
+    <div className={`${isFullWidth ? 'w-full' : 'flex-1 lg:flex-1'} min-w-0 mb-2 lg:mb-0`}>
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -72,7 +73,7 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal }) => {
           </Button>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-full">
-          <div className="relative w-32 h-32">
+          <div className={`relative ${isFullWidth ? 'w-40 h-40' : 'w-32 h-32'}`}>
             {/* Background and animated progress ring */}
             <svg
               className="absolute top-0 left-0 w-full h-full"
@@ -133,7 +134,9 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal }) => {
 
             {/* Animated percentage */}
             <div
-              className="absolute inset-0 flex items-center justify-center text-white text-xl font-bold"
+              className={`absolute inset-0 flex items-center justify-center text-white font-bold ${
+                isFullWidth ? 'text-2xl' : 'text-xl'
+              }`}
               style={{
                 textShadow: "0 0 8pxrgb(216, 252, 255), 0 0 16px #00eaff, 0 0 32px #00eaff"
               }}

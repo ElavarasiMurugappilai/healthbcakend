@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, XCircle, AlertCircle, Clock, Pill, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 
 interface HistoryProps {
   medicationLogs: any[];
@@ -151,13 +151,13 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
   const getEnhancedStatusIcon = (status: string) => {
     switch (status) {
       case 'taken':
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <Icons.checkCircle className="w-4 h-4 text-green-500" />;
       case 'missed':
-        return <XCircle className="w-4 h-4 text-red-500" />;
+        return <Icons.xCircle className="w-4 h-4 text-red-500" />;
       case 'skipped':
-        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+        return <Icons.alertCircle className="w-4 h-4 text-yellow-500" />;
       default:
-        return <Clock className="w-4 h-4 text-gray-400" />;
+        return <Icons.clock className="w-4 h-4 text-gray-400" />;
     }
   };
 
@@ -210,7 +210,7 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
                     log.status === 'missed' ? 'bg-red-500' :
                     'bg-yellow-500'
                   }`}>
-                    <Pill className="w-3 h-3 text-white" />
+                    <Icons.pill className="w-3 h-3 text-white" />
                   </div>
                 </motion.div>
                 
@@ -266,7 +266,7 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
             className="space-y-4"
           >
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto">
-              <Calendar className="w-8 h-10 sm:w-10 sm:h-12 text-gray-400" />
+              <Icons.calendar className="w-8 h-10 sm:w-10 sm:h-12 text-gray-400" />
             </div>
             <div className="space-y-2">
               <h3 className="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300">
@@ -293,7 +293,7 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
           onClick={() => handleMonthChange('prev')}
           className="p-1 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
         >
-          <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <Icons.chevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
         <div className="flex items-center space-x-1 sm:space-x-2">
           <Select value={currentMonth.toString()} onValueChange={(value) => setCurrentMonth(parseInt(value))}>
@@ -330,7 +330,7 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
           onClick={() => handleMonthChange('next')}
           className="p-1 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
         >
-          <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <Icons.chevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
         </Button>
       </div>
 
@@ -370,60 +370,46 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
         ))}
       </div>
 
-      {/* Quick Date Navigation */}
-      <div className="flex flex-wrap gap-1 sm:gap-2">
-        {['Today', 'Yesterday', 'Last Week', 'Last Month'].map((period, index) => {
-          let date = new Date();
-          switch (period) {
-            case 'Yesterday':
-              date.setDate(date.getDate() - 1);
-              break;
-            case 'Last Week':
-              date.setDate(date.getDate() - 7);
-              break;
-            case 'Last Month':
-              date.setMonth(date.getMonth() - 1);
-              break;
-            default:
-              break;
-          }
-          return (
-            <Button
-              key={period}
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedDate(date.toISOString().slice(0, 10))}
-              className="text-xs px-2 py-1 h-auto"
-            >
-              {period}
-            </Button>
-          );
-        })}
-      </div>
+
     </Card>
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 ">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 ">
         <div>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Medication History</h2>
           <p className="text-sm text-gray-600 dark:text-gray-300">Track your medication adherence over time</p>
         </div>
-        <div className="flex items-center space-x-2">
-          <Badge variant="outline" className="text-xs">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Taken
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            <XCircle className="w-3 h-3 mr-1" />
-            Missed
-          </Badge>
-          <Badge variant="outline" className="text-xs">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Skipped
-          </Badge>
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+          {['Today', 'Yesterday', 'Last Week', 'Last Month'].map((period, index) => {
+            let date = new Date();
+            switch (period) {
+              case 'Yesterday':
+                date.setDate(date.getDate() - 1);
+                break;
+              case 'Last Week':
+                date.setDate(date.getDate() - 7);
+                break;
+              case 'Last Month':
+                date.setMonth(date.getMonth() - 1);
+                break;
+              default:
+                break;
+            }
+            return (
+              <Button
+                key={period}
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedDate(date.toISOString().slice(0, 10))}
+                className="text-xs px-2 py-1 h-auto"
+              >
+                {period}
+              </Button>
+            );
+          })}
         </div>
       </div>
 

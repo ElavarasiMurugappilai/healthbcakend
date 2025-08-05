@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Award, Users } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 
 type Challenge = {
   id: string;
@@ -79,11 +79,11 @@ const ChallengeTab: React.FC<ChallengeTabProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Award className="w-4 h-4" />
+                        <Icons.award className="w-4 h-4" />
                         {challenge.points} pts
                       </span>
                       <span className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
+                        <Icons.users className="w-4 h-4" />
                         {challenge.participants}
                       </span>
                     </div>

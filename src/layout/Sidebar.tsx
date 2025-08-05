@@ -6,28 +6,15 @@ import { Separator } from "@/components/ui/separator";
 import { useTheme } from "../contexts/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Home,
-  Pill,
-  Trophy,
-  BarChart2,
-  Calendar,
-  Bell,
-  Search,
-  LayoutDashboard,
-  CalendarDays,
-  Sun,
-  Moon,
-  X,
-} from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 
 const sidebarIcons = [
-  <Home size={20} />, // Dashboard
-  <Pill size={20} />, // Medications
-  <Trophy size={20} />, // Challenges
-  <BarChart2 size={20} />, // Health Insights
-  <Calendar size={20} />, // Appointments
-  <Bell size={20} />, // Notifications
+  <Icons.home size={20} />, // Dashboard
+  <Icons.pill size={20} />, // Medications
+  <Icons.trophy size={20} />, // Challenges
+  <Icons.barChart2 size={20} />, // Health Insights
+  <Icons.calendar size={20} />, // Appointments
+  <Icons.bell size={20} />, // Notifications
 ];
 
 const sidebarLinks = [
@@ -134,7 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={handleSidebarClose}
             aria-label="Close sidebar"
           >
-            <X size={24} />
+            <Icons.x size={24} />
           </Button>
         </div>
         <div className="relative h-full flex flex-col px-6 pt-6 md:pt-0">
@@ -175,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     }
                   }}
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+                <Icons.search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
                 {searchValue && (
                   <Button
                     variant="ghost"
@@ -184,7 +171,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => setSearchValue("")}
                     aria-label="Clear search"
                   >
-                    <X size={16} />
+                    <Icons.x size={16} />
                   </Button>
                 )}
               </div>
@@ -195,7 +182,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   className="w-full justify-start flex items-center gap-2 mb-2"
                   onClick={() => setShowCustomizeModal(true)}
                 >
-                  <LayoutDashboard size={18} />
+                  <Icons.layoutDashboard size={18} />
                   Customize Dashboard
                 </Button>
               )}
@@ -206,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={toggleTheme}
                 aria-label={`Switch to ${theme === 'light' ? 'dark'  : 'light'}  mode`}
               >
-                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                {theme === 'light' ? <Icons.moon size={18} /> : <Icons.sun size={18} />}
                 {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
               </Button>
             </div>

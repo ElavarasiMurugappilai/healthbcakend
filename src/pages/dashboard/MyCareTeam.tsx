@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Phone, MessageCircle, Video } from 'lucide-react';
+import { Icons } from "@/components/ui/icons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -104,7 +104,7 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
                     className="hover:bg-green-50 dark:hover:bg-green-900/20 rounded p-0.5 sm:p-1 transition h-5 w-5 sm:h-6 sm:w-6 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
                     onClick={e => { e.stopPropagation(); alert(`Calling ${member.name}...`); }}
                   >
-                    <Phone className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5" />
+                    <Icons.phone className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -113,7 +113,7 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
                     className="hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded p-0.5 sm:p-1 transition h-5 w-5 sm:h-6 sm:w-6 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                     onClick={e => { e.stopPropagation(); setChatMember(member); }}
                   >
-                    <MessageCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5" />
+                    <Icons.messageCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5" />
                   </Button>
                   <Button
                     variant="ghost"
@@ -122,7 +122,7 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
                     className="hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded p-0.5 sm:p-1 transition h-5 w-5 sm:h-6 sm:w-6 lg:h-6 lg:w-6 xl:h-7 xl:w-7 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
                     onClick={e => { e.stopPropagation(); alert(`Starting video call with ${member.name}...`); }}
                   >
-                    <Video className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5" />
+                    <Icons.video className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-3 lg:h-3 xl:w-3.5 xl:h-3.5" />
                   </Button>
                 </div>
               </li>

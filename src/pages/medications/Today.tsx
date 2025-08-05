@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pill, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 
 interface TodayProps {
   getTodayMedications: () => any[];
@@ -18,7 +18,7 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
       <Card className="p-4">
         <div className="flex items-center space-x-2">
           <div className="p-2 bg-blue-100 rounded-lg">
-            <Pill className="w-4 h-4 text-blue-600" />
+            <Icons.pill className="w-4 h-4 text-blue-600" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total Today</p>
@@ -29,7 +29,7 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
       <Card className="p-4">
         <div className="flex items-center space-x-2">
           <div className="p-2 bg-green-100 rounded-lg">
-            <CheckCircle className="w-4 h-4 text-green-600" />
+            <Icons.checkCircle className="w-4 h-4 text-green-600" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Taken</p>
@@ -42,7 +42,7 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
       <Card className="p-4">
         <div className="flex items-center space-x-2">
           <div className="p-2 bg-red-100 rounded-lg">
-            <XCircle className="w-4 h-4 text-red-600" />
+            <Icons.xCircle className="w-4 h-4 text-red-600" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Missed</p>
@@ -55,7 +55,7 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
       <Card className="p-4">
         <div className="flex items-center space-x-2">
           <div className="p-2 bg-yellow-100 rounded-lg">
-            <Clock className="w-4 h-4 text-yellow-600" />
+            <Icons.clock className="w-4 h-4 text-yellow-600" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Pending</p>
@@ -72,7 +72,7 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
           <div className="flex items-center justify-between w-full gap-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                <Pill className="w-6 h-6 text-primary" />
+                <Icons.pill className="w-6 h-6 text-primary" />
               </div>
               <div className="flex flex-col min-w-0 text-left">
                 <h3 className="font-semibold text-foreground truncate text-left">{med.name}</h3>

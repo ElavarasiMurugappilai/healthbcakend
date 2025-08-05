@@ -1,7 +1,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarPlus } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -1064,7 +1064,7 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
         aria-label="Schedule new appointment"
         title="Schedule new appointment"
       >
-        <CalendarPlus className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <Icons.calendarPlus className="w-5 h-5 sm:w-6 sm:h-6" />
       </motion.button>
     </motion.div>
   );

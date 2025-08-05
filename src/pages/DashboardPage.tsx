@@ -5,7 +5,7 @@ import Fitness from "./dashboard/Fitness";
 import BloodGlucose from "./dashboard/BloodGlucose";
 import MyCareTeam from "./dashboard/MyCareTeam";
 import MedicationSchedule from "./dashboard/MedicationSchedule";
-import { Cloud } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 
 // Import shadcn components
@@ -20,33 +20,34 @@ import { Badge } from "@/components/ui/badge";
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <Card className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-        <CardContent className="p-3">
-          <Badge variant="secondary" className="font-semibold text-gray-800 dark:text-gray-200 mb-2 bg-transparent border-none p-0">
-            Time: {label}:00
-          </Badge>
-          <Card className="flex flex-col gap-2 bg-transparent border-none shadow-none">
-            <CardContent className="p-0">
-              <Card className="flex items-center gap-2 bg-transparent border-none shadow-none">
-                <CardContent className="p-0">
-                  <Badge variant="secondary" className="w-3 h-3 rounded-full bg-orange-500 p-0" />
-                </CardContent>
-                <Badge variant="secondary" className="text-gray-700 dark:text-gray-300 text-sm bg-transparent border-none p-0">
-                  Today: <Badge variant="secondary" className="font-bold bg-transparent border-none p-0">{payload[0].value}</Badge>
-                </Badge>
-              </Card>
-            </CardContent>
-            <CardContent className="p-0">
-              <Card className="flex items-center gap-2 bg-transparent border-none shadow-none">
-                <CardContent className="p-0">
-                  <Badge variant="secondary" className="w-3 h-3 rounded-full bg-blue-200 p-0" />
-                </CardContent>
-                <Badge variant="secondary" className="text-gray-700 dark:text-gray-300 text-sm bg-transparent border-none p-0">
-                  Yesterday: <Badge variant="secondary" className="font-bold bg-transparent border-none p-0">{payload[1].value}</Badge>
-                </Badge>
-              </Card>
-            </CardContent>
-          </Card>
+      <Card className="bg-background border-border shadow-lg">
+        <CardContent className="p-3 space-y-2">
+          {/* Time header */}
+          <div className="flex items-center gap-2">
+            <Icons.clock className="w-4 h-4 text-muted-foreground" />
+            <Badge variant="outline" className="text-sm font-medium">
+              Time: {label}:00
+            </Badge>
+          </div>
+          
+          {/* Data points */}
+          <div className="space-y-2">
+            {/* Today's data */}
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-orange-500" />
+              <span className="text-sm text-muted-foreground">
+                Today: <span className="font-semibold text-foreground">{payload[0].value}</span>
+              </span>
+            </div>
+            
+            {/* Yesterday's data */}
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-200" />
+              <span className="text-sm text-muted-foreground">
+                Yesterday: <span className="font-semibold text-foreground">{payload[1].value}</span>
+              </span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -58,10 +59,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const CustomBar = (props: any) => {
   const { x, y, width, height, payload, fill } = props;
   const barRadius = width / 2; // fully rounded
+  
   // Responsive cloud size: smaller on small screens
   const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 640;
   const isMediumScreen = typeof window !== 'undefined' && window.innerWidth >= 640 && window.innerWidth < 1024;
-  const isLargeScreen = typeof window !== 'undefined' && window.innerWidth >= 1024;
   
   // More granular responsive sizing
   const cloudRadius = isSmallScreen ? 8 : isMediumScreen ? 12 : 16;
@@ -71,12 +72,40 @@ const CustomBar = (props: any) => {
   
   return (
     <g>
-      <rect x={x} y={y} width={width} height={height} rx={barRadius} fill={fill} />
+      {/* Main bar with rounded corners using shadcn styling */}
+      <rect 
+        x={x} 
+        y={y} 
+        width={width} 
+        height={height} 
+        rx={barRadius} 
+        fill={fill}
+        className="transition-all duration-200 hover:opacity-80"
+      />
+      
+      {/* Cloud icon overlay for specific time points */}
       {[10, 14, 18].includes(payload.time) && (
         <g>
-          <circle cx={x + width / 2} cy={cloudY + cloudYOffset} r={cloudRadius} fill="#e5e7eb" />
-          <foreignObject x={x + width / 2 - cloudIconSize / 2} y={cloudY + cloudYOffset - cloudIconSize / 2} width={cloudIconSize} height={cloudIconSize}>
-            <Cloud size={cloudIconSize} color="#b0c4de" />
+          {/* Cloud background circle */}
+          <circle 
+            cx={x + width / 2} 
+            cy={cloudY + cloudYOffset} 
+            r={cloudRadius} 
+            fill="#e5e7eb" 
+            className="dark:fill-gray-700"
+          />
+          
+          {/* Cloud icon using shadcn Icons */}
+          <foreignObject 
+            x={x + width / 2 - cloudIconSize / 2} 
+            y={cloudY + cloudYOffset - cloudIconSize / 2} 
+            width={cloudIconSize} 
+            height={cloudIconSize}
+            className="text-blue-400 dark:text-blue-300"
+          >
+            <div className="flex items-center justify-center w-full h-full">
+              <Icons.cloud size={cloudIconSize} />
+            </div>
           </foreignObject>
         </g>
       )}

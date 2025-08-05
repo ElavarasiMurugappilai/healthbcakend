@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Goals from "./challenges/Goals";
 import BadgesTab from "./challenges/Badges";
 import LeaderboardTab from "./challenges/Leaderboard";
-import { Target, Award, Users, Activity, Zap, Heart, Star, Trophy, Calendar, Lightbulb, X, ChevronRight } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -142,11 +142,11 @@ const ChallengeCard: React.FC<{
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4 text-sm">
             <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <Award className="w-4 h-4" />
+              <Icons.award className="w-4 h-4" />
               <span className="font-semibold">{challenge.points} pts</span>
             </span>
             <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <Users className="w-4 h-4" />
+              <Icons.users className="w-4 h-4" />
               <span className="font-semibold">{challenge.participants}</span>
             </span>
           </div>
@@ -197,7 +197,7 @@ const ChallengeCard: React.FC<{
         {challenge.tip && (
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
             <div className="flex items-start gap-3">
-              <Lightbulb className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <Icons.lightbulb className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">{challenge.tip}</p>
             </div>
           </div>
@@ -323,7 +323,7 @@ const ChallengeModal: React.FC<{
                 <div className="text-sm text-muted-foreground">Start Date</div>
                 <div className="font-medium">{challenge.startDate}</div>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <Icons.chevronRight className="w-4 h-4 text-muted-foreground" />
               <div>
                 <div className="text-sm text-muted-foreground">End Date</div>
                 <div className="font-medium">{challenge.endDate}</div>
@@ -335,7 +335,7 @@ const ChallengeModal: React.FC<{
           {challenge.tip && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <div className="flex items-start gap-2">
-                <Lightbulb className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <Icons.lightbulb className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Pro Tip</div>
                   <p className="text-sm text-blue-700 dark:text-blue-300">{challenge.tip}</p>
@@ -359,7 +359,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       target: 5000,
       current: 3200,
       unit: 'steps',
-      icon: <Activity size={24} />,
+      icon: <Icons.activity size={24} />,
       color: 'bg-blue-500',
       points: 50,
       isActive: true,
@@ -377,7 +377,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       target: 5,
       current: 3,
       unit: 'workouts',
-      icon: <Zap size={24} />,
+      icon: <Icons.zap size={24} />,
       color: 'bg-green-500',
       points: 200,
       isActive: true,
@@ -395,7 +395,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       target: 8,
       current: 6,
       unit: 'glasses',
-      icon: <Heart size={24} />,
+      icon: <Icons.heart size={24} />,
       color: 'bg-cyan-500',
       points: 30,
       isActive: true,
@@ -413,7 +413,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       target: 7,
       current: 4,
       unit: 'days',
-      icon: <Star size={24} />,
+      icon: <Icons.star size={24} />,
       color: 'bg-purple-500',
       points: 150,
       isActive: true,
@@ -431,7 +431,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       target: 10,
       current: 7,
       unit: 'minutes',
-      icon: <Target size={24} />,
+      icon: <Icons.target size={24} />,
       color: 'bg-indigo-500',
       points: 40,
       isActive: false,
@@ -449,7 +449,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       target: 4,
       current: 2,
       unit: 'books',
-      icon: <Trophy size={24} />,
+      icon: <Icons.trophy size={24} />,
       color: 'bg-orange-500',
       points: 300,
       isActive: true,
@@ -466,7 +466,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       id: '1',
       name: 'First Steps',
       description: 'Complete your first daily challenge',
-      icon: <Trophy size={20} />,
+      icon: <Icons.trophy size={20} />,
       color: 'text-yellow-500',
       isEarned: true,
       earnedDate: '2024-01-15',
@@ -476,7 +476,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       id: '2',
       name: 'Week Warrior',
       description: 'Complete 5 weekly challenges',
-      icon: <Award size={20} />,
+      icon: <Icons.award size={20} />,
       color: 'text-blue-500',
       isEarned: true,
       earnedDate: '2024-01-18',
@@ -486,7 +486,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       id: '3',
       name: 'Hydration Hero',
       description: 'Drink 8 glasses of water for 7 consecutive days',
-      icon: <Heart size={20} />,
+      icon: <Icons.heart size={20} />,
       color: 'text-cyan-500',
       isEarned: false,
       points: 300
@@ -495,7 +495,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       id: '4',
       name: 'Fitness Master',
       description: 'Complete 20 challenges total',
-      icon: <Target size={20} />,
+      icon: <Icons.target size={20} />,
       color: 'text-green-500',
       isEarned: false,
       points: 500
@@ -622,7 +622,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
               className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
             >
               <div className="flex flex-col items-center gap-1">
-                <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Icons.target className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Challenges</span>
               </div>
             </TabsTrigger>
@@ -631,7 +631,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
               className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
             >
               <div className="flex flex-col items-center gap-1">
-                <Award className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Icons.award className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Badges</span>
               </div>
             </TabsTrigger>
@@ -640,7 +640,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
               className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
             >
               <div className="flex flex-col items-center gap-1">
-                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Icons.users className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Leaderboard</span>
               </div>
             </TabsTrigger>

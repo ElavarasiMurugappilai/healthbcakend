@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 
 type Badge = {
   id: string;
@@ -35,7 +35,7 @@ const BadgesTab: React.FC<BadgesTabProps> = ({ badges }) => (
           <h3 className="text-lg font-semibold text-foreground mb-2">{badge.name}</h3>
           <p className="text-muted-foreground mb-3">{badge.description}</p>
           <div className="flex items-center justify-center gap-2 mb-3">
-            <Award className="w-4 h-4 text-yellow-500" />
+            <Icons.award className="w-4 h-4 text-yellow-500" />
             <span className="text-sm font-medium">{badge.points} points</span>
           </div>
           {badge.isEarned ? (

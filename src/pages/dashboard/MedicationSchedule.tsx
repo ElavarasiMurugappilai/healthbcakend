@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Clock } from "lucide-react";
+import { Icons } from "@/components/ui/icons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 
@@ -70,7 +70,7 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
                 <col className="w-[25%] sm:w-[14%] md:w-[16%]" />
               </colgroup>
 
-              <thead className="sticky top-0 bg-white dark:bg-zinc-800 z-10">
+              <thead className="sticky top-0 bg-white dark:bg-zinc-800 z-10 dark:bg-gradient-to-r from-gray-800 to-zinc-800 border border-gray-200 dark:border-zinc-800">
                 <tr className="text-muted-foreground border-b">
                   <th className="text-left py-2 px-1 text-xs">Medication</th>
                   <th className="text-center py-2 px-1 text-xs">Qty</th>
@@ -110,7 +110,7 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
                       </td>
                       <td className="py-3 px-1 text-center">
                         {med.status === "Upcoming" ? (
-                          <Clock size={16} className="text-yellow-700 mx-auto" />
+                          <Icons.clock size={16} className="text-yellow-700 mx-auto" />
                         ) : (
                           med.time
                         )}

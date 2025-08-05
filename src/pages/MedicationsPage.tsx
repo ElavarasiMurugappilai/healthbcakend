@@ -299,7 +299,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
   const sortedTimes = Object.keys(timelineData).sort();
 
   return (
-    <div className="space-y-6 bg-transparent dark:bg-gray-900 min-h-screen p-3 sm:p-6 overflow-x-hidden">
+    <div className="space-y-6 bg-transparent dark:bg-transparent min-h-screen p-3 sm:p-6 overflow-x-hidden">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -410,16 +410,6 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                         <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400 bg-transparent border-none p-0">
                           {takenMeds}
                         </Badge>
-                    {totalMeds > 0 && (
-                          <Card className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1 sm:h-2 mt-1 sm:mt-2 bg-transparent border-none shadow-none">
-                            <CardContent className="p-0">
-                        <div 
-                          className="bg-gradient-to-r from-green-400 to-green-600 h-1 sm:h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${(takenMeds / totalMeds) * 100}%` }}
-                        ></div>
-                            </CardContent>
-                          </Card>
-                        )}
                       </CardContent>
                     </Card>
                   </Card>

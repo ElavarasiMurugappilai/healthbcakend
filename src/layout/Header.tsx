@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLocation } from "react-router-dom";
 import {
@@ -18,6 +20,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 
 const Logo = () => (
   <div className="font-bold text-xl flex items-center gap-2">{/* increased gap from 2 to 4 */}
@@ -63,6 +66,7 @@ const Header: React.FC<HeaderProps> = ({
   const location = useLocation();
   const [dashboardView, setDashboardView] = useState<"today" | "week" | "custom">("today");
   const [showTodaySummary, setShowTodaySummary] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
   // Sample data for today's summary
   const glucoseData = [
@@ -99,8 +103,6 @@ const Header: React.FC<HeaderProps> = ({
     if (selectedDate !== today) {
       setSelectedDate(today);
       setToast('Dashboard refreshed to show today\'s data 📅');
-    } else {
-      setToast('Already viewing today\'s data ✅');
     }
     setShowTodaySummary(true);
   };
@@ -204,16 +206,14 @@ const Header: React.FC<HeaderProps> = ({
                 <TrendingUp className="text-blue-500" size={20} />
                 <h3 className="font-semibold text-lg">Glucose Trend</h3>
               </div>
-              <div className="h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={glucoseData}>
-                    <XAxis dataKey="time" fontSize={12} />
-                    <YAxis fontSize={12} />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <ChartContainer config={{ value: { label: "Glucose", color: "#3b82f6" } }}>
+                <LineChart data={glucoseData}>
+                  <XAxis dataKey="time" fontSize={12} />
+                  <YAxis fontSize={12} />
+                  <ChartTooltip />
+                  <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
+                </LineChart>
+              </ChartContainer>
             </motion.div>
 
             {/* Medications Due Section */}
@@ -347,32 +347,83 @@ const Header: React.FC<HeaderProps> = ({
         </DialogContent>
       </Dialog>
 
-      {showCustomizeModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg min-w-[320px] w-full max-w-xs border">
-            <div className="font-bold text-lg mb-2">Customize Dashboard</div>
-            <div className="flex flex-col gap-3">
-              <label>
-                <input type="checkbox" checked={visibleSections.fitnessGoals} onChange={() => handleSectionToggle("fitnessGoals")} />
-                Fitness Goals
-              </label>
-              <label>
-                <input type="checkbox" checked={visibleSections.glucoseTrends} onChange={() => handleSectionToggle("glucoseTrends")} />
-                Blood Glucose Trends
-              </label>
-              <label>
-                <input type="checkbox" checked={visibleSections.careTeam} onChange={() => handleSectionToggle("careTeam")} />
-                My Care Team
-              </label>
-              <label>
-                <input type="checkbox" checked={visibleSections.medicationSchedule} onChange={() => handleSectionToggle("medicationSchedule")} />
-                Medication Schedule
-              </label>
-              <button onClick={() => setShowCustomizeModal(false)}>Close</button>
+      {/* Customize Dashboard Modal */}
+      <Dialog open={showCustomizeModal} onOpenChange={setShowCustomizeModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LayoutDashboard className="w-5 h-5" />
+              Customize Dashboard
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Select which dashboard sections to display:
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="fitnessGoals"
+                  checked={visibleSections.fitnessGoals}
+                  onChange={() => handleSectionToggle("fitnessGoals")}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
+                />
+                <Label htmlFor="fitnessGoals" className="text-sm font-medium cursor-pointer">
+                  Fitness Goals
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="glucoseTrends"
+                  checked={visibleSections.glucoseTrends}
+                  onChange={() => handleSectionToggle("glucoseTrends")}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
+                />
+                <Label htmlFor="glucoseTrends" className="text-sm font-medium cursor-pointer">
+                  Blood Glucose Trends
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="careTeam"
+                  checked={visibleSections.careTeam}
+                  onChange={() => handleSectionToggle("careTeam")}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
+                />
+                <Label htmlFor="careTeam" className="text-sm font-medium cursor-pointer">
+                  My Care Team
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="medicationSchedule"
+                  checked={visibleSections.medicationSchedule}
+                  onChange={() => handleSectionToggle("medicationSchedule")}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
+                />
+                <Label htmlFor="medicationSchedule" className="text-sm font-medium cursor-pointer">
+                  Medication Schedule
+                </Label>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomizeModal(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
     </header>
   );
