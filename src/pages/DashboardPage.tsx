@@ -22,21 +22,31 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return (
       <Card className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
         <CardContent className="p-3">
-          <div className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Time: {label}:00</div>
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="w-3 h-3 rounded-full bg-orange-500 p-0" />
-              <span className="text-gray-700 dark:text-gray-300 text-sm">
-                Today: <span className="font-bold">{payload[0].value}</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="w-3 h-3 rounded-full bg-blue-200 p-0" />
-              <span className="text-gray-700 dark:text-gray-300 text-sm">
-                Yesterday: <span className="font-bold">{payload[1].value}</span>
-              </span>
-            </div>
-          </div>
+          <Badge variant="secondary" className="font-semibold text-gray-800 dark:text-gray-200 mb-2 bg-transparent border-none p-0">
+            Time: {label}:00
+          </Badge>
+          <Card className="flex flex-col gap-2 bg-transparent border-none shadow-none">
+            <CardContent className="p-0">
+              <Card className="flex items-center gap-2 bg-transparent border-none shadow-none">
+                <CardContent className="p-0">
+                  <Badge variant="secondary" className="w-3 h-3 rounded-full bg-orange-500 p-0" />
+                </CardContent>
+                <Badge variant="secondary" className="text-gray-700 dark:text-gray-300 text-sm bg-transparent border-none p-0">
+                  Today: <Badge variant="secondary" className="font-bold bg-transparent border-none p-0">{payload[0].value}</Badge>
+                </Badge>
+              </Card>
+            </CardContent>
+            <CardContent className="p-0">
+              <Card className="flex items-center gap-2 bg-transparent border-none shadow-none">
+                <CardContent className="p-0">
+                  <Badge variant="secondary" className="w-3 h-3 rounded-full bg-blue-200 p-0" />
+                </CardContent>
+                <Badge variant="secondary" className="text-gray-700 dark:text-gray-300 text-sm bg-transparent border-none p-0">
+                  Yesterday: <Badge variant="secondary" className="font-bold bg-transparent border-none p-0">{payload[1].value}</Badge>
+                </Badge>
+              </Card>
+            </CardContent>
+          </Card>
         </CardContent>
       </Card>
     );
