@@ -16,102 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-// Shadcn-styled Tooltip for Recharts
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <Card className="bg-background border-border shadow-lg">
-        <CardContent className="p-3 space-y-2">
-          {/* Time header */}
-          <div className="flex items-center gap-2">
-            <Icons.clock className="w-4 h-4 text-muted-foreground" />
-            <Badge variant="outline" className="text-sm font-medium">
-              Time: {label}:00
-            </Badge>
-          </div>
-          
-          {/* Data points */}
-          <div className="space-y-2">
-            {/* Today's data */}
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-orange-500" />
-              <span className="text-sm text-muted-foreground">
-                Today: <span className="font-semibold text-foreground">{payload[0].value}</span>
-              </span>
-            </div>
-            
-            {/* Yesterday's data */}
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-blue-200" />
-              <span className="text-sm text-muted-foreground">
-                Yesterday: <span className="font-semibold text-foreground">{payload[1].value}</span>
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  return null;
-};
 
-// Shadcn-styled bar shape with cloud icon for selected bars
-const CustomBar = (props: any) => {
-  const { x, y, width, height, payload, fill } = props;
-  const barRadius = width / 2; // fully rounded
-  
-  // Responsive cloud size: smaller on small screens
-  const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 640;
-  const isMediumScreen = typeof window !== 'undefined' && window.innerWidth >= 640 && window.innerWidth < 1024;
-  
-  // More granular responsive sizing
-  const cloudRadius = isSmallScreen ? 8 : isMediumScreen ? 12 : 16;
-  const cloudIconSize = isSmallScreen ? 12 : isMediumScreen ? 16 : 20;
-  const cloudYOffset = isSmallScreen ? 6 : isMediumScreen ? 10 : 14;
-  const cloudY = y - 32;
-  
-  return (
-    <g>
-      {/* Main bar with rounded corners using shadcn styling */}
-      <rect 
-        x={x} 
-        y={y} 
-        width={width} 
-        height={height} 
-        rx={barRadius} 
-        fill={fill}
-        className="transition-all duration-200 hover:opacity-80"
-      />
-      
-      {/* Cloud icon overlay for specific time points */}
-      {[10, 14, 18].includes(payload.time) && (
-        <g>
-          {/* Cloud background circle */}
-          <circle 
-            cx={x + width / 2} 
-            cy={cloudY + cloudYOffset} 
-            r={cloudRadius} 
-            fill="#e5e7eb" 
-            className="dark:fill-gray-700"
-          />
-          
-          {/* Cloud icon using shadcn Icons */}
-          <foreignObject 
-            x={x + width / 2 - cloudIconSize / 2} 
-            y={cloudY + cloudYOffset - cloudIconSize / 2} 
-            width={cloudIconSize} 
-            height={cloudIconSize}
-            className="text-blue-400 dark:text-blue-300"
-          >
-            <div className="flex items-center justify-center w-full h-full">
-              <Icons.cloud size={cloudIconSize} />
-            </div>
-          </foreignObject>
-        </g>
-      )}
-    </g>
-  );
-};
 
 type SectionKey = "careTeam" | "fitnessGoals" | "glucoseTrends" | "medicationSchedule";
 
@@ -237,7 +142,7 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
           <Fitness setShowFitnessModal={setShowFitnessModal} />
         )}
         {visibleSections.glucoseTrends && (
-          <BloodGlucose glucoseData={glucoseData} barSize={barSize} CustomTooltip={CustomTooltip} CustomBar={CustomBar} />
+                        <BloodGlucose glucoseData={glucoseData} barSize={barSize} />
         )}
       </section>
       {/* My Care Team and Medication Schedule */}
