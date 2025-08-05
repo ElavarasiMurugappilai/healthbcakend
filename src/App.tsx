@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Calendar } from "@/components/ui/calendar";
 
 // Import modular components
 import Header from "./layout/Header";
@@ -537,13 +538,16 @@ export default function App() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="selectedDate">Date</Label>
-                <Input
-                  id="selectedDate"
-                  type="date"
-                  value={selectedDate}
-                  onChange={e => setSelectedDate(e.target.value)}
-                  max={new Date().toISOString().slice(0, 10)}
+                <Calendar
+                  mode="single"
+                  selected={selectedDate ? new Date(selectedDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date.toISOString().slice(0, 10));
+                    }
+                  }}
+                  disabled={(date) => date > new Date()}
+                  className="rounded-md border"
                 />
               </div>
               <DialogFooter>

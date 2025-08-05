@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Plus,
   Clock,
@@ -312,14 +313,67 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
           <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words">Medications</h1>
           <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base break-words">Track daily medicines and dosage</p>
         </div>
-        <Button 
-          onClick={() => setShowAddModal(true)} 
-          variant="default" 
-          className="w-full mt-4 sm:w-auto sm:mt-0 bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg text-sm"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Medication
-        </Button>
+        <div className="flex gap-2 w-full mt-4 sm:w-auto sm:mt-0">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline"
+                className="bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg text-sm"
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Quick Actions
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">Quick Actions</h4>
+                <div className="space-y-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => setShowAddModal(true)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Medication
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => handleMarkAllAsTaken()}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Mark All as Taken
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => alert('Export medication history feature coming soon!')}
+                  >
+                    <HistoryIcon className="w-4 h-4 mr-2" />
+                    Export History
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => alert('Set reminders feature coming soon!')}
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    Set Reminders
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+          
+          <Button 
+            onClick={() => setShowAddModal(true)} 
+            variant="default" 
+            className="bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg text-sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Medication
+          </Button>
+        </div>
       </motion.div>
 
       {/* Tabs - Using shadcn Tabs with Compact Responsive Design */}

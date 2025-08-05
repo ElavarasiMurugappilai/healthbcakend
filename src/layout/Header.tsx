@@ -4,8 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "../contexts/ThemeContext";
 import { useLocation } from "react-router-dom";
+import { Icons } from "@/components/ui/icons";
 import {
   Search,
   LayoutDashboard,
@@ -67,6 +71,7 @@ const Header: React.FC<HeaderProps> = ({
   const [dashboardView, setDashboardView] = useState<"today" | "week" | "custom">("today");
   const [showTodaySummary, setShowTodaySummary] = useState(false);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Sample data for today's summary
   const glucoseData = [
@@ -173,15 +178,78 @@ const Header: React.FC<HeaderProps> = ({
           <CalendarDays size={16} />
           {selectedDate === new Date().toISOString().slice(0, 10) ? 'Today' : selectedDate}
         </button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="flex items-center justify-center"
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark'  : 'light'}  mode`}
-        >
-          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-        </Button>
+        {/* Notifications Sheet */}
+        <Sheet open={showNotifications} onOpenChange={setShowNotifications}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="flex items-center justify-center relative"
+              aria-label="Notifications"
+            >
+              <Icons.bell className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
+                3
+              </span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+            <SheetHeader>
+              <SheetTitle>Notifications</SheetTitle>
+            </SheetHeader>
+            <div className="space-y-4 mt-6">
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <Icons.activity className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Glucose Reading Due</p>
+                    <p className="text-xs text-muted-foreground">Time to check your blood glucose levels</p>
+                    <p className="text-xs text-muted-foreground mt-1">2 minutes ago</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <Icons.checkCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Medication Taken</p>
+                    <p className="text-xs text-muted-foreground">Metformin 500mg marked as taken</p>
+                    <p className="text-xs text-muted-foreground mt-1">15 minutes ago</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <Icons.calendar className="w-5 h-5 text-orange-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Appointment Reminder</p>
+                    <p className="text-xs text-muted-foreground">Dr. Johnson appointment in 2 hours</p>
+                    <p className="text-xs text-muted-foreground mt-1">1 hour ago</p>
+                  </div>
+                </div>
+              </div>
+              
+             
+            </div>
+          </SheetContent>
+        </Sheet>
+
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="flex items-center justify-center"
+                onClick={toggleTheme}
+                aria-label={`Switch to ${theme === 'light' ? 'dark'  : 'light'}  mode`}
+              >
+                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Switch to {theme === 'light' ? 'dark' : 'light'} mode</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Today's Summary Modal */}
@@ -363,56 +431,48 @@ const Header: React.FC<HeaderProps> = ({
             </div>
             
             <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="fitnessGoals"
-                  checked={visibleSections.fitnessGoals}
-                  onChange={() => handleSectionToggle("fitnessGoals")}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
-                />
+              <div className="flex items-center justify-between">
                 <Label htmlFor="fitnessGoals" className="text-sm font-medium cursor-pointer">
                   Fitness Goals
                 </Label>
+                <Switch
+                  id="fitnessGoals"
+                  checked={visibleSections.fitnessGoals}
+                  onCheckedChange={() => handleSectionToggle("fitnessGoals")}
+                />
               </div>
               
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="glucoseTrends"
-                  checked={visibleSections.glucoseTrends}
-                  onChange={() => handleSectionToggle("glucoseTrends")}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
-                />
+              <div className="flex items-center justify-between">
                 <Label htmlFor="glucoseTrends" className="text-sm font-medium cursor-pointer">
                   Blood Glucose Trends
                 </Label>
+                <Switch
+                  id="glucoseTrends"
+                  checked={visibleSections.glucoseTrends}
+                  onCheckedChange={() => handleSectionToggle("glucoseTrends")}
+                />
               </div>
               
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="careTeam"
-                  checked={visibleSections.careTeam}
-                  onChange={() => handleSectionToggle("careTeam")}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
-                />
+              <div className="flex items-center justify-between">
                 <Label htmlFor="careTeam" className="text-sm font-medium cursor-pointer">
                   My Care Team
                 </Label>
+                <Switch
+                  id="careTeam"
+                  checked={visibleSections.careTeam}
+                  onCheckedChange={() => handleSectionToggle("careTeam")}
+                />
               </div>
               
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="medicationSchedule"
-                  checked={visibleSections.medicationSchedule}
-                  onChange={() => handleSectionToggle("medicationSchedule")}
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 rounded"
-                />
+              <div className="flex items-center justify-between">
                 <Label htmlFor="medicationSchedule" className="text-sm font-medium cursor-pointer">
                   Medication Schedule
                 </Label>
+                <Switch
+                  id="medicationSchedule"
+                  checked={visibleSections.medicationSchedule}
+                  onCheckedChange={() => handleSectionToggle("medicationSchedule")}
+                />
               </div>
             </div>
           </div>

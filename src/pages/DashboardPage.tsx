@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 
 
@@ -84,6 +86,7 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
  
   const [scheduleForm, setScheduleForm] = useState({ date: '', time: '', reason: '' });
   const [toast, setToast] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   // const width = window.innerWidth; // This line is removed as width is now a prop
 
   const glucoseData = [
@@ -124,10 +127,41 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
   };
 
   const handleTake = (index: number) => {
-    setMedications(prevMeds => prevMeds.map((med, i) =>
-      i === index ? { ...med, status: 'Taken' } : med
-    ));
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setMedications(prevMeds => prevMeds.map((med, i) =>
+        i === index ? { ...med, status: 'Taken' } : med
+      ));
+      setIsLoading(false);
+    }, 500);
   };
+
+  // Skeleton loading component
+  const DashboardSkeleton = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="h-80">
+          <CardContent className="p-6">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <Skeleton className="h-48 w-full" />
+          </CardContent>
+        </Card>
+        <Card className="h-80">
+          <CardContent className="p-6">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <Skeleton className="h-48 w-full" />
+          </CardContent>
+        </Card>
+        <Card className="h-80">
+          <CardContent className="p-6">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <Skeleton className="h-48 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
 
   // Global selectedDate from Zustand store
   const selectedDate = useDateStore(state => state.selectedDate);
@@ -136,29 +170,36 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
   return (
     <>
       <Welcome user={user} setShowScheduleModal={setShowScheduleModal} />
-      {/* Fitness Goals and Blood Glucose Trends */}
-      <section className="flex flex-col w-10 lg:flex-row gap-2 mb-2 w-full">
-        {visibleSections.fitnessGoals && (
-          <Fitness setShowFitnessModal={setShowFitnessModal} />
-        )}
-        {visibleSections.glucoseTrends && (
-                        <BloodGlucose glucoseData={glucoseData} barSize={barSize} />
-        )}
-      </section>
-      {/* My Care Team and Medication Schedule */}
-      <section className="flex flex-col lg:flex-row gap-2 w-full mb-6">
-        {visibleSections.careTeam && (
-          <MyCareTeam filteredCareTeam={filteredCareTeam} setSelectedMember={setSelectedMember} setShowCareTeamModal={setShowCareTeamModal} />
-        )}
-        {visibleSections.medicationSchedule && (
-          <MedicationSchedule
-            filteredMedications={filteredMedications}
-            handleTake={handleTake}
-            statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
-          />
-        )}
-      </section>
+      
+      {isLoading ? (
+        <DashboardSkeleton />
+      ) : (
+        <>
+          {/* Fitness Goals and Blood Glucose Trends */}
+          <section className="flex flex-col w-10 lg:flex-row gap-2 mb-2 w-full">
+            {visibleSections.fitnessGoals && (
+              <Fitness setShowFitnessModal={setShowFitnessModal} />
+            )}
+            {visibleSections.glucoseTrends && (
+                            <BloodGlucose glucoseData={glucoseData} barSize={barSize} />
+            )}
+          </section>
+          {/* My Care Team and Medication Schedule */}
+          <section className="flex flex-col lg:flex-row gap-2 w-full mb-6">
+            {visibleSections.careTeam && (
+              <MyCareTeam filteredCareTeam={filteredCareTeam} setSelectedMember={setSelectedMember} setShowCareTeamModal={setShowCareTeamModal} />
+            )}
+            {visibleSections.medicationSchedule && (
+              <MedicationSchedule
+                filteredMedications={filteredMedications}
+                handleTake={handleTake}
+                statusFilter={statusFilter}
+                onStatusChange={setStatusFilter}
+              />
+            )}
+          </section>
+        </>
+      )}
       {/* Bottom spacing to ensure page is fully visible */}
       <div className="h-4"></div>
 
