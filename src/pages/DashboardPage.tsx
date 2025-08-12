@@ -49,7 +49,7 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
     { name: "Levothyroxine", qty: "2 ", dosage: "50 mg", status: "Upcoming", time: "18:00" },
     { name: "Aspirin", qty: "1 ", dosage: "100 mg", status: "Taken", time: "09:00" },
     { name: "Atorvastatin", qty: "1 ", dosage: "20 mg", status: "Upcoming", time: "21:00" },
-    
+    { name: "Vitamin D", qty: "1 ", dosage: "1000 IU", status: "Missed", time: "07:00" },
   ]);
   const [careTeam, setCareTeam] = useState([
     {
@@ -127,14 +127,10 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
   };
 
   const handleTake = (index: number) => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setMedications(prevMeds => prevMeds.map((med, i) =>
-        i === index ? { ...med, status: 'Taken' } : med
-      ));
-      setIsLoading(false);
-    }, 500);
+    // Update medication status immediately without any async operations
+    setMedications(prevMeds => prevMeds.map((med, i) =>
+      i === index ? { ...med, status: 'Taken' } : med
+    ));
   };
 
   // Skeleton loading component

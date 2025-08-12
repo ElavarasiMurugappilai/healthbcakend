@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 interface Appointment {
   id: number;
@@ -18,8 +19,7 @@ interface UpcomingProps {
 }
 
 const Upcoming: React.FC<UpcomingProps> = ({ upcoming, handleJoin, handleReschedule, handleCancel }) => (
-  <div className="bg-card rounded-lg shadow p-4 
-  ">
+  <div className="bg-card rounded-lg shadow p-4">
     <h2 className="text-lg font-semibold mb-2">Upcoming Appointments</h2>
     {upcoming.length === 0 ? (
       <div className="text-muted-foreground">No upcoming appointments.</div>
@@ -58,25 +58,30 @@ const Upcoming: React.FC<UpcomingProps> = ({ upcoming, handleJoin, handleResched
                 <td className="text-left px-4 py-2 w-1/5 text-xs whitespace-nowrap">
                   <div className="flex flex-col sm:flex-row flex-wrap gap-1 sm:gap-2">
                     {appt.telehealth && (
-                      <button
-                        className="bg-blue-500 text-white text-xs px-2 py-1 rounded hover:bg-blue-600 active:scale-95 transition-transform"
+                      <Button
+                        size="sm"
+                        className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 active:scale-95 transition-transform"
                         onClick={() => handleJoin(appt.id)}
                       >
                         Join
-                      </button>
+                      </Button>
                     )}
-                    <button
-                      className="bg-yellow-400 text-black text-xs px-2 py-1 rounded hover:bg-yellow-500 active:scale-95 transition-transform"
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-yellow-400 hover:bg-yellow-500 text-black text-xs px-2 py-1 active:scale-95 transition-transform"
                       onClick={() => handleReschedule(appt.id)}
                     >
                       Reschedule
-                    </button>
-                    <button
-                      className="bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600 active:scale-95 transition-transform"
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 active:scale-95 transition-transform"
                       onClick={() => handleCancel(appt.id)}
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>

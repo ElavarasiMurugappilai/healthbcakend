@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { Icons } from "@/components/ui/icons";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Icons } from "@/components/ui/icons";
 
 interface Medication {
   name: string;
@@ -28,17 +27,28 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
   onStatusChange,
 }) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
 
   const handleTakeMedication = (index: number) => {
+    setLoadingIndex(index);
+    
+    // Call the parent's handleTake function to update the medication status
     handleTake(index);
+    
+    // Show success message
     const medication = filteredMedications[index];
     setSuccessMessage(`${medication.name} successfully taken!`);
-    setTimeout(() => setSuccessMessage(null), 1000);
+    
+    // Clear loading state after a short delay
+    setTimeout(() => {
+      setLoadingIndex(null);
+      setSuccessMessage(null);
+    }, 1500);
   };
 
   return (
     <div className="flex-1 min-w-0 mb-2 lg:mb-0 h-[420px]">
-      <Card className="w-full h-full min-h-[420px] flex flex-col shadow-2xl hover:-translate-y-1 transition-all duration-200 bg-white dark:bg-gradient-to-r from-gray-800 to-zinc-800 border border-gray-200 dark:border-zinc-800">
+      <Card className="w-full h-full flex flex-col shadow-2xl hover:-translate-y-1 transition-all duration-200 bg-white dark:bg-gradient-to-r from-gray-800 to-zinc-800 border border-gray-200 dark:border-zinc-800">
         <CardHeader className="flex flex-col sm:flex-row sm:justify-between pb-2 flex-shrink-0">
           <div className="flex items-center justify-between w-full">
             <CardTitle className="text-sm sm:text-base md:text-lg lg:text-xl break-words">Medication Schedule</CardTitle>
@@ -58,88 +68,74 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 px-3 pb-3 overflow-y-auto scrollbar-hide">
-          <div className="w-full h-full">
-            <table className="w-full text-xs sm:text-sm table-fixed">
-              <colgroup>
-                <col className="w-[25%] sm:w-[28%] md:w-[30%]" />
-                <col className="w-[10%] sm:w-[10%] md:w-[8%]" />
-                <col className="w-[20%] sm:w-[18%] md:w-[16%]" />
-                <col className="hidden sm:table-column sm:w-[12%] md:w-[14%]" />
-                <col className="w-[20%] sm:w-[20%] md:w-[18%]" />
-                <col className="w-[25%] sm:w-[14%] md:w-[16%]" />
-              </colgroup>
+        <CardContent className="flex-1 px-3 pb-3">
+          <div className="w-full h-full space-y-0.5">
+            {/* Header Row */}
+            <div className="grid grid-cols-6 gap-2 text-xs font-medium text-muted-foreground pb-1 border-b">
+              <div className="col-span-2 sm:col-span-1">Medication</div>
+              <div className="col-span-1 text-center">Qty</div>
+              <div className="col-span-1 hidden sm:block">Dosage</div>
+              <div className="col-span-1 hidden sm:block">Status</div>
+              <div className="col-span-1 text-center">Time</div>
+              <div className="col-span-1 text-center">Action</div>
+            </div>
 
-              <thead className="sticky top-0 bg-white dark:bg-zinc-800 z-10 dark:bg-gradient-to-r from-gray-800 to-zinc-800 border border-gray-200 dark:border-zinc-800">
-                <tr className="text-muted-foreground border-b">
-                  <th className="text-left py-2 px-1 text-xs">Medication</th>
-                  <th className="text-center py-2 px-1 text-xs">Qty</th>
-                  <th className="text-left py-2 px-1 text-xs">Dosage</th>
-                  <th className="hidden sm:table-cell text-left py-2 px-1 text-xs">Status</th>
-                  <th className="text-center py-2 px-1 text-xs">Time</th>
-                  <th className="text-center py-2 px-1 text-xs">Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredMedications.map((med, idx) => {
-                  return (
-                    <motion.tr
-                      key={med.name + idx}
-                      initial={{ x: 50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: idx * 0.1 }}
-                      className="border-t align-middle hover:bg-accent transition-colors"
+            {/* Medication Rows - Compact spacing */}
+            {filteredMedications.map((med, idx) => {
+              const isLoading = loadingIndex === idx;
+              return (
+                <div key={med.name + idx} className="grid grid-cols-6 gap-2 items-center py-1 hover:bg-accent/50 rounded-lg transition-colors">
+                  <div className="col-span-2 sm:col-span-1 font-medium text-xs break-words">
+                    <div>{med.name}</div>
+                    <div className="text-xs text-muted-foreground sm:hidden">{med.dosage}</div>
+                  </div>
+                  <div className="col-span-1 text-center text-xs">{med.qty}</div>
+                  <div className="col-span-1 hidden sm:block text-xs">{med.dosage}</div>
+                  <div className="col-span-1 hidden sm:block">
+                    <Badge
+                      variant={
+                        med.status === "Missed"
+                          ? "destructive"
+                          : med.status === "Taken"
+                          ? "default"
+                          : "secondary"
+                      }
+                      className="text-xs"
                     >
-                      <td className="py-3 px-2 text-left font-medium text-xs">{med.name}</td>
-                      <td className="py-3 px-1 text-center text-xs">{med.qty}</td>
-                      <td className="py-3 px-1 text-left text-xs">{med.dosage}</td>
-                      <td className="py-3 px-1 text-left hidden sm:table-cell">
-                        <Badge
-                          variant={
-                            med.status === "Missed"
-                              ? "destructive"
-                              : med.status === "Taken"
-                              ? "default"
-                              : "secondary"
-                          }
-                          className="text-xs"
-                        >
-                          {med.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-1 text-center">
-                        {med.status === "Upcoming" ? (
-                          <Icons.clock size={16} className="text-yellow-700 mx-auto" />
-                        ) : (
-                          med.time
-                        )}
-                      </td>
-                      <td className="py-3 px-1 text-right">
-                        {med.status === "Taken" ? (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="rounded-full text-xs px-3 py-1 w-full sm:w-auto"
-                            disabled
-                          >
-                            Taken
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            className="rounded-full bg-black text-white hover:bg-gray-700 text-xs px-3 py-1 w-full sm:w-auto"
-                            onClick={() => handleTakeMedication(idx)}
-                          >
-                            Take
-                          </Button>
-                        )}
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      {med.status}
+                    </Badge>
+                  </div>
+                  <div className="col-span-1 text-center">
+                    {med.status === "Upcoming" ? (
+                      <Icons.clock size={16} className="text-yellow-700 mx-auto" />
+                    ) : (
+                      <span className="text-xs">{med.time}</span>
+                    )}
+                  </div>
+                  <div className="col-span-1 text-center">
+                    {med.status === "Taken" ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="rounded-full text-xs px-2 py-0.5 w-full sm:w-auto"
+                        disabled
+                      >
+                        Taken
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="rounded-full bg-black text-white hover:bg-gray-700 text-xs px-2 py-0.5 w-full sm:w-auto"
+                        onClick={() => handleTakeMedication(idx)}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? "Taking..." : "Take"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
 

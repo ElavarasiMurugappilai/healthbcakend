@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Plus,
   Clock,
@@ -16,7 +15,6 @@ import {
   AlertCircle,
   History as HistoryIcon,
   Pill,
-  Zap,
   Calendar,
   TrendingUp,
   Droplets,
@@ -300,7 +298,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
   const sortedTimes = Object.keys(timelineData).sort();
 
   return (
-    <div className="space-y-6 bg-transparent dark:bg-transparent min-h-screen p-3 sm:p-6 overflow-x-hidden">
+    <div className="space-y-6 bg-transparent dark:bg-transparent min-h-screen p-3 sm:p-6 overflow-x-hidden overflow-y-auto scrollbar-hide">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -314,57 +312,6 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
           <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base break-words">Track daily medicines and dosage</p>
         </div>
         <div className="flex gap-2 w-full mt-4 sm:w-auto sm:mt-0">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button 
-                variant="outline"
-                className="bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg text-sm"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Quick Actions
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64" align="end">
-              <div className="space-y-3">
-                <h4 className="font-medium text-sm">Quick Actions</h4>
-                <div className="space-y-2">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => setShowAddModal(true)}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Medication
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => handleMarkAllAsTaken()}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Mark All as Taken
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => alert('Export medication history feature coming soon!')}
-                  >
-                    <HistoryIcon className="w-4 h-4 mr-2" />
-                    Export History
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                    onClick={() => alert('Set reminders feature coming soon!')}
-                  >
-                    <Clock className="w-4 h-4 mr-2" />
-                    Set Reminders
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-          
           <Button 
             onClick={() => setShowAddModal(true)} 
             variant="default" 
@@ -381,20 +328,20 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
         <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-gray-800 p-1 rounded-lg my-4 shadow-md border border-gray-200 dark:border-gray-700 h-auto min-h-[40px] sm:min-h-[45px] md:min-h-[50px]">
           <TabsTrigger 
             value="today"
-            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300 data-[state=inactive]:opacity-80 data-[state=active]:scale-[1.01]"
         >
           Today's Medications
           </TabsTrigger>
           <TabsTrigger 
             value="history"
-            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300 data-[state=inactive]:opacity-80 data-[state=active]:scale-[1.01]"
         >
           <HistoryIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />
           History
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="today" className="space-y-4 sm:space-y-6 overflow-x-hidden">
+        <TabsContent value="today" className="space-y-4 sm:space-y-6 overflow-x-hidden overflow-y-auto scrollbar-hide data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-left-2 md:data-[state=active]:slide-in-from-left-4">
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">Today's Medications</h2>
             
             {/* Enhanced Summary Cards */}
@@ -557,7 +504,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                   onClick={handleMarkAllAsTaken}
                   className="bg-blue-600 dark:bg-blue-500 text-white shadow-lg transform hover:scale-105 transition-all duration-300 text-sm hover:bg-blue-700 dark:hover:bg-blue-600"
                 >
-                  <Zap className="w-4 h-4 mr-2" />
+                  <TrendingUp className="w-4 h-4 mr-2" />
                   Mark All as Taken
                 </Button>
               </motion.div>
@@ -657,7 +604,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
             </div>
         </TabsContent>
 
-        <TabsContent value="history" className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-xs border border-white/20 overflow-x-hidden">
+        <TabsContent value="history" className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-xs border border-white/20 overflow-x-hidden overflow-y-auto scrollbar-hide data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-2 md:data-[state=active]:slide-in-from-right-4">
             <History 
               medicationLogs={medicationLogs}
               medications={medications}

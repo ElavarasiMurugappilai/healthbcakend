@@ -56,7 +56,7 @@ const FlipCard = ({ icon, title, summary, details, gradient, flipped, setFlipped
     >
       {/* Front */}
       <Card
-        className={`absolute inset-0 flex flex-col items-center justify-center rounded-xl shadow-xl bg-gradient-to-br ${gradient} text-gray-900 dark:text-gray-100 transition-all duration-300 select-none dark:bg-gradient-to-br dark:from-[#23272f] dark:to-[#1a1d23]`}
+        className={`absolute inset-0 flex flex-col items-center justify-center rounded-xl shadow-xl bg-gradient-to-br ${gradient} text-gray-900 dark:text-gray-100 transition-all duration-300 select-none dark:bg-gradient-to-br dark:from-[#23272f] dark:to-[#1a1d23] pb-12`}
         style={{ backfaceVisibility: "hidden" }}
       >
         <span className="text-4xl mb-2">
@@ -64,16 +64,24 @@ const FlipCard = ({ icon, title, summary, details, gradient, flipped, setFlipped
         </span>
         <div className="font-bold text-lg mb-1">{title}</div>
         <div className="text-sm text-gray-700 dark:text-gray-200 text-center">{summary}</div>
-        <Badge variant="secondary" className="mt-4 text-xs text-black dark:text-black-200">Click to see more</Badge>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+          <Button variant="secondary" size="sm" className="text-xs bg-white/20 hover:bg-white/30 text-black dark:text-white">
+            Click to see more
+          </Button>
+        </div>
       </Card>
       {/* Back */}
       <Card
-        className={`absolute inset-0 flex flex-col items-center justify-center rounded-xl shadow-xl bg-gradient-to-br ${gradient} text-gray-900 dark:text-gray-100 transition-all duration-300 select-none dark:bg-gradient-to-br dark:from-[#23272f] dark:to-[#1a1d23]`}
+        className={`absolute inset-0 flex flex-col items-center justify-center rounded-xl shadow-xl bg-gradient-to-br ${gradient} text-gray-900 dark:text-gray-100 transition-all duration-300 select-none dark:bg-gradient-to-br dark:from-[#23272f] dark:to-[#1a1d23] pb-12`}
         style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
       >
         <div className="font-bold text-lg mb-2">{title} Details</div>
         <div className="text-base text-center px-2 text-black dark:text-gray-200">{details}</div>
-        <Badge variant="secondary" className="mt-4 text-xs text-black dark:text-black-800">Click to flip back</Badge>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+          <Button variant="secondary" size="sm" className="text-xs bg-white/20 hover:bg-white/30 text-black dark:text-white">
+            Click to flip back
+          </Button>
+        </div>
       </Card>
     </motion.div>
   </motion.div>

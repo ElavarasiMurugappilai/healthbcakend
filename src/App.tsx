@@ -382,59 +382,6 @@ export default function App() {
           </DialogContent>
         </Dialog>
 
-        {/* Customize Dashboard Modal - Using shadcn Dialog */}
-        <Dialog open={showCustomizeModal} onOpenChange={setShowCustomizeModal}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Customize Dashboard</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="fitnessGoals"
-                    checked={visibleSections.fitnessGoals}
-                    onChange={() => handleSectionToggle('fitnessGoals')}
-                    className="rounded"
-                  />
-                  <Label htmlFor="fitnessGoals">Fitness Goals</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="glucoseTrends"
-                    checked={visibleSections.glucoseTrends}
-                    onChange={() => handleSectionToggle('glucoseTrends')}
-                    className="rounded"
-                  />
-                  <Label htmlFor="glucoseTrends">Blood Glucose Trends</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="careTeam"
-                    checked={visibleSections.careTeam}
-                    onChange={() => handleSectionToggle('careTeam')}
-                    className="rounded"
-                  />
-                  <Label htmlFor="careTeam">My Care Team</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="medicationSchedule"
-                    checked={visibleSections.medicationSchedule}
-                    onChange={() => handleSectionToggle('medicationSchedule')}
-                    className="rounded"
-                  />
-                  <Label htmlFor="medicationSchedule">Medication Schedule</Label>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
         {/* Schedule Visit Modal - Using shadcn Dialog */}
         <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
           <DialogContent className="sm:max-w-[425px]">

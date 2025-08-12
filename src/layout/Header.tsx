@@ -115,13 +115,15 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="flex items-center justify-between px-4 pb-2 md:px-8 py-4 bg-gray-200 dark:bg-[#18181b] sticky top-0 z-20">
       <div className="flex items-center gap-4 md:gap-8">
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           className="md:hidden mr-2"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Open sidebar"
         >
           <span className="text-2xl">☰</span>
-        </button>
+        </Button>
         <Logo />
         {/* Search bar with icon inside and clear button - only on md+ */}
         <div className="hidden md:block relative ml-8 md:ml-16 w-60 md:w-80">
@@ -143,14 +145,15 @@ const Header: React.FC<HeaderProps> = ({
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
           {searchValue && (
-            <button
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0 h-auto"
               onClick={() => setSearchValue("")}
               aria-label="Clear search"
-              type="button"
             >
               &#10005;
-            </button>
+            </Button>
           )}
           
         </div>
@@ -167,7 +170,9 @@ const Header: React.FC<HeaderProps> = ({
             Customize Dashboard
           </Button>
         )}
-        <button
+        <Button
+          variant="ghost"
+          size="sm"
           className={`text-sm flex items-center gap-1 px-2 py-1 rounded transition ${
             selectedDate === new Date().toISOString().slice(0, 10) 
               ? 'text-orange-600 bg-orange-100 dark:bg-orange-900/20 dark:text-orange-400' 
@@ -177,7 +182,7 @@ const Header: React.FC<HeaderProps> = ({
         >
           <CalendarDays size={16} />
           {selectedDate === new Date().toISOString().slice(0, 10) ? 'Today' : selectedDate}
-        </button>
+        </Button>
         {/* Notifications Sheet */}
         <Sheet open={showNotifications} onOpenChange={setShowNotifications}>
           <SheetTrigger asChild>
@@ -254,7 +259,7 @@ const Header: React.FC<HeaderProps> = ({
 
       {/* Today's Summary Modal */}
       <Dialog open={showTodaySummary} onOpenChange={setShowTodaySummary}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto scrollbar-hide">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <CalendarDays className="text-orange-500" size={24} />

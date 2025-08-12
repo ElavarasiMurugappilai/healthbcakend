@@ -1,4 +1,8 @@
-  import React, { useState } from "react";
+  import React, { useState, useEffect } from "react";
+  import { Button } from "@/components/ui/button";
+  import { Badge } from "@/components/ui/badge";
+  import { Card, CardContent } from "@/components/ui/card";
+  import { Icons } from "@/components/ui/icons";
   // Framer Motion removed - using CSS animations instead
 
   interface NotificationsPageProps {
@@ -154,82 +158,88 @@
       <div className="p-4 w-full max-w-6xl mx-auto space-y-6 overflow-x-hidden overflow-y-hidden min-h-screen">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold flex items-center gap-2">🔔 Notifications</h1>
-          <button className="bg-primary text-primary-foreground px-4 py-2 rounded shadow hover:bg-primary/90 transition-colors" onClick={handleMarkAllRead}>Mark all as read</button>
+          <Button onClick={handleMarkAllRead}>Mark all as read</Button>
         </div>
         
         {/* Filters */}
         <div className="flex gap-3 flex-wrap mb-4 w-full">
           {["All", ...types].map(t => (
-                         <button
-               key={t}
-               className={`px-4 py-2 rounded-full text-sm border transition-all duration-300 whitespace-nowrap animate-in fade-in duration-300 ${
-                 notifFilter === t
-                   ? "bg-primary text-primary-foreground border-primary shadow-[0_0_8px_2px_rgba(251,191,36,0.5)] ring-2 ring-yellow-300"
-                   : "bg-muted text-muted-foreground border-muted hover:bg-muted/80"
-               }`}
-               onClick={() => setNotifFilter(t)}
-             >
+            <Button
+              key={t}
+              variant={notifFilter === t ? "default" : "outline"}
+              size="sm"
+              className={`rounded-full text-sm transition-all duration-300 whitespace-nowrap animate-in fade-in duration-300 ${
+                notifFilter === t
+                  ? "shadow-[0_0_8px_2px_rgba(251,191,36,0.5)] ring-2 ring-yellow-300"
+                  : ""
+              }`}
+              onClick={() => setNotifFilter(t)}
+            >
               {t}
-                          </button>
+            </Button>
           ))}
         </div>
         
         {/* Notification List */}
-        <div className="bg-gray-100 dark:bg-gray-900 border-none dark:border-zinc-800 rounded-lg shadow p-4 w-full text-black dark:text-white">
-          {filtered.length === 0 ? (
-            <div className="text-muted-foreground text-center py-8">No notifications.</div>
-          ) : (
-                        <ul className="space-y-4">
-              {filtered.map(n => {
-                const isUrgent = n.title.toLowerCase().includes("missed");
-                return (
-                <li
-                  key={n.id}
-                  className={`flex w-full items-stretch justify-between py-4 gap-4 rounded-lg transition-all border border-gray-200 dark:border-zinc-800 hover:border-primary/40 hover:shadow-md bg-white dark:bg-gradient-to-r from-gray-800 to-zinc-800 px-4 text-black dark:text-white animate-in fade-in slide-in-from-right-4 duration-300 ${typeColors[n.type]}`}
-                  onClick={() => setExpanded(expanded === n.id ? null : n.id)}
-                  style={{ cursor: "pointer" }}
-                >
-                    <div className="flex-1 min-w-0 flex flex-col justify-center space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="text-lg flex-shrink-0">{typeIcons[n.type]}</span>
-                        <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${n.read ? "bg-gray-400" : "bg-orange-500"}`}></span>
-                        <span className="font-semibold text-sm sm:text-base break-words text-left flex-1">{n.title}</span>
-                      </div>
+        <Card className="w-full">
+          <CardContent className="p-4">
+            {filtered.length === 0 ? (
+              <div className="text-muted-foreground text-center py-8">No notifications.</div>
+            ) : (
+              <ul className="space-y-4">
+                {filtered.map(n => {
+                  const isUrgent = n.title.toLowerCase().includes("missed");
+                  return (
+                  <li
+                    key={n.id}
+                    className={`flex w-full items-stretch justify-between py-4 gap-4 rounded-lg transition-all border border-gray-200 dark:border-zinc-800 hover:border-primary/40 hover:shadow-md bg-white dark:bg-gradient-to-r from-gray-800 to-zinc-800 px-4 text-black dark:text-white animate-in fade-in slide-in-from-right-4 duration-300 ${typeColors[n.type]}`}
+                    onClick={() => setExpanded(expanded === n.id ? null : n.id)}
+                    style={{ cursor: "pointer" }}
+                  >
+                      <div className="flex-1 min-w-0 flex flex-col justify-center space-y-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg flex-shrink-0">{typeIcons[n.type]}</span>
+                          <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${n.read ? "bg-gray-400" : "bg-orange-500"}`}></span>
+                          <span className="font-semibold text-sm sm:text-base break-words text-left flex-1">{n.title}</span>
+                        </div>
                                                 {expanded === n.id && (
-                          <div
-                            className="text-sm text-muted-foreground text-left animate-in fade-in slide-in-from-top-2 duration-300"
-                          >
-                            {detailsMap[n.title] || n.desc}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:block">{n.time}</span>
-                        <button
-                          className={`text-lg p-2 rounded-full border-none bg-transparent hover:bg-orange-100 hover:scale-110 transition-all duration-150 ${n.read ? "text-gray-400" : "text-orange-500"}`}
-                          onClick={e => { e.stopPropagation(); handleToggleRead(n.id); }}
-                          title={n.read ? "Mark as Unread" : "Mark as Read"}
+                        <div
+                          className="text-sm text-muted-foreground text-left animate-in fade-in slide-in-from-top-2 duration-300"
                         >
-                          {n.read ? "🔕" : "🔔"}
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+                          {detailsMap[n.title] || n.desc}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:block">{n.time}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`text-lg p-2 rounded-full hover:scale-110 transition-all duration-150 ${n.read ? "text-gray-400" : "text-orange-500"}`}
+                        onClick={e => { e.stopPropagation(); handleToggleRead(n.id); }}
+                        title={n.read ? "Mark as Unread" : "Mark as Read"}
+                      >
+                        {n.read ? "🔕" : "🔔"}
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           )}
+        </CardContent>
+      </Card>
+      
+      {toast && (
+        <div
+          className="fixed bottom-6 right-6 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-bottom-4 duration-400"
+        >
+          {toast}
         </div>
-        
-                 {toast && (
-           <div
-             className="fixed bottom-6 right-6 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-bottom-4 duration-400"
-           >
-             {toast}
-           </div>
-         )}
-      </div>
-    );
-  };
+      )}
+    </div>
+  );
+};
 
   export default NotificationsPage; 
 

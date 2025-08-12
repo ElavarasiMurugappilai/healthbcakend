@@ -342,31 +342,33 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
           </div>
         ))}
         {getCalendarDays().map((day, index) => (
-          <button
+          <Button
             key={index}
+            variant="ghost"
+            size="sm"
             onClick={() => day && setSelectedDate(day.toISOString().slice(0, 10))}
             disabled={!day}
-                         className={`relative p-2 text-xs sm:text-sm rounded-lg transition-all duration-200 ${
-               day
-                 ? getDateStatus(day) === 'all-taken'
-                   ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50'
-                   : getDateStatus(day) === 'missed'
-                   ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
-                   : getDateStatus(day) === 'partial'
-                   ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
-                   : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                 : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-             } ${
-               day && selectedDate === day.toISOString().slice(0, 10)
-                 ? 'ring-2 ring-blue-500 dark:ring-blue-400'
-                 : ''
-             }`}
+            className={`relative p-2 text-xs sm:text-sm rounded-lg transition-all duration-200 h-auto ${
+              day
+                ? getDateStatus(day) === 'all-taken'
+                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50'
+                  : getDateStatus(day) === 'missed'
+                  ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
+                  : getDateStatus(day) === 'partial'
+                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
+                  : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+            } ${
+              day && selectedDate === day.toISOString().slice(0, 10)
+                ? 'ring-2 ring-blue-500 dark:ring-blue-400'
+                : ''
+            }`}
           >
             {day?.getDate()}
             {day && getDateStatus(day) !== 'none' && (
               <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-current opacity-75"></div>
             )}
-          </button>
+          </Button>
         ))}
       </div>
 
