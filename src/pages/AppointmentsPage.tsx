@@ -1,4 +1,3 @@
-
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
@@ -63,9 +62,10 @@ function StatCard({ label, value, color }: { label: string; value: number; color
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      style={{ willChange: "transform, opacity" }}
-      className="p-2 sm:p-3 text-center rounded-xl bg-white shadow dark:bg-gradient-to-r from-gray-800 to-zinc-800"
+      whileHover={{ y: -8, boxShadow: "0 8px 32px 0 rgba(0,0,0,0.12)" }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      style={{ willChange: "transform, box-shadow, opacity" }}
+      className="p-2 sm:p-3 text-center rounded-xl bg-white shadow dark:bg-gradient-to-r from-gray-800 to-zinc-800 cursor-pointer"
     >
       <div className="text-xs text-gray-500">{label}</div>
       <motion.div 
@@ -400,7 +400,7 @@ function RescheduleModal({
             </DialogTitle>
           </motion.div>
 
-          {/* Current Appointment Info */}
+          {/* Current Appointment Info - single line with pipe separators */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -412,21 +412,14 @@ function RescheduleModal({
               Current Appointment:
             </div>
             <div className="bg-white dark:bg-gray-600 rounded-lg p-2 sm:p-3 border border-gray-200 dark:border-gray-500">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-white text-xs sm:text-sm">
-                    {appointment.doctor}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-300">
-                    {appointment.mode}
-                  </div>
-                </div>
-                <Badge variant="secondary" className="text-xs font-mono text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-500 px-1.5 py-0.5 rounded-md">
-                  {appointment.time}
-                </Badge>
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {appointment.date}
+              <div className="flex items-center justify-center text-xs sm:text-sm text-gray-700 dark:text-gray-200 gap-2">
+                <span>{appointment.doctor}</span>
+                <span className="mx-1">|</span>
+                <span>{appointment.mode}</span>
+                <span className="mx-1">|</span>
+                <span>{appointment.date}</span>
+                <span className="mx-1">|</span>
+                <span>{appointment.time}</span>
               </div>
             </div>
           </motion.div>

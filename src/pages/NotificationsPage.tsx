@@ -2,7 +2,14 @@
   import { Button } from "@/components/ui/button";
   import { Badge } from "@/components/ui/badge";
   import { Card, CardContent } from "@/components/ui/card";
-  import { Icons } from "@/components/ui/icons";
+  import {
+    Bell,
+    BellOff,
+    Pill,
+    CalendarDays,
+    Trophy,
+    Settings2
+  } from "lucide-react";
   // Framer Motion removed - using CSS animations instead
 
   interface NotificationsPageProps {
@@ -137,11 +144,11 @@
     };
 
     const types: NotificationType[] = ["Medication", "Appointments", "Challenge", "System"];
-    const typeIcons: { [key in NotificationType]: string } = {
-      Medication: "💊",
-      Appointments: "📅",
-      Challenge: "🏃",
-      System: "⚙️"
+    const typeIcons: { [key in NotificationType]: React.ReactNode } = {
+      Medication: <Pill className="w-5 h-5 text-blue-500" />,
+      Appointments: <CalendarDays className="w-5 h-5 text-green-500" />,
+      Challenge: <Trophy className="w-5 h-5 text-orange-500" />,
+      System: <Settings2 className="w-5 h-5 text-gray-500" />
     };
 
     // Add a details map for demonstration
@@ -157,7 +164,7 @@
     return (
       <div className="p-4 w-full max-w-6xl mx-auto space-y-6 overflow-x-hidden overflow-y-hidden min-h-screen">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold flex items-center gap-2">🔔 Notifications</h1>
+          <h1 className="text-3xl font-bold flex items-center gap-2">Notifications</h1>
           <Button onClick={handleMarkAllRead}>Mark all as read</Button>
         </div>
         
@@ -215,11 +222,11 @@
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`text-lg p-2 rounded-full hover:scale-110 transition-all duration-150 ${n.read ? "text-gray-400" : "text-orange-500"}`}
+                        className={`p-2 rounded-full hover:scale-110 transition-all duration-150 ${n.read ? "text-gray-400" : "text-orange-500"}`}
                         onClick={e => { e.stopPropagation(); handleToggleRead(n.id); }}
                         title={n.read ? "Mark as Unread" : "Mark as Read"}
                       >
-                        {n.read ? "🔕" : "🔔"}
+                        {n.read ? <BellOff className="w-6 h-6" /> : <Bell className="w-6 h-6 text-orange-500" />}
                       </Button>
                     </div>
                   </li>
@@ -247,3 +254,5 @@
 
 
 
+
+  

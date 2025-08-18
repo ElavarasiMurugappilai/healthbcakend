@@ -33,7 +33,7 @@ const ShadcnBar = (props: any) => {
       />
       
       {/* Cloud icon overlay for specific time points */}
-      {[10, 14, 18].includes(payload.time) && (
+      {[10, 14, 18,].includes(payload.time) && (
         <g>
           {/* Cloud background circle */}
           <circle 

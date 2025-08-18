@@ -2,32 +2,37 @@ import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
+import { Icon ,IceCreamBowlIcon, Moon,Heart,Footprints  } from 'lucide-react';
+import { } from 'lucide-react';
+
+
 import { motion, AnimatePresence } from "framer-motion";
 
 const insights = [
   {
-    icon: "🍚",
+    icon: <IceCreamBowlIcon size={65} strokeWidth={1.25}  />,
     title: "Sugar Spike",
     summary: "After lunch this week",
     details: "Your blood sugar spiked by 30% after lunch. Recommendation: Try a lighter lunch and monitor your intake.",
     gradient: "from-[#fceabb] to-[#f8b500]"
   },
   {
-    icon: "😴",
+    icon:  <Moon size={65} strokeWidth={1.25} />,
     title: "Sleep Trend",
     summary: "Longer on weekends",
     details: "You sleep 1.5 hours longer on weekends. Try to keep a consistent sleep schedule for better rest.",
     gradient: "from-[#c2e9fb] to-[#81a4fd]"
   },
   {
-    icon: "❤️",
+    icon: <Heart size={65} strokeWidth={1.25} />,
     title: "Heart Rate",
     summary: "Higher on Fridays",
     details: "Your average heart rate is 8 bpm higher on Fridays. Consider stress-reducing activities.",
     gradient: "from-[#fbc2eb] to-[#a6c1ee]"
   },
   {
-    icon: "👟",
+    icon:  <Footprints size={65} strokeWidth={1.25} />,
     title: "Step Peak",
     summary: "Saturday steps peaked",
     details: "You reached 9,200 steps on Saturday. Great job! Aim for 8,000+ steps daily.",
@@ -63,7 +68,7 @@ const FlipCard = ({ icon, title, summary, details, gradient, flipped, setFlipped
           {icon}
         </span>
         <div className="font-bold text-lg mb-1">{title}</div>
-        <div className="text-sm text-gray-700 dark:text-gray-200 text-center">{summary}</div>
+       
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
           <Button variant="secondary" size="sm" className="text-xs bg-white/20 hover:bg-white/30 text-black dark:text-white">
             Click to see more
