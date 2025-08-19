@@ -25,6 +25,7 @@ import HealthInsightsPage from "./pages/HealthInsightsPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 
+
 // Responsive window width hook
 function useWindowWidth() {
   const [width, setWidth] = React.useState(window.innerWidth);
@@ -162,6 +163,7 @@ export default function App() {
     <SidebarProvider>
       <div className="h-screen w-screen overflow-hidden flex flex-col bg-gray-100 dark:bg-[#252545]">
         {/* Header */}
+        
         <Header
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
@@ -191,6 +193,7 @@ export default function App() {
             setShowDateModal={setShowDateModal}
             selectedDate={selectedDate}
           />
+          
 
           {/* Main Content */}
           <main className="flex-1 p-2 sm:p-4 md:p-6 pb-8 overflow-y-auto space-y-3 bg-gray-200 dark:bg-[#18181b]">
@@ -291,6 +294,8 @@ export default function App() {
             </form>
           </DialogContent>
         </Dialog>
+       
+
 
         {/* Profile Modal - Using shadcn Dialog */}
         <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
