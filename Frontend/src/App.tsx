@@ -25,6 +25,10 @@ import HealthInsightsPage from "./pages/HealthInsightsPage";
 import AppointmentsPage from "./pages/AppointmentsPage";
 import NotificationsPage from "./pages/NotificationsPage";
 
+import SignupPage from "./pages/SignupPage";
+import LoginPage from "./pages/LoginPage";
+
+
 
 // Responsive window width hook
 function useWindowWidth() {
@@ -230,12 +234,17 @@ export default function App() {
                   <Route path="/health-insights" element={<HealthInsightsPage searchValue={searchValue} />} />
                   <Route path="/appointments" element={<AppointmentsPage searchValue={searchValue} />} />
                   <Route path="/notifications" element={<NotificationsPage searchValue={searchValue} />} />
+                  <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
+                  <Route path="*" element={<Navigate to="/signup" />} />
                   {/* Redirect all other routes to /dashboard */}
-                  <Route path="" element={<Navigate to="/dashboard" replace />} />
+                  
             </Routes>
               </motion.div>
             </AnimatePresence>
           </main>
+
         </div>
 
         {/* Toast message */}
