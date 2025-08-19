@@ -1,0 +1,17 @@
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YTQ2ZDZkMjgxMThjZjQxYzcxZTExNyIsImlhdCI6MTc1NTYwNjQ3OCwiZXhwIjoxNzU1NjkyODc4fQ.op-xwWKva1l_X1HwHiQOrXEZBUdbUMwhpmwpCH38ln8",
+  "user": {
+    "id": "68a46d6d28118cf41c71e117",
+    "name": "Elavarasi",
+    "email": "ela@test.com",
+    "age": 22,
+    "gender": "Female",
+    "conditions": [
+      "Diabetes"
+    ],
+    "goals": [
+      "Track glucose",
+      "Exercise"
+    ]
+  }
+}
