@@ -241,7 +241,7 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
               <Button type="button" variant="outline" onClick={() => setShowScheduleModal(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-orange-500 hover:bg-orange-600 hover:-translate-y-1 transition-all duration-200">
+              <Button type="submit" className="bg-primary hover:bg-primary/90 hover:-translate-y-1 transition-all duration-200">
                 Schedule
               </Button>
             </DialogFooter>
@@ -251,7 +251,7 @@ const DashboardPage: React.FC<DashboardPageProps> = (props) => {
 
       {/* Toast message */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 transition">
+        <div className="fixed bottom-6 right-6 bg-success text-success-foreground px-4 py-2 rounded shadow-lg z-50 transition">
           {toast}
         </div>
       )}

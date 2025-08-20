@@ -298,24 +298,24 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
   const sortedTimes = Object.keys(timelineData).sort();
 
   return (
-    <div className="space-y-6 bg-transparent dark:bg-transparent min-h-screen p-3 sm:p-6 overflow-x-hidden overflow-y-auto scrollbar-hide">
+  <div className="space-y-6 bg-gray-200 min-h-screen p-3 sm:p-6 overflow-x-hidden overflow-y-auto scrollbar-hide">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
         style={{ willChange: "transform, opacity" }}
-        className="flex flex-col sm:flex-row items-center justify-between w-full gap-2 sm:gap-4 bg-white dark:bg-gray-800 text-card-foreground rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700"
+  className="flex flex-col sm:flex-row items-center justify-between w-full gap-2 sm:gap-4 bg-card text-card-foreground rounded-2xl p-4 sm:p-6 shadow-lg border border-border"
       >
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white break-words">Medications</h1>
-          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm md:text-base break-words">Track daily medicines and dosage</p>
+          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground break-words">Medications</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm md:text-base break-words">Track daily medicines and dosage</p>
         </div>
         <div className="flex gap-2 w-full mt-4 sm:w-auto sm:mt-0">
           <Button 
             onClick={() => setShowAddModal(true)} 
-            variant="default" 
-            className="bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg text-sm"
+            variant="primary" 
+            className="shadow-lg text-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Medication
@@ -325,16 +325,16 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
 
       {/* Tabs - Using shadcn Tabs with Compact Responsive Design */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'today' | 'history')} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white dark:bg-gray-800 p-1 rounded-lg my-4 shadow-md border border-gray-200 dark:border-gray-700 h-auto min-h-[40px] sm:min-h-[45px] md:min-h-[50px]">
+  <TabsList className="grid w-full grid-cols-2 bg-card p-1 rounded-lg my-4 shadow-md border border-border h-auto min-h-[40px] sm:min-h-[45px] md:min-h-[50px]">
           <TabsTrigger 
             value="today"
-            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300 data-[state=inactive]:opacity-80 data-[state=active]:scale-[1.01]"
+            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:opacity-80 data-[state=active]:scale-[1.01]"
         >
           Today's Medications
           </TabsTrigger>
           <TabsTrigger 
             value="history"
-            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300 data-[state=inactive]:opacity-80 data-[state=active]:scale-[1.01]"
+            className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:opacity-80 data-[state=active]:scale-[1.01]"
         >
           <HistoryIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 inline" />
           History
@@ -342,7 +342,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
         </TabsList>
 
         <TabsContent value="today" className="space-y-4 sm:space-y-6 overflow-x-hidden overflow-y-auto scrollbar-hide data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-left-2 md:data-[state=active]:slide-in-from-left-4">
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">Today's Medications</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Today's Medications</h2>
             
             {/* Enhanced Summary Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
@@ -351,7 +351,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 style={{ willChange: "transform" }}
               >
-              <Card className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
                 <CardContent className="p-0">
                 <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-400 to-blue-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
                   <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
@@ -369,10 +369,10 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                     </CardContent>
                     <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
                       <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
                           Total Today
                         </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400 bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-primary bg-transparent border-none p-0">
                           {totalMeds}
                         </Badge>
                       </CardContent>
@@ -387,7 +387,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 style={{ willChange: "transform" }}
               >
-              <Card className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
                 <CardContent className="p-0">
                 <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
                   <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
@@ -405,10 +405,10 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                     </CardContent>
                     <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
                       <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
                           Taken
                         </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400 bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-primary bg-transparent border-none p-0">
                           {takenMeds}
                         </Badge>
                       </CardContent>
@@ -423,7 +423,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 style={{ willChange: "transform" }}
               >
-              <Card className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
                 <CardContent className="p-0">
                 <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
                   <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
@@ -441,10 +441,10 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                     </CardContent>
                     <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
                       <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
                           Missed
                         </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400 bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-destructive bg-transparent border-none p-0">
                           {missedMeds}
                         </Badge>
                       </CardContent>
@@ -459,7 +459,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 style={{ willChange: "transform" }}
               >
-              <Card className="relative overflow-hidden bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
                 <CardContent className="p-0">
                 <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
                   <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
@@ -477,10 +477,10 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                     </CardContent>
                     <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
                       <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-medium bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
                           Pending
                         </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400 bg-transparent border-none p-0">
+                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-accent bg-transparent border-none p-0">
                           {pendingMeds}
                         </Badge>
                       </CardContent>
@@ -502,7 +502,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
               >
                 <Button
                   onClick={handleMarkAllAsTaken}
-                  className="bg-blue-600 dark:bg-blue-500 text-white shadow-lg transform hover:scale-105 transition-all duration-300 text-sm hover:bg-blue-700 dark:hover:bg-blue-600"
+                  className="bg-primary text-primary-foreground shadow-lg transform hover:scale-105 transition-all duration-300 text-sm hover:bg-primary/80"
                 >
                   <TrendingUp className="w-4 h-4 mr-2" />
                   Mark All as Taken
@@ -512,7 +512,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
 
             {/* Enhanced Medication Cards Grid */}
                         <div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4">All Medications</h3>
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">All Medications</h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
                 {todayMeds.map((med, index) => (
                   <motion.div
@@ -522,7 +522,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                     transition={{ delay: index * 0.05, duration: 0.3, ease: "easeOut" }}
                     whileHover={{ scale: 1.01, y: -2 }}
                     style={{ willChange: "transform, opacity" }}
-                    className="relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 flex"
+                    className="relative bg-card rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-border hover:shadow-xl transition-all duration-300 flex"
                   >
                     {/* Left side - Medication content */}
                     <div className="flex-1">
@@ -546,9 +546,9 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                         <Pill className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                         </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white mb-1 truncate text-left">{med.name}</h4>
-                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-1 truncate text-left">{med.dosage} • {med.time}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">{med.instructions}</p>
+                        <h4 className="font-semibold text-base sm:text-lg text-foreground mb-1 truncate text-left">{med.name}</h4>
+                        <p className="text-xs sm:text-sm text-muted-foreground mb-1 truncate text-left">{med.dosage} • {med.time}</p>
+                        <p className="text-xs text-muted-foreground/70 truncate text-left">{med.instructions}</p>
                       </div>
                     </div>
 
@@ -557,21 +557,21 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                       <div className="flex space-x-1 sm:space-x-2">
                         <Button
                               onClick={() => handleTakeMedication(med.id, med.time)}
-                          className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 px-2 sm:px-4 rounded-lg font-medium shadow-lg transition-all duration-300 text-xs sm:text-sm"
+                          className="flex-1 bg-primary text-primary-foreground py-2 px-2 sm:px-4 rounded-lg font-medium shadow-lg transition-all duration-300 text-xs sm:text-sm hover:bg-primary/80"
                             >
                               Take
                         </Button>
                         <Button
                           variant="outline"
                               onClick={() => handleSkipMedication(med.id, med.time)}
-                          className="flex-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 py-2 px-2 sm:px-4 rounded-lg font-medium transition-all duration-300 text-xs sm:text-sm"
+                          className="flex-1 bg-card border border-border hover:bg-muted text-muted-foreground py-2 px-2 sm:px-4 rounded-lg font-medium transition-all duration-300 text-xs sm:text-sm"
                             >
                               Skip
                         </Button>
                         <Button
                           variant="outline"
                               onClick={() => handleMissedMedication(med.id, med.time)}
-                          className="flex-1 bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 py-2 px-2 sm:px-4 rounded-lg font-medium transition-all duration-300 text-xs sm:text-sm"
+                          className="flex-1 bg-card border border-destructive hover:bg-destructive/10 text-destructive py-2 px-2 sm:px-4 rounded-lg font-medium transition-all duration-300 text-xs sm:text-sm"
                             >
                               Missed
                         </Button>
@@ -582,9 +582,9 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                       <div className="flex items-center space-x-2">
                         {getStatusIcon(med.status)}
                         <span className={`text-xs sm:text-sm font-medium ${
-                          med.status === 'taken' ? 'text-green-600' :
-                          med.status === 'missed' ? 'text-red-600' :
-                          'text-yellow-600'
+                          med.status === 'taken' ? 'text-primary' :
+                          med.status === 'missed' ? 'text-destructive' :
+                          'text-accent'
                         }`}>
                           {getStatusText(med.status)}
                         </span>
@@ -594,7 +594,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
                     
                     {/* Right side - Medication-specific icon */}
                     <div className="flex items-center justify-center ml-4 sm:ml-6">
-                      <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-full p-3 sm:p-4 border border-blue-100">
+                      <div className="bg-muted rounded-full p-3 sm:p-4 border border-border">
                         {getMedicationIcon(med.name)}
                       </div>
                     </div>
@@ -604,7 +604,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
             </div>
         </TabsContent>
 
-        <TabsContent value="history" className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-xs border border-white/20 overflow-x-hidden overflow-y-auto scrollbar-hide data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-2 md:data-[state=active]:slide-in-from-right-4">
+  <TabsContent value="history" className="bg-card/80 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-xs border border-border/20 overflow-x-hidden overflow-y-auto scrollbar-hide data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-2 md:data-[state=active]:slide-in-from-right-4">
             <History 
               medicationLogs={medicationLogs}
               medications={medications}
@@ -697,7 +697,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
           style={{ willChange: "transform, opacity" }}
-          className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg z-50 text-sm"
+          className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 bg-primary text-primary-foreground px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg z-50 text-sm"
         >
           {toast}
         </motion.div>

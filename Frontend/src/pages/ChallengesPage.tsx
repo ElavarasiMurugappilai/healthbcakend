@@ -68,19 +68,19 @@ const ChallengeCard: React.FC<{
   
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'hard': return 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400';
-      default: return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'easy': return 'text-success bg-success/10';
+      case 'medium': return 'text-warning bg-warning/10';
+      case 'hard': return 'text-destructive bg-destructive/10';
+      default: return 'text-muted-foreground bg-muted';
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'daily': return 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400';
-      case 'weekly': return 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400';
-      case 'monthly': return 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400';
-      default: return 'text-gray-600 bg-gray-50 dark:bg-gray-900/20 dark:text-gray-400';
+      case 'daily': return 'text-primary bg-primary/10';
+      case 'weekly': return 'text-purple-600 bg-purple-50';
+      case 'monthly': return 'text-orange-600 bg-orange-50';
+      default: return 'text-muted-foreground bg-muted';
     }
   };
 
@@ -94,10 +94,10 @@ const ChallengeCard: React.FC<{
       className="group cursor-pointer"
       onClick={() => onCardClick(challenge)}
     >
-      <Card className="h-full p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 bg-white dark:bg-gray-800">
+  <Card className="h-full p-6 hover:shadow-xl transition-all duration-300 border border-border hover:border-primary bg-card">
         {/* Header with Icon and Badges */}
         <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-2xl ${challenge.color} text-white shadow-lg`}>
+          <div className={`p-3 rounded-2xl ${challenge.color} text-primary-foreground shadow-lg`}>
             {challenge.icon}
           </div>
           <div className="flex flex-col gap-2">
@@ -112,10 +112,10 @@ const ChallengeCard: React.FC<{
 
         {/* Content */}
         <div className="mb-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
             {challenge.title}
           </h3>
-          <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+          <p className="text-muted-foreground text-sm leading-relaxed">
             {challenge.description}
           </p>
         </div>
@@ -123,12 +123,12 @@ const ChallengeCard: React.FC<{
         {/* Progress Section */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-3">
-            <span className="text-gray-600 dark:text-gray-400 font-medium">Progress</span>
-            <span className="font-bold text-gray-900 dark:text-white">
+            <span className="text-muted-foreground font-medium">Progress</span>
+            <span className="font-bold text-foreground">
               {challenge.current} / {challenge.target} {challenge.unit}
             </span>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
             <motion.div
               className={`h-full rounded-full ${challenge.color}`}
               initial={{ width: 0 }}
@@ -141,11 +141,11 @@ const ChallengeCard: React.FC<{
         {/* Stats */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4 text-sm">
-            <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <Icons.award className="w-4 h-4" />
               <span className="font-semibold">{challenge.points} pts</span>
             </span>
-            <span className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <span className="flex items-center gap-2 text-muted-foreground">
               <Icons.users className="w-4 h-4" />
               <span className="font-semibold">{challenge.participants}</span>
             </span>
@@ -163,7 +163,7 @@ const ChallengeCard: React.FC<{
                   e.stopPropagation();
                   onLeave(challenge.id);
                 }}
-                className="flex-1 text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-red-400 dark:border-red-400"
+                className="flex-1 text-destructive border-destructive hover:bg-destructive/10"
               >
                 Leave
               </Button>
@@ -174,7 +174,7 @@ const ChallengeCard: React.FC<{
                   onUpdateProgress(challenge.id, Math.min(challenge.target, challenge.current + 1));
                 }}
                 disabled={challenge.current >= challenge.target}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                className="flex-1 bg-primary hover:bg-primary/90"
               >
                 Update
               </Button>
@@ -186,7 +186,7 @@ const ChallengeCard: React.FC<{
                 e.stopPropagation();
                 onJoin(challenge.id);
               }}
-              className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+              className="flex-1 bg-success hover:bg-success/90"
             >
               Join Challenge
             </Button>
@@ -195,10 +195,10 @@ const ChallengeCard: React.FC<{
 
         {/* Tip */}
         {challenge.tip && (
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+          <div className="mt-6 p-4 bg-muted rounded-xl border border-border">
             <div className="flex items-start gap-3">
-              <Icons.lightbulb className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">{challenge.tip}</p>
+              <Icons.lightbulb className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-primary leading-relaxed">{challenge.tip}</p>
             </div>
           </div>
         )}
@@ -244,19 +244,19 @@ const ChallengeModal: React.FC<{
         <div className="space-y-6">
           {/* Challenge Details */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="p-4 bg-muted rounded-lg">
               <div className="text-sm text-muted-foreground">Type</div>
               <div className="font-medium capitalize">{challenge.type}</div>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="p-4 bg-muted rounded-lg">
               <div className="text-sm text-muted-foreground">Difficulty</div>
               <div className="font-medium capitalize">{challenge.difficulty}</div>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="p-4 bg-muted rounded-lg">
               <div className="text-sm text-muted-foreground">Points</div>
               <div className="font-medium">{challenge.points} pts</div>
             </div>
-            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="p-4 bg-muted rounded-lg">
               <div className="text-sm text-muted-foreground">Participants</div>
               <div className="font-medium">{challenge.participants}</div>
             </div>
@@ -270,7 +270,7 @@ const ChallengeModal: React.FC<{
                 <span>Current Progress</span>
                 <span className="font-medium">{progress} / {challenge.target} {challenge.unit}</span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                 <motion.div
                   className={`h-full rounded-full ${challenge.color}`}
                   animate={{ width: `${progressPercentage}%` }}
@@ -299,7 +299,7 @@ const ChallengeModal: React.FC<{
                     max={challenge.target}
                     value={progress}
                     onChange={(e) => setProgress(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer slider"
                   />
                 </div>
               </div>
@@ -318,7 +318,7 @@ const ChallengeModal: React.FC<{
           {/* Timeline */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Timeline</h3>
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
               <div>
                 <div className="text-sm text-muted-foreground">Start Date</div>
                 <div className="font-medium">{challenge.startDate}</div>
@@ -333,12 +333,12 @@ const ChallengeModal: React.FC<{
 
           {/* Tip */}
           {challenge.tip && (
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <div className="p-4 bg-muted rounded-lg">
               <div className="flex items-start gap-2">
-                <Icons.lightbulb className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <Icons.lightbulb className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                 <div>
-                  <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Pro Tip</div>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">{challenge.tip}</p>
+                  <div className="text-sm font-medium text-primary">Pro Tip</div>
+                  <p className="text-sm text-primary">{challenge.tip}</p>
                 </div>
               </div>
             </div>
@@ -607,7 +607,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
   );
 
   return (
-    <div className="min-h-screen bg-transparent">
+  <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with Goals */}
         <div className="mb-8">
@@ -616,10 +616,10 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
         
       {/* Tabs - Using shadcn Tabs with Compact Responsive Design */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'challenges' | 'badges' | 'leaderboard')} className="w-full mb-8">
-          <TabsList className="grid w-full grid-cols-3 bg-white dark:bg-gray-800 p-1 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 h-auto min-h-[50px] sm:min-h-[55px] md:min-h-[60px]">
+          <TabsList className="grid w-full grid-cols-3 bg-card p-1 rounded-lg shadow-md border border-border h-auto min-h-[50px] sm:min-h-[55px] md:min-h-[60px]">
             <TabsTrigger 
               value="challenges"
-              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground"
             >
               <div className="flex flex-col items-center gap-1">
                 <Icons.target className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -628,7 +628,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
             </TabsTrigger>
             <TabsTrigger 
               value="badges"
-              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground"
             >
               <div className="flex flex-col items-center gap-1">
                 <Icons.award className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -637,7 +637,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
             </TabsTrigger>
             <TabsTrigger 
               value="leaderboard"
-              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 data-[state=inactive]:text-gray-700 dark:data-[state=inactive]:text-gray-300"
+              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground"
             >
               <div className="flex flex-col items-center gap-1">
                 <Icons.users className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -691,7 +691,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
               initial={{ opacity: 0, y: 50, scale: 0.3 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.3 }}
-              className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50"
+              className="fixed bottom-6 right-6 bg-success text-success-foreground px-6 py-3 rounded-xl shadow-lg z-50"
             >
               {toast}
             </motion.div>

@@ -65,11 +65,11 @@ function StatCard({ label, value, color }: { label: string; value: number; color
       whileHover={{ y: -8, boxShadow: "0 8px 32px 0 rgba(0,0,0,0.12)" }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       style={{ willChange: "transform, box-shadow, opacity" }}
-      className="p-2 sm:p-3 text-center rounded-xl bg-white shadow dark:bg-gradient-to-r from-gray-800 to-zinc-800 cursor-pointer"
+  className="p-2 sm:p-3 text-center rounded-xl bg-card shadow cursor-pointer"
     >
-      <div className="text-xs text-gray-500">{label}</div>
+  <div className="text-xs text-muted-foreground">{label}</div>
       <motion.div 
-        className={`text-lg sm:text-xl font-bold ${color || ""}`}
+        className={`text-lg sm:text-xl font-bold text-foreground ${color || ""}`}
         initial={{ scale: 0.8 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.2, ease: "easeOut" }}
@@ -518,7 +518,7 @@ function RescheduleModal({
                   onReschedule({ ...appointment, ...form });
                 }}
                 disabled={!form.doctor || !form.date || !form.time}
-                className="flex-1 py-2 text-xs sm:text-sm bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 py-2 text-xs sm:text-sm bg-orange-600 hover:bg-orange-700 text-black"
               >
                 Reschedule
               </Button>

@@ -17,10 +17,10 @@
   }
 
   const typeColors: Record<string, string> = {
-    Medication: "border-l-4 border-blue-400",
-    Appointments: "border-l-4 border-green-400",
-    Challenge: "border-l-4 border-orange-400",
-    System: "border-l-4 border-gray-400"
+    Medication: "border-l-4 border-primary",
+    Appointments: "border-l-4 border-success",
+    Challenge: "border-l-4 border-warning",
+    System: "border-l-4 border-muted"
   };
   const urgentTypes = ["Missed Dose"];
 
@@ -145,10 +145,10 @@
 
     const types: NotificationType[] = ["Medication", "Appointments", "Challenge", "System"];
     const typeIcons: { [key in NotificationType]: React.ReactNode } = {
-      Medication: <Pill className="w-5 h-5 text-blue-500" />,
-      Appointments: <CalendarDays className="w-5 h-5 text-green-500" />,
-      Challenge: <Trophy className="w-5 h-5 text-orange-500" />,
-      System: <Settings2 className="w-5 h-5 text-gray-500" />
+    Medication: <Pill className="w-5 h-5 text-primary" />,
+    Appointments: <CalendarDays className="w-5 h-5 text-success" />,
+    Challenge: <Trophy className="w-5 h-5 text-warning" />,
+    System: <Settings2 className="w-5 h-5 text-muted-foreground" />
     };
 
     // Add a details map for demonstration
@@ -162,7 +162,7 @@
     };
 
     return (
-      <div className="p-4 w-full max-w-6xl mx-auto space-y-6 overflow-x-hidden overflow-y-hidden min-h-screen">
+  <div className="p-4 w-full max-w-6xl mx-auto space-y-6 overflow-x-hidden overflow-y-hidden min-h-screen">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h1 className="text-3xl font-bold flex items-center gap-2">Notifications</h1>
           <Button onClick={handleMarkAllRead}>Mark all as read</Button>
@@ -177,7 +177,7 @@
               size="sm"
               className={`rounded-full text-sm transition-all duration-300 whitespace-nowrap animate-in fade-in duration-300 ${
                 notifFilter === t
-                  ? "shadow-[0_0_8px_2px_rgba(251,191,36,0.5)] ring-2 ring-yellow-300"
+                  ? "shadow-[0_0_8px_2px_var(--theme-warning)] ring-2 ring-warning"
                   : ""
               }`}
               onClick={() => setNotifFilter(t)}
@@ -199,17 +199,17 @@
                   return (
                   <li
                     key={n.id}
-                    className={`flex w-full items-stretch justify-between py-4 gap-4 rounded-lg transition-all border border-gray-200 dark:border-zinc-800 hover:border-primary/40 hover:shadow-md bg-white dark:bg-gradient-to-r from-gray-800 to-zinc-800 px-4 text-black dark:text-white animate-in fade-in slide-in-from-right-4 duration-300 ${typeColors[n.type]}`}
+                    className={`flex w-full items-stretch justify-between py-4 gap-4 rounded-lg transition-all border border-border hover:border-primary/40 hover:shadow-md bg-card px-4 text-foreground animate-in fade-in slide-in-from-right-4 duration-300 ${typeColors[n.type]}`}
                     onClick={() => setExpanded(expanded === n.id ? null : n.id)}
                     style={{ cursor: "pointer" }}
                   >
                       <div className="flex-1 min-w-0 flex flex-col justify-center space-y-2">
                         <div className="flex items-center gap-3">
                           <span className="text-lg flex-shrink-0">{typeIcons[n.type]}</span>
-                          <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${n.read ? "bg-gray-400" : "bg-orange-500"}`}></span>
+                          <span className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${n.read ? "bg-muted" : "bg-warning"}`}></span>
                           <span className="font-semibold text-sm sm:text-base break-words text-left flex-1">{n.title}</span>
                         </div>
-                                                {expanded === n.id && (
+                        {expanded === n.id && (
                         <div
                           className="text-sm text-muted-foreground text-left animate-in fade-in slide-in-from-top-2 duration-300"
                         >
@@ -222,11 +222,11 @@
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`p-2 rounded-full hover:scale-110 transition-all duration-150 ${n.read ? "text-gray-400" : "text-orange-500"}`}
+                        className={`p-2 rounded-full hover:scale-110 transition-all duration-150 ${n.read ? "text-muted-foreground" : "text-warning"}`}
                         onClick={e => { e.stopPropagation(); handleToggleRead(n.id); }}
                         title={n.read ? "Mark as Unread" : "Mark as Read"}
                       >
-                        {n.read ? <BellOff className="w-6 h-6" /> : <Bell className="w-6 h-6 text-orange-500" />}
+                        {n.read ? <BellOff className="w-6 h-6" /> : <Bell className="w-6 h-6 text-warning" />}
                       </Button>
                     </div>
                   </li>
@@ -239,7 +239,7 @@
       
       {toast && (
         <div
-          className="fixed bottom-6 right-6 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-bottom-4 duration-400"
+          className="fixed bottom-6 right-6 bg-success text-success-foreground px-4 py-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-bottom-4 duration-400"
         >
           {toast}
         </div>

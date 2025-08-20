@@ -337,7 +337,7 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
       {/* Calendar Grid */}
       <div className="grid grid-cols-7 gap-1 mb-3">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="text-xs font-medium text-gray-500 dark:text-gray-400 text-center py-1">
+          <div key={day} className="text-xs font-medium text-muted-foreground text-center py-1">
             {day}
           </div>
         ))}
@@ -351,16 +351,16 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
             className={`relative p-2 text-xs sm:text-sm rounded-lg transition-all duration-200 h-auto ${
               day
                 ? getDateStatus(day) === 'all-taken'
-                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/50'
+                  ? 'bg-primary/10 text-primary hover:bg-primary/20'
                   : getDateStatus(day) === 'missed'
-                  ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50'
+                  ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
                   : getDateStatus(day) === 'partial'
-                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/50'
-                  : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                  ? 'bg-accent/10 text-accent hover:bg-accent/20'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                : 'text-muted-foreground/50 cursor-not-allowed'
             } ${
               day && selectedDate === day.toISOString().slice(0, 10)
-                ? 'ring-2 ring-blue-500 dark:ring-blue-400'
+                ? 'ring-2 ring-primary'
                 : ''
             }`}
           >

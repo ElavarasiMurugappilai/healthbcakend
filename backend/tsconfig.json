@@ -8,8 +8,12 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "resolveJsonModule": true,
+    "moduleResolution": "node"
   },
   "include": ["src"],
   "exclude": ["node_modules"]
+  
 }

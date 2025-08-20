@@ -61,7 +61,7 @@ const FlipCard = ({ icon, title, summary, details, gradient, flipped, setFlipped
     >
       {/* Front */}
       <Card
-        className={`absolute inset-0 flex flex-col items-center justify-center rounded-xl shadow-xl bg-gradient-to-br ${gradient} text-gray-900 dark:text-gray-100 transition-all duration-300 select-none dark:bg-gradient-to-br dark:from-[#23272f] dark:to-[#1a1d23] pb-12`}
+  className={`absolute inset-0 flex flex-col items-center justify-center rounded-xl shadow-xl bg-gradient-to-br ${gradient} text-foreground transition-all duration-300 select-none pb-12`}
         style={{ backfaceVisibility: "hidden" }}
       >
         <span className="text-4xl mb-2">
@@ -81,9 +81,9 @@ const FlipCard = ({ icon, title, summary, details, gradient, flipped, setFlipped
         style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}
       >
         <div className="font-bold text-lg mb-2">{title} Details</div>
-        <div className="text-base text-center px-2 text-black dark:text-gray-200">{details}</div>
+  <div className="text-base text-center px-2 text-foreground">{details}</div>
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
-          <Button variant="secondary" size="sm" className="text-xs bg-white/20 hover:bg-white/30 text-black dark:text-white">
+          <Button variant="secondary" size="sm" className="text-xs bg-muted/60 hover:bg-muted/80 text-foreground">
             Click to flip back
           </Button>
         </div>

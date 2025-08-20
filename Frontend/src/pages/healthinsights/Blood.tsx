@@ -21,7 +21,7 @@ const Blood: React.FC<BloodProps> = ({ glucoseData, barSize }) => {
   };
 
   return (
-    <Card className="h-80 flex flex-col w-full min-w-0 px-0 py-0 shadow-xl hover:-translate-y-1 transition-all duration-200 bg-white dark:bg-gradient-to-r from-gray-800 to-zinc-800 border border-gray-200 dark:border-zinc-800">
+  <Card className="h-80 flex flex-col w-full min-w-0 px-0 py-0 shadow-xl hover:-translate-y-1 transition-all duration-200 bg-card border border-border">
       <CardHeader className="pb-2 pt-1">
         <CardTitle className="mt-4">Blood Glucose</CardTitle>
       </CardHeader>

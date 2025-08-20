@@ -125,7 +125,7 @@ const MedicationSchedule: React.FC<MedicationScheduleProps> = ({
                     ) : (
                       <Button
                         size="sm"
-                        className="rounded-full bg-black text-white hover:bg-gray-700 text-xs px-5 py-1 w-full sm:w-auto"
+                        className="rounded-full px-4  h-6 py-0.5   bg-black text-white hover:bg-gray-700 text-xs px-4  h-6 py-0.5 w-full sm:w-auto "
                         onClick={() => handleTakeMedication(idx)}
                         disabled={isLoading}
                         style={{ borderRadius: "9999px" }}

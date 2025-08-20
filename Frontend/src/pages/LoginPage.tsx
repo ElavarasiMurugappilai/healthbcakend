@@ -38,7 +38,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md mx-auto p-6 shadow-lg">
         <CardContent>
-          <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center text-foreground">Login</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <Label>Email</Label>
             <Input name="email" type="email" value={form.email} onChange={handleChange} required />
@@ -49,7 +49,7 @@ export default function LoginPage() {
             </Button>
             {msg && <div className="text-center mt-2 text-primary">{msg}</div>}
           </form>
-          <div className="mt-4 text-center">
+          <div className="mt-4 text-center text-muted-foreground">
             Don't have an account? <a href="/signup" className="text-primary underline">Sign Up</a>
           </div>
         </CardContent>

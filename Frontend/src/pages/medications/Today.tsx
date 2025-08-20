@@ -17,8 +17,8 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <Card className="p-4">
         <div className="flex items-center space-x-2">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Icons.pill className="w-4 h-4 text-blue-600" />
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Icons.pill className="w-4 h-4 text-primary" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total Today</p>
@@ -28,12 +28,12 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
       </Card>
       <Card className="p-4">
         <div className="flex items-center space-x-2">
-          <div className="p-2 bg-green-100 rounded-lg">
-            <Icons.checkCircle className="w-4 h-4 text-green-600" />
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Icons.checkCircle className="w-4 h-4 text-primary" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Taken</p>
-            <p className="text-xl font-bold text-green-600">
+            <p className="text-xl font-bold text-primary">
               {getTodayMedications().filter(med => med.status === 'taken').length}
             </p>
           </div>
@@ -41,12 +41,12 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
       </Card>
       <Card className="p-4">
         <div className="flex items-center space-x-2">
-          <div className="p-2 bg-red-100 rounded-lg">
-            <Icons.xCircle className="w-4 h-4 text-red-600" />
+          <div className="p-2 bg-destructive/10 rounded-lg">
+            <Icons.xCircle className="w-4 h-4 text-destructive" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Missed</p>
-            <p className="text-xl font-bold text-red-600">
+            <p className="text-xl font-bold text-destructive">
               {getTodayMedications().filter(med => med.status === 'missed').length}
             </p>
           </div>
@@ -54,12 +54,12 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
       </Card>
       <Card className="p-4">
         <div className="flex items-center space-x-2">
-          <div className="p-2 bg-yellow-100 rounded-lg">
-            <Icons.clock className="w-4 h-4 text-yellow-600" />
+          <div className="p-2 bg-accent/10 rounded-lg">
+            <Icons.clock className="w-4 h-4 text-accent" />
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Pending</p>
-            <p className="text-xl font-bold text-yellow-600">
+            <p className="text-xl font-bold text-accent">
               {getTodayMedications().filter(med => med.status === 'pending').length}
             </p>
           </div>
@@ -89,7 +89,7 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
                 <Button
                   size="sm"
                   onClick={() => handleTakeMedication(med.id, med.time)}
-                  className="bg-green-500 hover:bg-green-600 text-white"
+                  className="bg-primary hover:bg-primary/80 text-primary-foreground"
                 >
                   Take
                 </Button>
@@ -104,7 +104,7 @@ const Today: React.FC<TodayProps> = ({ getTodayMedications, handleTakeMedication
                   size="sm"
                   variant="outline"
                   onClick={() => handleMissedMedication(med.id, med.time)}
-                  className="text-red-600 border-red-600 hover:bg-red-50"
+                  className="text-destructive border-destructive hover:bg-destructive/10"
                 >
                   Missed
                 </Button>

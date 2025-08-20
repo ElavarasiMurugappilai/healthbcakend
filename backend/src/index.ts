@@ -3,11 +3,29 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db";
 import authRoutes from "./routes/authRoutes";
-
+import mongoose from "mongoose";
 dotenv.config();
+
+console.log("MONGO_URI:", process.env.MONGO_URI);
+
+mongoose.connect(process.env.MONGO_URI!)
+  .then(() => {
+    console.log("MongoDB Connected ✅");
+    if (mongoose.connection.db) {
+      console.log("Connected database name:", mongoose.connection.db.databaseName);
+    } else {
+      console.log("Database connection object is undefined.");
+    }
+  })
+  .catch(err => {
+    console.error("Mongo connect error:", err);
+  });
+
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
 
 connectDB();
 
@@ -37,3 +55,6 @@ app.get("/medications", (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+
+
+

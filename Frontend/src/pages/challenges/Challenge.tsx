@@ -47,7 +47,7 @@ const ChallengeTab: React.FC<ChallengeTabProps> = ({
           <Card className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-4 flex-1">
-                <div className={`p-3 rounded-lg ${challenge.color} text-white`}>
+                <div className={`p-3 rounded-lg ${challenge.color} text-primary-foreground`}>
                   {challenge.icon}
                 </div>
                 <div className="flex-1">
@@ -69,7 +69,7 @@ const ChallengeTab: React.FC<ChallengeTabProps> = ({
                         {challenge.current} / {challenge.target} {challenge.unit}
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-muted rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full transition-all duration-300 ${challenge.color.replace('bg-', 'bg-')}`}
                         style={{ width: `${getProgressPercentage(challenge.current, challenge.target)}%` }}
@@ -93,7 +93,7 @@ const ChallengeTab: React.FC<ChallengeTabProps> = ({
                           size="sm"
                           variant="outline"
                           onClick={() => handleLeaveChallenge(challenge.id)}
-                          className="text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          className="text-destructive border-destructive hover:bg-destructive/10"
                         >
                           Leave
                         </Button>
@@ -101,7 +101,7 @@ const ChallengeTab: React.FC<ChallengeTabProps> = ({
                           size="sm"
                           onClick={() => handleUpdateProgress(challenge.id, challenge.current + 1)}
                           disabled={challenge.current >= challenge.target}
-                          className="hover:bg-white hover:text-black dark:hover:bg-white dark:hover:text-black"
+                          className="hover:bg-card hover:text-foreground"
                         >
                           Update Progress
                         </Button>
@@ -110,7 +110,7 @@ const ChallengeTab: React.FC<ChallengeTabProps> = ({
                       <Button
                         size="sm"
                         onClick={() => handleJoinChallenge(challenge.id)}
-                        className="hover:bg-white hover:text-black dark:hover:bg-white dark:hover:text-black"
+                        className="hover:bg-card hover:text-foreground"
                       >
                         Join Challenge
                       </Button>
