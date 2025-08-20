@@ -299,29 +299,68 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
 
   return (
   <div className="space-y-6 bg-gray-200 min-h-screen p-3 sm:p-6 overflow-x-hidden overflow-y-auto scrollbar-hide">
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        style={{ willChange: "transform, opacity" }}
-  className="flex flex-col sm:flex-row items-center justify-between w-full gap-2 sm:gap-4 bg-card text-card-foreground rounded-2xl p-4 sm:p-6 shadow-lg border border-border"
-      >
-        <div className="min-w-0 flex-1">
-          <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground break-words">Medications</h1>
-          <p className="text-muted-foreground text-xs sm:text-sm md:text-base break-words">Track daily medicines and dosage</p>
+    {/* Redesigned Header Card */}
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      style={{ willChange: "transform, opacity" }}
+      className="w-full bg-card text-card-foreground rounded-2xl p-4 sm:p-6 shadow-lg border border-border flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6"
+    >
+      {/* Progress Ring and Adherence */}
+      <div className="flex items-center gap-4 w-full md:w-auto justify-center md:justify-start">
+        {/* Progress Ring SVG */}
+        <div className="relative flex items-center justify-center w-20 h-20">
+          <svg className="w-20 h-20" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="34" fill="none" stroke="#e5e7eb" strokeWidth="8" />
+            <circle
+              cx="40" cy="40" r="34" fill="none"
+              stroke="#6366f1"
+              strokeWidth="8"
+              strokeDasharray={2 * Math.PI * 34}
+              strokeDashoffset={(2 * Math.PI * 34) * (1 - (takenMeds / (totalMeds || 1)))}
+              strokeLinecap="round"
+              style={{ transition: 'stroke-dashoffset 0.5s' }}
+            />
+          </svg>
+          <span className="absolute text-xl font-bold text-primary">
+            {totalMeds > 0 ? Math.round((takenMeds / totalMeds) * 100) : 0}%
+          </span>
         </div>
-        <div className="flex gap-2 w-full mt-4 sm:w-auto sm:mt-0">
-          <Button 
-            onClick={() => setShowAddModal(true)} 
-            variant="primary" 
-            className="shadow-lg text-sm"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Medication
-          </Button>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Medications</h1>
+          <p className="text-muted-foreground text-xs sm:text-sm">Track daily medicines and dosage</p>
+          <div className="flex gap-2 mt-1">
+            <Badge variant="outline" className="text-xs px-2 py-1 border-primary text-primary bg-primary/10">Taken: {takenMeds}</Badge>
+            <Badge variant="outline" className="text-xs px-2 py-1 border-destructive text-destructive bg-destructive/10">Missed: {missedMeds}</Badge>
+            <Badge variant="outline" className="text-xs px-2 py-1 border-warning text-warning bg-warning/10">Pending: {pendingMeds}</Badge>
+          </div>
         </div>
-      </motion.div>
+      </div>
+      {/* Next Medication Reminder and Add Button */}
+      <div className="flex flex-col items-center md:items-end gap-2 w-full md:w-auto">
+        {/* Next Medication Reminder */}
+        {todayMeds.length > 0 ? (
+          <div className="flex items-center gap-2 text-sm bg-muted rounded-lg px-3 py-2 mb-1 w-full md:w-auto">
+            <Clock className="w-4 h-4 text-primary" />
+            <span className="font-medium text-foreground">
+              Next: {(() => {
+                const next = todayMeds.find(med => med.status === 'pending');
+                return next ? `${next.name} at ${next.time}` : 'All taken!';
+              })()}
+            </span>
+          </div>
+        ) : null}
+        <Button
+          onClick={() => setShowAddModal(true)}
+          variant="default"
+          className="shadow-lg text-sm w-full md:w-auto"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Medication
+        </Button>
+      </div>
+    </motion.div>
 
       {/* Tabs - Using shadcn Tabs with Compact Responsive Design */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'today' | 'history')} className="w-full">
@@ -342,154 +381,42 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
         </TabsList>
 
         <TabsContent value="today" className="space-y-4 sm:space-y-6 overflow-x-hidden overflow-y-auto scrollbar-hide data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-left-2 md:data-[state=active]:slide-in-from-left-4">
-            <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Today's Medications</h2>
-            
-            {/* Enhanced Summary Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                style={{ willChange: "transform" }}
-              >
-              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
-                <CardContent className="p-0">
-                <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-orange-400 to-blue-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
-                  <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
-                    <CardContent className="p-0">
-                  <div className="relative">
-                        <Card className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-400 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
-                          <CardContent className="p-0">
-                      <Pill className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                          </CardContent>
-                        </Card>
-                        <Badge variant="secondary" className="absolute -top-1 -right-1 w-4 h-4 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center p-0">
-                      <span className="text-xs text-white font-bold">{totalMeds}</span>
-                        </Badge>
-                    </div>
-                    </CardContent>
-                    <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
-                      <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
-                          Total Today
-                        </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-primary bg-transparent border-none p-0">
-                          {totalMeds}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  </Card>
-                </CardContent>
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground">Today's Medications</h2>
+            {/* Compact, Responsive Summary Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3 w-full">
+              {/* Total Today */}
+              <Card className="flex flex-col items-center justify-center p-1 sm:p-2 rounded-md shadow border border-border min-h-[60px] max-h-[90px] w-full aspect-[4/3]">
+                <span className="mb-0.5">
+                  <Pill className="w-5 h-5" style={{ color: 'var(--primary)' }} />
+                </span>
+                <span className="text-xs sm:text-sm font-medium text-foreground">Total Today</span>
+                <span className="text-sm sm:text-base font-bold text-primary">{totalMeds}</span>
               </Card>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                style={{ willChange: "transform" }}
-              >
-              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
-                <CardContent className="p-0">
-                <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
-                  <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
-                    <CardContent className="p-0">
-                  <div className="relative">
-                        <Card className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
-                          <CardContent className="p-0">
-                      <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                          </CardContent>
-                        </Card>
-                        <Badge variant="secondary" className="absolute -top-1 -right-1 w-4 h-4 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center p-0">
-                      <span className="text-xs text-white font-bold">{takenMeds}</span>
-                        </Badge>
-                    </div>
-                    </CardContent>
-                    <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
-                      <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
-                          Taken
-                        </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-primary bg-transparent border-none p-0">
-                          {takenMeds}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  </Card>
-                </CardContent>
+              {/* Taken */}
+              <Card className="flex flex-col items-center justify-center p-1 sm:p-2 rounded-md shadow border border-border min-h-[60px] max-h-[90px] w-full aspect-[4/3]">
+                <span className="mb-0.5">
+                  <CheckCircle className="w-5 h-5" style={{ color: 'var(--success)' }} />
+                </span>
+                <span className="text-xs sm:text-sm font-medium text-foreground">Taken</span>
+                <span className="text-sm sm:text-base font-bold" style={{ color: 'var(--success)' }}>{takenMeds}</span>
               </Card>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                style={{ willChange: "transform" }}
-              >
-              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
-                <CardContent className="p-0">
-                <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
-                  <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
-                    <CardContent className="p-0">
-                  <div className="relative">
-                        <Card className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg">
-                          <CardContent className="p-0">
-                      <XCircle className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                          </CardContent>
-                        </Card>
-                        <Badge variant="secondary" className="absolute -top-1 -right-1 w-4 h-4 sm:w-6 sm:h-6 bg-red-500 rounded-full flex items-center justify-center p-0">
-                      <span className="text-xs text-white font-bold">{missedMeds}</span>
-                        </Badge>
-                    </div>
-                    </CardContent>
-                    <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
-                      <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
-                          Missed
-                        </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-destructive bg-transparent border-none p-0">
-                          {missedMeds}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  </Card>
-                </CardContent>
+              {/* Missed */}
+              <Card className="flex flex-col items-center justify-center p-1 sm:p-2 rounded-md shadow border border-border min-h-[60px] max-h-[90px] w-full aspect-[4/3]">
+                <span className="mb-0.5">
+                  <XCircle className="w-5 h-5" style={{ color: 'var(--destructive)' }} />
+                </span>
+                <span className="text-xs sm:text-sm font-medium text-foreground">Missed</span>
+                <span className="text-sm sm:text-base font-bold" style={{ color: 'var(--destructive)' }}>{missedMeds}</span>
               </Card>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                style={{ willChange: "transform" }}
-              >
-              <Card className="relative overflow-hidden bg-card rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-border">
-                <CardContent className="p-0">
-                <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full opacity-10 transform translate-x-4 sm:translate-x-8 -translate-y-4 sm:-translate-y-8"></div>
-                  <Card className="flex items-center space-x-2 sm:space-x-4 bg-transparent border-none shadow-none">
-                    <CardContent className="p-0">
-                  <div className="relative">
-                        <Card className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg animate-pulse">
-                          <CardContent className="p-0">
-                      <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
-                          </CardContent>
-                        </Card>
-                        <Badge variant="secondary" className="absolute -top-1 -right-1 w-4 h-4 sm:w-6 sm:h-6 bg-yellow-500 rounded-full flex items-center justify-center p-0">
-                      <span className="text-xs text-white font-bold">{pendingMeds}</span>
-                        </Badge>
-                    </div>
-                    </CardContent>
-                    <Card className="min-w-0 flex-1 bg-transparent border-none shadow-none">
-                      <CardContent className="p-0">
-                        <Badge variant="secondary" className="text-xs sm:text-sm text-muted-foreground font-medium bg-transparent border-none p-0">
-                          Pending
-                        </Badge>
-                        <Badge variant="secondary" className="text-lg sm:text-2xl font-bold text-accent bg-transparent border-none p-0">
-                          {pendingMeds}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  </Card>
-                </CardContent>
+              {/* Pending */}
+              <Card className="flex flex-col items-center justify-center p-1 sm:p-2 rounded-md shadow border border-border min-h-[60px] max-h-[90px] w-full aspect-[4/3]">
+                <span className="mb-0.5">
+                  <Clock className="w-5 h-5" style={{ color: 'var(--warning)' }} />
+                </span>
+                <span className="text-xs sm:text-sm font-medium text-foreground">Pending</span>
+                <span className="text-sm sm:text-base font-bold" style={{ color: 'var(--warning)' }}>{pendingMeds}</span>
               </Card>
-              </motion.div>
-              </div>
+            </div>
 
             {/* Mark All as Taken Button */}
             {pendingMeds > 0 && (
