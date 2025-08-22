@@ -9,14 +9,14 @@ interface WelcomeProps {
 
 
 const Welcome: React.FC<WelcomeProps> = ({ user, setShowScheduleModal }) => {
-  // Get user name from localStorage if not provided
+  // Derive display name: prefer prop, fallback to localStorage
   let displayName = user?.name;
   if (!displayName) {
     try {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const parsed = JSON.parse(storedUser);
-        displayName = parsed.name || "Guest";
+        displayName = parsed?.name || "Guest";
       }
     } catch {
       displayName = "Guest";

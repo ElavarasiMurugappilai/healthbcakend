@@ -29,23 +29,22 @@ const sidebarLinks = [
 // Add a dynamic UserProfile component that takes user as a prop
 const UserProfile = ({
   user,
-  setShowLoginModal,
   setShowProfileModal,
 }: {
   user: { name: string; email: string; avatar: string },
-  setShowLoginModal: (show: boolean) => void,
   setShowProfileModal: (show: boolean) => void,
 }) => {
+  const navigate = useNavigate();
   const isGuest = !user.name && !user.email && !user.avatar;
   return (
     <Card
       className="flex items-center gap-3 p-4 rounded-xl bg-sidebar-accent mt-auto cursor-pointer hover:shadow"
-      onClick={() => isGuest ? setShowLoginModal(true) : setShowProfileModal(true)}
+      onClick={() => (isGuest ? navigate('/login') : setShowProfileModal(true))}
       title={isGuest ? "Login" : "Profile"}
       tabIndex={0}
       role="button"
       aria-label={isGuest ? "Login" : "Profile"}
-      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") (isGuest ? setShowLoginModal(true) : setShowProfileModal(true)); }}
+      onKeyDown={e => { if (e.key === "Enter" || e.key === " ") (isGuest ? navigate('/login') : setShowProfileModal(true)); }}
     >
       <CardContent className="p-0 flex items-center gap-3 w-full">
         <Avatar className="w-10 h-10">
@@ -70,7 +69,6 @@ interface SidebarProps {
   setSearchValue: (value: string) => void;
   user: { name: string; email: string; avatar: string };
   setShowCustomizeModal: (show: boolean) => void;
-  setShowLoginModal: (show: boolean) => void;
   setShowProfileModal: (show: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   setShowDateModal: (show: boolean) => void; // <-- add this
@@ -84,7 +82,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   setSearchValue,
   user,
   setShowCustomizeModal,
-  setShowLoginModal,
   setShowProfileModal,
   setShowDateModal, // <-- add this
   selectedDate, // <-- add this
@@ -202,7 +199,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="mt-auto mb-4">
             <UserProfile
               user={user}
-              setShowLoginModal={setShowLoginModal}
               setShowProfileModal={setShowProfileModal}
             />
           </div>

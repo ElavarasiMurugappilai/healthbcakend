@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate,useNavigate } from "react-router-dom";
 import "./App.css";
 import { AnimatePresence, motion } from "framer-motion";
-
+// import ProtectedRoute from "./routes/protectedRoute";
 // Import shadcn components
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+// import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
 
 // Import modular components
@@ -53,7 +53,8 @@ type CareTeamMember = {
 export default function App() {
   // User state
   const [user, setUser] = useState({ name: '', email: '', avatar: '' });
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  // Removed legacy inline login modal in favor of dedicated page
+  // const [showLoginModal, setShowLoginModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', email: '' });
@@ -86,11 +87,10 @@ export default function App() {
     const today = new Date();
     return today.toISOString().slice(0, 10);
   });
-  const [showCareTeamModal, setShowCareTeamModal] = useState(false);
-  const [loginForm, setLoginForm] = useState({ email: '', password: '', name: '' });
-  const defaultAvatar = 'https://ui-avatars.com/api/?name=User&background=cccccc&color=555555';
+  const [, setShowCareTeamModal] = useState(false);
+  // const [loginForm, setLoginForm] = useState({ email: '', password: '', name: '' });
 
-  const [careTeam, setCareTeam] = useState([
+  const [careTeam] = useState([
     {
       name: "Zain Curtis",
       role: "Endocrinologist",
@@ -110,6 +110,7 @@ export default function App() {
 
   const width = useWindowWidth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Handle Take button
   const handleTake = (index: number) => {
@@ -136,71 +137,63 @@ export default function App() {
     setVisibleSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Open edit form with current user info
-  useEffect(() => {
-    if (showProfileModal && user.name) {
-      setEditForm({ name: user.name, email: user.email });
-      setEditAvatar(user.avatar);
-      setEditingProfile(false);
-    }
-  }, [showProfileModal, user]);
+  // Auth helpers used by modal and routing
+  // const handleLogin = () => {
+  //   navigate("/dashboard");
+  // };
 
-  // Handle login
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setUser({ name: loginForm.name, email: loginForm.email, avatar: '' });
-    setShowLoginModal(false);
-    setShowProfileModal(true);
-    setToast('Logged in successfully!');
-    setTimeout(() => setToast(''), 2000);
-  };
-
-  // Handle logout
   const handleLogout = () => {
-    setUser({ name: '', email: '', avatar: '' });
-    setShowProfileModal(false);
-    setToast('Logged out successfully!');
-    setTimeout(() => setToast(''), 2000);
+    setUser({ name: "", email: "", avatar: "" });
+    navigate("/login");
   };
+
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
   return (
     <SidebarProvider>
       <div className="h-screen w-screen overflow-hidden flex flex-col bg-gray-100 dark:bg-[#252545]">
         {/* Header */}
-        
-        <Header
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          searchValue={searchValue}
-          setSearchValue={setSearchValue}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          setShowCustomizeModal={setShowCustomizeModal}
-          setShowDateModal={setShowDateModal}
-          showCustomizeModal={showCustomizeModal}
-          visibleSections={visibleSections}
-          handleSectionToggle={handleSectionToggle}
-          setToast={setToast}
-        />
-
-        <div className="flex flex-1 flex-col md:flex-row overflow-hidden bg-sidebar">
-          {/* Sidebar */}
-          <Sidebar
+        {!isAuthPage && (
+          <Header
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
             searchValue={searchValue}
             setSearchValue={setSearchValue}
-            user={user}
-            setShowCustomizeModal={setShowCustomizeModal}
-            setShowLoginModal={setShowLoginModal}
-            setShowProfileModal={setShowProfileModal}
-            setShowDateModal={setShowDateModal}
             selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            setShowCustomizeModal={setShowCustomizeModal}
+            setShowDateModal={setShowDateModal}
+            showCustomizeModal={showCustomizeModal}
+            visibleSections={visibleSections}
+            handleSectionToggle={handleSectionToggle}
+            setToast={setToast}
           />
-          
+        )}
+
+        <div className={`flex flex-1 ${isAuthPage ? "" : "flex-col md:flex-row overflow-hidden bg-sidebar"}`}>
+          {/* Sidebar */}
+          {!isAuthPage && (
+            <Sidebar
+              sidebarOpen={sidebarOpen}
+              setSidebarOpen={setSidebarOpen}
+              searchValue={searchValue}
+              setSearchValue={setSearchValue}
+              user={user}
+              setShowCustomizeModal={setShowCustomizeModal}
+              setShowProfileModal={setShowProfileModal}
+              setShowDateModal={setShowDateModal}
+              selectedDate={selectedDate}
+            />
+          )}
 
           {/* Main Content */}
-          <main className="flex-1 p-2 sm:p-4 md:p-6 pb-8 overflow-y-auto space-y-3 bg-gray-200 dark:bg-[#18181b]">
+          <main
+            className={
+              isAuthPage
+                ? "flex-1 min-h-screen flex items-center justify-center bg-background"
+                : "flex-1 p-2 sm:p-4 md:p-6 pb-8 overflow-y-auto space-y-3 bg-gray-200 dark:bg-[#18181b]"
+            }
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
@@ -208,10 +201,10 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.3 }}
-                style={{ height: "100%" }} // optional, helps with layout
+                style={{ height: "100%" }}
               >
                 <Routes location={location} key={location.pathname}>
-              <Route path="/dashboard" element={
+                  <Route path="/dashboard" element={
                     <DashboardPage
                       user={user}
                       setShowScheduleModal={setShowScheduleModal}
@@ -236,16 +229,14 @@ export default function App() {
                   <Route path="/notifications" element={<NotificationsPage searchValue={searchValue} />} />
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/login" element={<LoginPage />} />
-                  {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
-                  <Route path="*" element={<Navigate to="/signup" />} />
-                  {/* Redirect all other routes to /dashboard */}
-                  
-            </Routes>
+                  <Route path="*" element={<Navigate to="/login" replace />} />
+        
+                </Routes>
               </motion.div>
             </AnimatePresence>
           </main>
-
         </div>
+        {/* ...rest of the code... */}
 
         {/* Toast message */}
         {toast && (
@@ -254,55 +245,7 @@ export default function App() {
           </div>
         )}
 
-        {/* Login Modal - Using shadcn Dialog */}
-        <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Login Required</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Profile Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Profile Name"
-                  value={loginForm.name}
-                  onChange={e => setLoginForm(f => ({ ...f, name: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Email"
-                  value={loginForm.email}
-                  onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Password"
-                  value={loginForm.password}
-                  onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))}
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setShowLoginModal(false)}>
-                  Close
-                </Button>
-                <Button type="submit">Login</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {/* Removed legacy inline Login Modal; use /login route instead */}
        
 
 
@@ -331,7 +274,7 @@ export default function App() {
                         <Button variant="outline" onClick={handleLogout}>Logout</Button>
                       </>
                     ) : (
-                      <Button onClick={() => setShowLoginModal(true)}>Login</Button>
+                      <Button onClick={() => navigate('/login')}>Login</Button>
                     )}
                   </div>
                 </>
