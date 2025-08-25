@@ -3,6 +3,298 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Global styles to prevent scrolling and ensure full-screen layout */
+html, body, #root {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Ensure authentication pages take full screen */
+.auth-page {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Gradient animation support for all browsers */
+@keyframes gradient-shift {
+  0% { 
+    background-position: 0% 50%; 
+    background-size: 200% 200%;
+  }
+  25% { 
+    background-position: 100% 0%; 
+    background-size: 250% 250%;
+  }
+  50% { 
+    background-position: 100% 100%; 
+    background-size: 200% 200%;
+  }
+  75% { 
+    background-position: 0% 100%; 
+    background-size: 250% 250%;
+  }
+  100% { 
+    background-position: 0% 50%; 
+    background-size: 200% 200%;
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 25s ease-in-out infinite;
+  -webkit-animation: gradient-shift 25s ease-in-out infinite;
+  -moz-animation: gradient-shift 25s ease-in-out infinite;
+  -o-animation: gradient-shift 25s ease-in-out infinite;
+}
+
+/* Dashboard color consistency */
+.auth-page .text-orange-500 { color: rgb(249 115 22); }
+.auth-page .text-blue-500 { color: rgb(59 130 246); }
+.auth-page .text-orange-600 { color: rgb(234 88 12); }
+.auth-page .text-blue-600 { color: rgb(37 99 235); }
+
+/* Fix tab hover interference */
+.tabs-trigger {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+.tabs-trigger::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  transition: background-color 0.2s ease;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.tabs-trigger:hover::before {
+  background-color: hsl(var(--muted) / 0.5);
+}
+
+.tabs-trigger[data-state="active"]::before {
+  background-color: hsl(var(--primary));
+}
+
+/* Ensure tab content is properly layered */
+.tabs-content {
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
+}
+
+/* Prevent tab hover effects from bleeding */
+.tabs-list {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  contain: layout style paint;
+}
+
+/* Additional containment for tab triggers */
+.tabs-trigger > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure no hover effects extend beyond tab boundaries */
+.tabs-trigger:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.tabs-trigger:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Prevent any potential overflow */
+.tabs-trigger,
+.tabs-list,
+.tabs-content {
+  overflow: visible;
+}
+
+/* Specific tab hover containment */
+.tabs-trigger {
+  margin: 0;
+  padding: 0;
+}
+
+.tabs-trigger:hover {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: none;
+}
+
+/* Ensure tab content has proper spacing from tabs */
+.tabs-content {
+  margin-top: 1.5rem;
+  padding-top: 0;
+}
+
+/* Additional tab list containment */
+.tabs-list {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Prevent any hover effects from extending beyond tab boundaries */
+.tabs-trigger::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Override default shadcn/ui tab transitions */
+.tabs-trigger {
+  transition: none !important;
+  transition-property: none !important;
+}
+
+/* Ensure proper tab spacing and containment */
+.tabs {
+  gap: 0 !important;
+}
+
+.tabs-list {
+  gap: 0 !important;
+}
+
+/* Remove any default margins/padding that could cause interference */
+.tabs-trigger[data-state="active"] {
+  margin: 0 !important;
+  padding: inherit !important;
+}
+
+.tabs-trigger[data-state="inactive"] {
+  margin: 0 !important;
+  padding: inherit !important;
+}
+
+/* Final containment rules */
+.tabs-trigger,
+.tabs-list,
+.tabs-content {
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Ensure tab content is completely separated */
+.tabs-content[data-state="active"] {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* Prevent any hover effects from bleeding through */
+.tabs-trigger:hover,
+.tabs-trigger:focus,
+.tabs-trigger:active {
+  position: relative;
+  z-index: 2;
+}
+
+/* Floating icon animations */
+@keyframes float-slow {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg); 
+  }
+  25% { 
+    transform: translateY(-15px) translateX(5px) rotate(2deg); 
+  }
+  50% { 
+    transform: translateY(-25px) translateX(-3px) rotate(-1deg); 
+  }
+  75% { 
+    transform: translateY(-10px) translateX(8px) rotate(1deg); 
+  }
+}
+
+@keyframes float-medium {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg); 
+  }
+  33% { 
+    transform: translateY(-20px) translateX(-5px) rotate(-2deg); 
+  }
+  66% { 
+    transform: translateY(-15px) translateX(10px) rotate(1deg); 
+  }
+}
+
+@keyframes float-fast {
+  0%, 100% { 
+    transform: translateY(0px) translateX(0px) rotate(0deg); 
+  }
+  20% { 
+    transform: translateY(-12px) translateX(3px) rotate(1deg); 
+  }
+  40% { 
+    transform: translateY(-18px) translateX(-2px) rotate(-1deg); 
+  }
+  60% { 
+    transform: translateY(-8px) translateX(6px) rotate(0.5deg); 
+  }
+  80% { 
+    transform: translateY(-22px) translateX(-4px) rotate(-0.5deg); 
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 3s ease-in-out infinite;
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition: none;
+}
+
+/* Specific transitions for interactive elements */
+button, input, select, textarea, a {
+  transition: all 0.2s ease-in-out;
+}
+
+.card, .badge, .avatar {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom scrollbar for form cards if needed */
+.auth-page .overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.auth-page .overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.auth-page .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.auth-page .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

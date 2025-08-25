@@ -35,7 +35,35 @@ const UserProfile = ({
   setShowProfileModal: (show: boolean) => void,
 }) => {
   const navigate = useNavigate();
-  const isGuest = !user.name && !user.email && !user.avatar;
+  
+  // Get user data from localStorage if not provided
+  let displayUser = user;
+  if (!user.name && !user.email) {
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        displayUser = {
+          name: parsed?.name || "",
+          email: parsed?.email || "",
+          avatar: parsed?.avatar || ""
+        };
+      }
+    } catch {
+      displayUser = { name: "", email: "", avatar: "" };
+    }
+  }
+  
+  // Capitalize first letter of each word in the name
+  const capitalizeName = (name: string) => {
+    if (!name) return "";
+    return name.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+  };
+  
+  const formattedName = capitalizeName(displayUser.name);
+  const isGuest = !displayUser.name && !displayUser.email;
   return (
     <Card
       className="flex items-center gap-3 p-4 rounded-xl bg-sidebar-accent mt-auto cursor-pointer hover:shadow"
@@ -49,14 +77,14 @@ const UserProfile = ({
       <CardContent className="p-0 flex items-center gap-3 w-full">
         <Avatar className="w-10 h-10">
           <AvatarImage 
-            src={isGuest ? 'https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555' : user.avatar || `https://ui-avatars.com/api/?name=${user.name}`} 
-            alt={isGuest ? 'Guest' : user.name} 
+            src={isGuest ? 'https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555' : displayUser.avatar || `https://ui-avatars.com/api/?name=${formattedName}`} 
+            alt={isGuest ? 'Guest' : formattedName} 
           />
-          <AvatarFallback>{isGuest ? 'Guest' : user.name}</AvatarFallback>
+          <AvatarFallback>{isGuest ? 'Guest' : formattedName}</AvatarFallback>
         </Avatar>
         <div className="text-left">
-          <div className="font-semibold text-sm text-sidebar-foreground">{isGuest ? 'Guest' : user.name}</div>
-          <div className="text-xs text-muted-foreground">{isGuest ? 'Not logged in' : user.email}</div>
+          <div className="font-semibold text-sm text-sidebar-foreground">{isGuest ? 'Guest' : formattedName}</div>
+          <div className="text-xs text-muted-foreground">{isGuest ? 'Not logged in' : displayUser.email}</div>
         </div>
       </CardContent>
     </Card>

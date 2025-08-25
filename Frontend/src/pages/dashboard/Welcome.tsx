@@ -22,13 +22,22 @@ const Welcome: React.FC<WelcomeProps> = ({ user, setShowScheduleModal }) => {
       displayName = "Guest";
     }
   }
+  
+  // Capitalize first letter of each word in the name
+  const capitalizeName = (name: string) => {
+    return name.split(' ').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+  };
+  
+  const formattedName = displayName ? capitalizeName(displayName) : "Guest";
   return (
     <section className="w-full px-4 py-6">
       {/* Entire Block: stacked on mobile & tablet, row on desktop */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-4">
         {/* Row 1: Welcome Text */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center lg:text-left">
-          Welcome, {displayName || "Guest"}!
+          Welcome, {formattedName}!
         </h1>
         {/* Row 2: Stats + Schedule Button */}
         <div className="flex flex-col md:flex-row items-center justify-center lg:justify-end gap-4 sm:gap-6">

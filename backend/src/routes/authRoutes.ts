@@ -54,9 +54,25 @@ router.post("/signup", async (req: Request, res: Response) => {
 
     console.log("✅ User created:", user._id);
     
+    // Generate token for immediate login
+    const token = jwt.sign(
+      { id: user._id }, 
+      JWT_SECRET, 
+      { expiresIn: "7d" }
+    );
+
     res.status(201).json({ 
       message: "User created successfully",
-      userId: user._id 
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        age: user.age,
+        gender: user.gender,
+        conditions: user.conditions,
+        goals: user.goals
+      }
     });
 
   } catch (error: any) {

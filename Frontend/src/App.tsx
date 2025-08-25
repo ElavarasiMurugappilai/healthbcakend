@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Routes, Route, useLocation, Navigate,useNavigate } from "react-router-dom";
 import "./App.css";
@@ -112,6 +112,49 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Load user data from localStorage on component mount
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      console.log("Loading user from localStorage:", storedUser);
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        console.log("Parsed user data:", parsed);
+        setUser({
+          name: parsed?.name || "",
+          email: parsed?.email || "",
+          avatar: parsed?.avatar || ""
+        });
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    }
+  }, []);
+
+  // Listen for user-updated events
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        console.log("User updated event - stored user:", storedUser);
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          console.log("User updated event - parsed user:", parsed);
+          setUser({
+            name: parsed?.name || "",
+            email: parsed?.email || "",
+            avatar: parsed?.avatar || ""
+          });
+        }
+      } catch (error) {
+        console.error("Error updating user data:", error);
+      }
+    };
+
+    window.addEventListener("user-updated", handleUserUpdate);
+    return () => window.removeEventListener("user-updated", handleUserUpdate);
+  }, []);
+
   // Handle Take button
   const handleTake = (index: number) => {
     setMedications((prev) =>
@@ -144,10 +187,19 @@ export default function App() {
 
   const handleLogout = () => {
     setUser({ name: "", email: "", avatar: "" });
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+  
+  // Close profile modal when on auth pages
+  useEffect(() => {
+    if (isAuthPage && showProfileModal) {
+      setShowProfileModal(false);
+    }
+  }, [isAuthPage, showProfileModal]);
 
   return (
     <SidebarProvider>
@@ -249,8 +301,8 @@ export default function App() {
        
 
 
-        {/* Profile Modal - Using shadcn Dialog */}
-        <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+        {/* Profile Modal - Using shadcn Dialog - Only show when not on auth pages */}
+        <Dialog open={showProfileModal && !isAuthPage} onOpenChange={setShowProfileModal}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>Profile</DialogTitle>

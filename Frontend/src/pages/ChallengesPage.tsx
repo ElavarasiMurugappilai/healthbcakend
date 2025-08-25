@@ -616,37 +616,37 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
         
       {/* Tabs - Using shadcn Tabs with Compact Responsive Design */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'challenges' | 'badges' | 'leaderboard')} className="w-full mb-8">
-          <TabsList className="grid w-full grid-cols-3 bg-card p-1 rounded-lg shadow-md border border-border h-auto min-h-[50px] sm:min-h-[55px] md:min-h-[60px]">
+          <TabsList className="tabs-list grid w-full grid-cols-3 bg-card p-1 rounded-lg shadow-md border border-border h-auto min-h-[50px] sm:min-h-[55px] md:min-h-[60px] overflow-hidden">
             <TabsTrigger 
               value="challenges"
-              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground"
+              className="tabs-trigger relative py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/50 data-[state=inactive]:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1 relative z-10">
                 <Icons.target className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Challenges</span>
               </div>
             </TabsTrigger>
             <TabsTrigger 
               value="badges"
-              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground"
+              className="tabs-trigger relative py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/50 data-[state=inactive]:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1 relative z-10">
                 <Icons.award className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Badges</span>
               </div>
             </TabsTrigger>
             <TabsTrigger 
               value="leaderboard"
-              className="py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted data-[state=inactive]:text-muted-foreground"
+              className="tabs-trigger relative py-2 px-3 sm:px-4 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm hover:bg-muted/50 data-[state=inactive]:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1 relative z-10">
                 <Icons.users className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span>Leaderboard</span>
               </div>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="challenges" className="space-y-6">
+          <TabsContent value="challenges" className="tabs-content space-y-6 mt-6">
             {/* Challenges Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <AnimatePresence>
@@ -664,11 +664,11 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
             </div>
           </TabsContent>
           
-          <TabsContent value="badges" className="space-y-6">
+          <TabsContent value="badges" className="tabs-content space-y-6 mt-6">
             <BadgesTab badges={filteredBadges} />
           </TabsContent>
           
-          <TabsContent value="leaderboard" className="space-y-6">
+          <TabsContent value="leaderboard" className="tabs-content space-y-6 mt-6">
             <LeaderboardTab leaderboard={filteredLeaderboard} />
           </TabsContent>
         </Tabs>
