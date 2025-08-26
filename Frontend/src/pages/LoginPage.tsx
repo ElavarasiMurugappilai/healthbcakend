@@ -58,7 +58,7 @@ export default function LoginPage() {
         style: { background: "linear-gradient(90deg,#fdf6e3,#e0f2fe)" },
       });
       
-      setTimeout(() => navigate("/dashboard"), 600);
+      setTimeout(() => navigate("/quiz"), 600);
     } catch (err: unknown) {
       interface ApiError {
         response?: {

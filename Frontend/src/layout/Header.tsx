@@ -115,6 +115,9 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="flex items-center justify-between px-4 pb-2 md:px-8 py-4 bg-gray-200 dark:bg-[#18181b] sticky top-0 z-20">
       <div className="flex items-center gap-4 md:gap-8">
+         <div>
+          
+         </div>
         <Button
           variant="ghost"
           size="sm"

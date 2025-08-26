@@ -74,7 +74,7 @@ export default function SignupPage() {
         position: "top-center",
         style: { background: "linear-gradient(90deg,#fdf6e3,#e0f2fe)" },
       });
-      setTimeout(() => navigate("/dashboard"), 900);
+      setTimeout(() => navigate("/quiz"), 900);
     } catch (err: unknown) {
       interface ApiError {
         response?: {
