@@ -4,6 +4,7 @@ import { useForm, type SubmitHandler, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "../api";
+import { saveToken } from "../utils/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
@@ -55,7 +56,7 @@ export default function LoginPage() {
       avatar: res.data.user?.avatar || `https://ui-avatars.com/api/?name=${res.data.user?.name || "User"}`,
     };
 
-    localStorage.setItem("token", res.data.token);
+    saveToken(res.data.token);
     localStorage.setItem("user", JSON.stringify(userData));
 
     if (remember) localStorage.setItem("remember", "1");

@@ -14,7 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api':{
-         target: "http://localhost:5003", // must match backend
+         target: "http://localhost:5004", // must match backend
         changeOrigin: true,
         secure: false,
       }

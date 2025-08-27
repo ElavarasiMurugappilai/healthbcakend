@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -21,6 +21,17 @@ const QuizPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  // ✅ Check authentication on component mount (do not auto-redirect)
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    if (!token || !user) {
+      console.warn("No authentication found");
+    } else {
+      console.log("✅ User authenticated, proceeding with quiz");
+    }
+  }, [navigate]);
 
   const [formData, setFormData] = useState({
     age: "",
@@ -55,8 +66,14 @@ const QuizPage = () => {
     notificationsEnabled: true,
   });
 
-  const updateFormData = (key: string, value: any) =>
-    setFormData((prev) => ({ ...prev, [key]: value }));
+  function updateFormData(key: string, value: unknown): void;
+  function updateFormData<K extends typeof formData extends infer T ? keyof T : never>(
+    key: K,
+    value: (typeof formData)[K]
+  ): void;
+  function updateFormData(key: string, value: unknown): void {
+    setFormData((prev) => ({ ...prev, [key]: value } as typeof formData));
+  }
 
   // ✅ Fix for ProfileStep checkboxes
   const handleConditionToggle = (condition: string) => {
@@ -84,36 +101,72 @@ const QuizPage = () => {
     });
   };
 
-const handleSubmit = async () => {
-  setLoading(true);
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await API.post("/profile/quiz", formData, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    toast.success("Profile setup completed!");
-
-    // Save profile
-    localStorage.setItem("profile", JSON.stringify(res.data.profile));
-
-    // 🔑 Also update user in localStorage (if backend returns user)
-    if (res.data.user) {
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      // ✅ Debug: Check token and user data
+      const token = localStorage.getItem("token");
+      const userStr = localStorage.getItem("user");
+      
+      console.log("🔍 Quiz Submission Debug Info:");
+      console.log("- Token exists:", !!token);
+      console.log("- User data exists:", !!userStr);
+      console.log("- Form data:", formData);
+  
+      if (!token) {
+        toast.error("Please login again");
+        navigate("/login");
+        return;
+      }
+  
+      // ✅ Make API call with token in headers
+      const res = await API.post("/profile/quiz", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("✅ Quiz submission successful:", { status: res.status, data: res.data });
+  
+      // Show success message
+      toast.success("Profile setup completed successfully!", {
+        duration: 2000,
+      });
+  
+      // Save profile data
+      if (res.data.profile) {
+        localStorage.setItem("profile", JSON.stringify(res.data.profile));
+      }
+  
+      // Update user data if returned
+      if (res.data.user) {
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+      }
+  
+      // Notify app that user data changed
+      window.dispatchEvent(new Event("user-updated"));
+  
+      // ✅ Navigate to dashboard immediately on success
+      if (res.status >= 200 && res.status < 300) {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+  
+    } catch (error: unknown) {
+      type ApiError = { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const err = error as ApiError;
+      console.error("❌ Quiz submission error:", err);
+      const status = err.response?.status;
+      const errorMessage = err.response?.data?.message || err.message || "Something went wrong";
+  
+      if (status === 401) {
+        console.warn("Authentication failed during quiz submission");
+        toast.error("Authentication issue. Please login again, then retry.");
+        return; // do not redirect away from quiz automatically
+      }
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    // Notify app user data changed
-    window.dispatchEvent(new Event("user-updated"));
-
-    navigate("/dashboard");
-  } catch (err: any) {
-    console.error(err);
-    toast.error(err?.response?.data?.message || "Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+  
 
   const steps = [
     { title: "Personal Info", component: ProfileStep },

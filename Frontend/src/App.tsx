@@ -29,16 +29,16 @@ import LoginPage from "./pages/LoginPage";
 import QuizPage from "./pages/QuizPage";
 import OnboardingPage from "./pages/Onboarding";
 
-// Responsive window width hook
-function useWindowWidth() {
-  const [width, setWidth] = React.useState(window.innerWidth);
-  React.useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return width;
-}
+// Responsive window width hook (unused currently)
+// function useWindowWidth() {
+//   const [width, setWidth] = React.useState(window.innerWidth);
+//   React.useEffect(() => {
+//     const handleResize = () => setWidth(window.innerWidth);
+//     window.addEventListener("resize", handleResize);
+//     return () => window.removeEventListener("resize", handleResize);
+//   }, []);
+//   return width;
+// }
 
 type CareTeamMember = {
   name: string;
@@ -54,7 +54,7 @@ export default function App() {
   const [user, setUser] = useState(() => {
   try {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
       const parsed = JSON.parse(storedUser);
       return {
         name: parsed?.name || "",
@@ -62,9 +62,14 @@ export default function App() {
         avatar: parsed?.avatar || "",
       };
     }
+    // Clean up bad values if present
+    if (storedUser === "undefined" || storedUser === "null") {
+      localStorage.removeItem("user");
+    }
     return { name: "", email: "", avatar: "" };
   } catch (error) {
     console.error("Error parsing user from localStorage:", error);
+    localStorage.removeItem("user");
     return { name: "", email: "", avatar: "" };
   }
 });
@@ -76,6 +81,8 @@ export default function App() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  // Local demo medications (unused now)
+  /*
   const [medications, setMedications] = useState([
     { name: "Metformin", qty: "1 pill", dosage: "500 mg", status: "Missed", time: "12:30" },
     { name: "Omega 3", qty: "3 pills", dosage: "800 mg", status: "Taken", time: "08:00" },
@@ -83,6 +90,7 @@ export default function App() {
     { name: "Aspirin", qty: "1 pill", dosage: "100 mg", status: "Taken", time: "09:00" },
     { name: "Atorvastatin", qty: "1 pill", dosage: "20 mg", status: "Upcoming", time: "21:00" },
   ]);
+  */
   const [selectedMember, setSelectedMember] = useState<CareTeamMember | null>(null);
   const [showFitnessModal, setShowFitnessModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -99,9 +107,9 @@ export default function App() {
     const today = new Date();
     return today.toISOString().slice(0, 10);
   });
-  const [, setShowCareTeamModal] = useState(false);
+  // const [, setShowCareTeamModal] = useState(false);
 
-  const [careTeam] = useState([
+  /* const [careTeam] = useState([
     {
       name: "Zain Curtis",
       role: "Endocrinologist",
@@ -116,9 +124,9 @@ export default function App() {
     { name: "Phillip Workman", role: "Neurologist", img: "https://randomuser.me/api/portraits/men/45.jpg" },
     { name: "Cheyenne Herwitz", role: "Cardiologist", img: "https://randomuser.me/api/portraits/women/65.jpg" },
     { name: "Ava Patel", role: "General Physician", img: "https://randomuser.me/api/portraits/women/68.jpg" },
-  ]);
+  ]); */
 
-  const width = useWindowWidth();
+  // const width = useWindowWidth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -127,7 +135,7 @@ export default function App() {
   const handleUserUpdate = () => {
     try {
       const storedUser = localStorage.getItem("user");
-      if (storedUser) {
+      if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
         const parsed = JSON.parse(storedUser);
         setUser({
           name: parsed?.name || "",
@@ -135,23 +143,28 @@ export default function App() {
           avatar: parsed?.avatar || "",
         });
       } else {
+        if (storedUser === "undefined" || storedUser === "null") {
+          localStorage.removeItem("user");
+        }
         setUser({ name: "", email: "", avatar: "" });
       }
     } catch (error) {
       console.error("Error updating user data:", error);
+      localStorage.removeItem("user");
+      setUser({ name: "", email: "", avatar: "" });
     }
   };
 
   window.addEventListener("user-updated", handleUserUpdate);
   return () => window.removeEventListener("user-updated", handleUserUpdate);
 }, []);
-  const handleTake = (index: number) => {
-    setMedications((prev) =>
-      prev.map((med, i) => (i === index ? { ...med, status: "Taken" } : med))
-    );
-    setToast("Medication marked as taken!");
-    setTimeout(() => setToast(""), 2000);
-  };
+  // const handleTake = (index: number) => {
+  //   setMedications((prev) =>
+  //     prev.map((med, i) => (i === index ? { ...med, status: "Taken" } : med))
+  //   );
+  //   setToast("Medication marked as taken!");
+  //   setTimeout(() => setToast(""), 2000);
+  // };
 
   const handleScheduleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -241,24 +254,7 @@ export default function App() {
                 style={{ height: "100%" }}
               >
                 <Routes location={location} key={location.pathname}>
-                  <Route path="/dashboard" element={
-                    <DashboardPage
-                      user={user}
-                      setShowScheduleModal={setShowScheduleModal}
-                      medications={medications}
-                      careTeam={careTeam}
-                      searchValue={searchValue}
-                      visibleSections={visibleSections}
-                      selectedDate={selectedDate}
-                      setShowFitnessModal={setShowFitnessModal}
-                      setShowCareTeamModal={setShowCareTeamModal}
-                      setSelectedMember={setSelectedMember}
-                      handleTake={handleTake}
-                      handleSectionToggle={handleSectionToggle}
-                      width={width}
-                      showScheduleModal={showScheduleModal}
-                    />
-                  } />
+                  <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/medications" element={<MedicationsPage searchValue={searchValue} />} />
                   <Route path="/challenges" element={<ChallengesPage searchValue={searchValue} />} />
                   <Route path="/health-insights" element={<HealthInsightsPage searchValue={searchValue} />} />

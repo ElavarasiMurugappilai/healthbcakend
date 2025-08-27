@@ -4,6 +4,7 @@ import { useForm, type SubmitHandler, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "../api";
+import { saveToken } from "../utils/auth";
 import {
   Card,
   CardContent,
@@ -65,7 +66,7 @@ export default function SignupPage() {
     };
 
     const res = await api.post("/auth/signup", payload);
-    localStorage.setItem("token", res.data.token);
+    saveToken(res.data.token);
     localStorage.setItem("user", JSON.stringify(res.data.user));
     window.dispatchEvent(new Event("user-updated"));
     

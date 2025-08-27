@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 
 export interface HealthWheelProps {
-  steps: number;
   currentStep: number;
   completedSteps: boolean[];
   onSliceClick: (i: number) => void;

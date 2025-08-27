@@ -8,39 +8,54 @@ interface AuthRequest extends Request {
 
 const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: "No token provided" });
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
-  }
+  const token = authHeader.split(" ")[1]; // "Bearer <token>"
 
-  const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = decoded; // attach decoded payload (userId, email, etc.)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Token is invalid or expired" });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
+
+// ✅ Fixed protectLite middleware with proper error handling
 export const protectLite = async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
-  let token;
+  try {
+    const authHeader = req.headers.authorization;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    try {
-      token = req.headers.authorization.split(" ")[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Not authorized, no token" });
+    }
 
-      req.user = { id: decoded.id };
-      return next();
-    } catch (err) {
+    const token = authHeader.split(" ")[1];
+    
+    if (!token) {
+      return res.status(401).json({ message: "Not authorized, no token" });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+
+    // Attach user info to request
+    req.user = { id: decoded.id };
+    
+    console.log("✅ Token verified for user:", decoded.id);
+    
+    return next();
+  } catch (err: any) {
+    console.error("❌ Token verification error:", err.message);
+    
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: "Token expired" });
+    } else if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: "Invalid token" });
+    } else {
       return res.status(401).json({ message: "Not authorized, token failed" });
     }
   }
-
-  return res.status(401).json({ message: "Not authorized, no token" });
 };
 
 export default authMiddleware;
