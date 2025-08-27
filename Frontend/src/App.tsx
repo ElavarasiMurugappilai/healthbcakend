@@ -15,8 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 // import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
-import { Toaster } from 'sonner';
-import { Pill, Stethoscope, Droplets, Dumbbell, Heart, Activity, Zap, Star } from "lucide-react";
 
 
 // Import modular components
@@ -32,7 +30,7 @@ import NotificationsPage from "./pages/NotificationsPage";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import QuizPage from "./pages/QuizPage";
-
+import OnboardingPage from "./pages/Onboarding";
 
 
 // Responsive window width hook
@@ -200,8 +198,8 @@ export default function App() {
  const isAuthPage =
   location.pathname === "/login" ||
   location.pathname === "/signup" ||
-  location.pathname === "/quiz";
-  
+  location.pathname === "/quiz" ||
+  location.pathname === "/";
 
   
   // Close profile modal when on auth pages
@@ -214,39 +212,6 @@ export default function App() {
   return (
     <SidebarProvider>
       <div className="h-screen w-screen overflow-hidden flex flex-col bg-gray-100 dark:bg-[#252545]">
-        <div>
-            {/* Full Screen Gradient Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-blue-50 to-orange-50 dark:from-[#252545] dark:via-[#1e1e3a] dark:to-[#2a2a4a] animate-gradient-shift"></div>
-
-          {/* Floating Icons */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 text-orange-500/30 dark:text-orange-400/30 animate-float-slow">
-              <Pill size={32} />
-            </div>
-            <div className="absolute top-1/3 right-1/4 text-blue-500/25 dark:text-blue-400/25 animate-float-medium">
-              <Stethoscope size={28} />
-            </div>
-            <div className="absolute bottom-1/3 left-1/3 text-blue-600/35 dark:text-blue-500/35 animate-float-fast">
-              <Droplets size={24} />
-            </div>
-            <div className="absolute bottom-1/4 right-1/3 text-orange-600/20 dark:text-orange-500/20 animate-float-slow">
-              <Dumbbell size={36} />
-            </div>
-            <div className="absolute top-1/2 left-1/6 text-orange-500/30 dark:text-orange-400/30 animate-float-medium">
-              <Heart size={26} />
-            </div>
-            <div className="absolute top-2/3 right-1/6 text-blue-500/25 dark:text-blue-400/25 animate-float-fast">
-              <Activity size={30} />
-            </div>
-            <div className="absolute bottom-1/3 right-1/2 text-orange-600/20 dark:text-orange-500/20 animate-float-slow">
-              <Zap size={22} />
-            </div>
-            <div className="absolute top-1/6 right-1/3 text-blue-600/25 dark:text-blue-500/25 animate-float-medium">
-              <Star size={20} />
-            </div>
-          </div>
-        
-        </div>
         {/* Header */}
         {!isAuthPage && (
           <Header
@@ -280,6 +245,7 @@ export default function App() {
               selectedDate={selectedDate}
             />
           )}
+          {!isAuthPage && (<OnboardingPage />)}
 
           {/* Main Content */}
           <main
@@ -322,6 +288,7 @@ export default function App() {
                   <Route path="/health-insights" element={<HealthInsightsPage searchValue={searchValue} />} />
                   <Route path="/appointments" element={<AppointmentsPage searchValue={searchValue} />} />
                   <Route path="/notifications" element={<NotificationsPage searchValue={searchValue} />} />
+                  <Route path="/" element={<OnboardingPage />} />
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/quiz" element={<QuizPage />} />
