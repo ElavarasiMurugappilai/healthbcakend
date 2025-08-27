@@ -44,40 +44,54 @@ export default function LoginPage() {
   });
 
   const onSubmit: SubmitHandler<LoginForm> = async (data) => {
-    setLoading(true);
-    try {
-      const res = await api.post("/auth/login", data);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      if (remember) localStorage.setItem("remember", "1"); else localStorage.removeItem("remember");
-      window.dispatchEvent(new Event("user-updated"));
-      
-      toast.success("Login successful! Redirecting to dashboard...", {
-        duration: 1800,
-        position: "top-center",
-        style: { background: "linear-gradient(90deg,#fdf6e3,#e0f2fe)" },
-      });
-      
-      setTimeout(() => navigate("/quiz"), 600);
-    } catch (err: unknown) {
-      interface ApiError {
-        response?: {
-          data?: {
-            message?: string;
-          };
+  setLoading(true);
+  try {
+    const res = await api.post("/auth/login", data);
+
+    // ✅ Normalize user object
+    const userData = {
+      name: res.data.user?.name || "User",
+      email: res.data.user?.email || "",
+      avatar: res.data.user?.avatar || `https://ui-avatars.com/api/?name=${res.data.user?.name || "User"}`,
+    };
+
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    if (remember) localStorage.setItem("remember", "1");
+    else localStorage.removeItem("remember");
+
+    // let App.tsx know user changed
+    window.dispatchEvent(new Event("user-updated"));
+
+    toast.success("Login successful! Redirecting to dashboard...", {
+      duration: 1800,
+      position: "top-center",
+      style: { background: "linear-gradient(90deg,#fdf6e3,#e0f2fe)" },
+    });
+
+    setTimeout(() => navigate("/quiz"), 600);
+  } catch (err: unknown) {
+    interface ApiError {
+      response?: {
+        data?: {
+          message?: string;
         };
-      }
-      
-      const errorMessage = (err as ApiError)?.response?.data?.message || "Login failed";
-      toast.error(errorMessage, {
-        duration: 2200,
-        position: "top-center",
-        style: { background: "linear-gradient(90deg,#fee2e2,#e0f2fe)" },
-      });
-    } finally {
-      setLoading(false);
+      };
     }
-  };
+
+    const errorMessage =
+      (err as ApiError)?.response?.data?.message || "Login failed";
+    toast.error(errorMessage, {
+      duration: 2200,
+      position: "top-center",
+      style: { background: "linear-gradient(90deg,#fee2e2,#e0f2fe)" },
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>

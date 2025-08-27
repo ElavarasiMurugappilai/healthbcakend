@@ -1,144 +1,75 @@
-import { Router, Request, Response } from "express";
+import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/userModel";
+import User from "../models/userModel"; // adjust path if needed
+import authMiddleware from "../middleware/authMiddleware";
+import { signup, login } from "../controllers/authController";
 
-const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+const router = express.Router();
 
-// ✅ Test route
-router.get("/test", (req: Request, res: Response) => {
-  res.json({ message: "Auth routes working!" });
-});
+// POST /auth/register
+router.post("/signup", signup);
 
-// ✅ Signup route
-router.post("/signup", async (req: Request, res: Response) => {
+// POST /auth/login
+router.post("/login", login);
+
+// GET /auth/me (protected)
+router.get("/me", authMiddleware, async (req, res) => {
   try {
-    console.log("📝 Signup request:", req.body);
-    
-    const { name, email, password, age, gender, medicalInfo, primaryGoal, notes, consent } = req.body;
+    const { name, email, password } = req.body;
 
-    // Validation
-    if (!name || !email || !password) {
-      return res.status(400).json({ 
-        message: "Name, email, and password are required" 
-      });
-    }
-
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email already registered" });
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const userData: any = {
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
+    const user = await User.create({
+      name,
+      email,
       password: hashedPassword,
-      age: age ? Number(age) : undefined,
-      gender: gender || undefined,
-      conditions: medicalInfo?.conditions || [],
-      goals: medicalInfo?.goals || [],
-      primaryGoal: primaryGoal || undefined,
-      notes: notes || undefined,
-      consent: Boolean(consent)
-    };
+    });
 
-    const user = new User(userData);
-    await user.save();
-
-    console.log("✅ User created:", user._id);
-    
-    // Generate token for immediate login
     const token = jwt.sign(
-      { id: user._id }, 
-      JWT_SECRET, 
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
     );
 
-    res.status(201).json({ 
-      message: "User created successfully",
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        age: user.age,
-        gender: user.gender,
-        conditions: user.conditions,
-        goals: user.goals
-      }
-    });
-
-  } catch (error: any) {
-    console.error("❌ Signup error:", error);
-    res.status(500).json({ 
-      message: "Signup failed", 
-      error: error.message 
-    });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+  } catch (err) {
+    res.status(500).json({ message: "Error registering user" });
   }
 });
 
-// ✅ Login route
-router.post("/login", async (req: Request, res: Response) => {
+// POST /auth/login
+router.post("/login", async (req, res) => {
   try {
-    console.log("🔐 Login request:", { email: req.body.email });
-    
     const { email, password } = req.body;
 
-    // Validation
-    if (!email || !password) {
-      return res.status(400).json({ 
-        message: "Email and password are required" 
-      });
-    }
-
-    // Find user
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate token
     const token = jwt.sign(
-      { id: user._id }, 
-      JWT_SECRET, 
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
     );
 
-    console.log("✅ Login successful:", user._id);
-
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        age: user.age,
-        gender: user.gender,
-        conditions: user.conditions,
-        goals: user.goals
-      }
-    });
-
-  } catch (error: any) {
-    console.error("❌ Login error:", error);
-    res.status(500).json({ 
-      message: "Login failed", 
-      error: error.message 
-    });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+  } catch (err) {
+    res.status(500).json({ message: "Error logging in" });
   }
 });
+
+
 
 export default router;

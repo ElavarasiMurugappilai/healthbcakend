@@ -27,14 +27,14 @@ const QuizPage = () => {
     gender: "",
     weight: "",
     height: "",
-    conditions: [],
+    conditions: [] as string[],
     allergies: "",
     smoker: false,
     alcohol: "none",
     sleepHours: [8],
 
     exercise: "none",
-    exerciseTypes: [],
+    exerciseTypes: [] as string[],
     exerciseDuration: [30],
     fitnessGoals: "general_fitness",
     waterIntake: [2],
@@ -58,27 +58,62 @@ const QuizPage = () => {
   const updateFormData = (key: string, value: any) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const submitData = {
-        ...formData,
-        sleepHours: formData.sleepHours[0],
-        exerciseDuration: formData.exerciseDuration[0],
-        waterIntake: formData.waterIntake[0],
-        stepGoal: formData.stepGoal[0],
+  // ✅ Fix for ProfileStep checkboxes
+  const handleConditionToggle = (condition: string) => {
+    setFormData((prev) => {
+      const exists = prev.conditions.includes(condition);
+      return {
+        ...prev,
+        conditions: exists
+          ? prev.conditions.filter((c) => c !== condition)
+          : [...prev.conditions, condition],
       };
-      const res = await API.post("/api/quiz/submit", submitData);
-      if (res.data.success) {
-        toast.success("Profile setup completed!");
-        navigate("/dashboard");
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to save profile");
-    } finally {
-      setLoading(false);
-    }
+    });
   };
+
+  // ✅ Fix for FitnessStep checkboxes
+  const handleExerciseTypeToggle = (type: string) => {
+    setFormData((prev) => {
+      const exists = prev.exerciseTypes.includes(type);
+      return {
+        ...prev,
+        exerciseTypes: exists
+          ? prev.exerciseTypes.filter((t) => t !== type)
+          : [...prev.exerciseTypes, type],
+      };
+    });
+  };
+
+const handleSubmit = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await API.post("/profile/quiz", formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast.success("Profile setup completed!");
+
+    // Save profile
+    localStorage.setItem("profile", JSON.stringify(res.data.profile));
+
+    // 🔑 Also update user in localStorage (if backend returns user)
+    if (res.data.user) {
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+    }
+
+    // Notify app user data changed
+    window.dispatchEvent(new Event("user-updated"));
+
+    navigate("/dashboard");
+  } catch (err: any) {
+    console.error(err);
+    toast.error(err?.response?.data?.message || "Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const steps = [
     { title: "Personal Info", component: ProfileStep },
@@ -105,7 +140,6 @@ const QuizPage = () => {
       <div className="relative z-20 h-full flex flex-col md:flex-row">
         {/* Left */}
         <div className="flex flex-col justify-center items-center flex-1 p-6">
-          {/* Title Above Wheel */}
           <AnimatePresence mode="wait">
             <motion.div
               key={steps[currentStep].title}
@@ -147,6 +181,8 @@ const QuizPage = () => {
                   <CurrentStep
                     formData={formData}
                     updateFormData={updateFormData}
+                    handleConditionToggle={handleConditionToggle}
+                    handleExerciseTypeToggle={handleExerciseTypeToggle}
                   />
                 </motion.div>
               </AnimatePresence>

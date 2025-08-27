@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Routes, Route, useLocation, Navigate,useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate, useNavigate } from "react-router-dom";
 import "./App.css";
 import { AnimatePresence, motion } from "framer-motion";
 
-// import ProtectedRoute from "./routes/protectedRoute";
 // Import shadcn components
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,9 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-// import { Separator } from "@/components/ui/separator";
 import { Calendar } from "@/components/ui/calendar";
-
 
 // Import modular components
 import Header from "./layout/Header";
@@ -32,14 +29,13 @@ import LoginPage from "./pages/LoginPage";
 import QuizPage from "./pages/QuizPage";
 import OnboardingPage from "./pages/Onboarding";
 
-
 // Responsive window width hook
 function useWindowWidth() {
   const [width, setWidth] = React.useState(window.innerWidth);
   React.useEffect(() => {
     const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
   return width;
 }
@@ -54,17 +50,30 @@ type CareTeamMember = {
 };
 
 export default function App() {
-  // User state
-  const [user, setUser] = useState({ name: '', email: '', avatar: '' });
-  // Removed legacy inline login modal in favor of dedicated page
-  // const [showLoginModal, setShowLoginModal] = useState(false);
+  // ✅ Initialize user directly from localStorage
+  const [user, setUser] = useState(() => {
+  try {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const parsed = JSON.parse(storedUser);
+      return {
+        name: parsed?.name || "",
+        email: parsed?.email || "",
+        avatar: parsed?.avatar || "",
+      };
+    }
+    return { name: "", email: "", avatar: "" };
+  } catch (error) {
+    console.error("Error parsing user from localStorage:", error);
+    return { name: "", email: "", avatar: "" };
+  }
+});
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', email: '' });
-  const [editAvatar, setEditAvatar] = useState('');
-  const [toast, setToast] = useState('');
+  const [editForm, setEditForm] = useState({ name: "", email: "" });
+  const [editAvatar, setEditAvatar] = useState("");
+  const [toast, setToast] = useState("");
 
-  // Removed unused destructured elements from useTheme
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [medications, setMedications] = useState([
@@ -77,7 +86,7 @@ export default function App() {
   const [selectedMember, setSelectedMember] = useState<CareTeamMember | null>(null);
   const [showFitnessModal, setShowFitnessModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [scheduleForm, setScheduleForm] = useState({ date: '', time: '', reason: '' });
+  const [scheduleForm, setScheduleForm] = useState({ date: "", time: "", reason: "" });
   const [showCustomizeModal, setShowCustomizeModal] = useState(false);
   const [visibleSections, setVisibleSections] = useState({
     fitnessGoals: true,
@@ -91,7 +100,6 @@ export default function App() {
     return today.toISOString().slice(0, 10);
   });
   const [, setShowCareTeamModal] = useState(false);
-  // const [loginForm, setLoginForm] = useState({ email: '', password: '', name: '' });
 
   const [careTeam] = useState([
     {
@@ -102,91 +110,60 @@ export default function App() {
       unread: true,
       messages: [
         "Your next appointment is on Friday at 10am.",
-        "Please remember to update your glucose log."
-      ]
+        "Please remember to update your glucose log.",
+      ],
     },
     { name: "Phillip Workman", role: "Neurologist", img: "https://randomuser.me/api/portraits/men/45.jpg" },
     { name: "Cheyenne Herwitz", role: "Cardiologist", img: "https://randomuser.me/api/portraits/women/65.jpg" },
     { name: "Ava Patel", role: "General Physician", img: "https://randomuser.me/api/portraits/women/68.jpg" },
-   
   ]);
 
   const width = useWindowWidth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Load user data from localStorage on component mount
+  // ✅ Listen for user-updated events
   useEffect(() => {
+  const handleUserUpdate = () => {
     try {
       const storedUser = localStorage.getItem("user");
-      console.log("Loading user from localStorage:", storedUser);
       if (storedUser) {
         const parsed = JSON.parse(storedUser);
-        console.log("Parsed user data:", parsed);
         setUser({
           name: parsed?.name || "",
           email: parsed?.email || "",
-          avatar: parsed?.avatar || ""
+          avatar: parsed?.avatar || "",
         });
+      } else {
+        setUser({ name: "", email: "", avatar: "" });
       }
     } catch (error) {
-      console.error("Error loading user data:", error);
+      console.error("Error updating user data:", error);
     }
-  }, []);
+  };
 
-  // Listen for user-updated events
-  useEffect(() => {
-    const handleUserUpdate = () => {
-      try {
-        const storedUser = localStorage.getItem("user");
-        console.log("User updated event - stored user:", storedUser);
-        if (storedUser) {
-          const parsed = JSON.parse(storedUser);
-          console.log("User updated event - parsed user:", parsed);
-          setUser({
-            name: parsed?.name || "",
-            email: parsed?.email || "",
-            avatar: parsed?.avatar || ""
-          });
-        }
-      } catch (error) {
-        console.error("Error updating user data:", error);
-      }
-    };
-
-    window.addEventListener("user-updated", handleUserUpdate);
-    return () => window.removeEventListener("user-updated", handleUserUpdate);
-  }, []);
-
-  // Handle Take button
+  window.addEventListener("user-updated", handleUserUpdate);
+  return () => window.removeEventListener("user-updated", handleUserUpdate);
+}, []);
   const handleTake = (index: number) => {
     setMedications((prev) =>
-      prev.map((med, i) =>
-        i === index ? { ...med, status: "Taken" } : med
-      )
+      prev.map((med, i) => (i === index ? { ...med, status: "Taken" } : med))
     );
     setToast("Medication marked as taken!");
     setTimeout(() => setToast(""), 2000);
   };
 
-  // Handle Schedule Visit form submit
   const handleScheduleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowScheduleModal(false);
-    setToast('Visit scheduled successfully!');
-    setTimeout(() => setToast(''), 2000);
-    setScheduleForm({ date: '', time: '', reason: '' });
+    setToast("Visit scheduled successfully!");
+    setTimeout(() => setToast(""), 2000);
+    setScheduleForm({ date: "", time: "", reason: "" });
   };
 
-  // Handle section toggle
   const handleSectionToggle = (section: keyof typeof visibleSections) => {
-    setVisibleSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setVisibleSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
-
-  // Auth helpers used by modal and routing
-  // const handleLogin = () => {
-  //   navigate("/dashboard");
-  // };
 
   const handleLogout = () => {
     setUser({ name: "", email: "", avatar: "" });
@@ -194,15 +171,14 @@ export default function App() {
     localStorage.removeItem("user");
     navigate("/login");
   };
-
- const isAuthPage =
-  location.pathname === "/login" ||
-  location.pathname === "/signup" ||
-  location.pathname === "/quiz" ||
-  location.pathname === "/";
-
   
-  // Close profile modal when on auth pages
+
+  const isAuthPage =
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/quiz" ||
+    location.pathname === "/";
+
   useEffect(() => {
     if (isAuthPage && showProfileModal) {
       setShowProfileModal(false);
@@ -245,7 +221,7 @@ export default function App() {
               selectedDate={selectedDate}
             />
           )}
-          {!isAuthPage && (<OnboardingPage />)}
+          
 
           {/* Main Content */}
           <main

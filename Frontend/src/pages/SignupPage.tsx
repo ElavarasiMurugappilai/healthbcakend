@@ -56,26 +56,26 @@ export default function SignupPage() {
   });
 
   const onSubmit: SubmitHandler<SignupForm> = async (data) => {
-    setLoading(true);
-    try {
-      const payload = {
-        name: data.name.trim(),
-        email: data.email.trim().toLowerCase(),
-        password: data.password,
-      };
+  setLoading(true);
+  try {
+    const payload = {
+      name: data.name.trim(),
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+    };
 
-      const res = await api.post("/auth/signup", payload);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      window.dispatchEvent(new Event("user-updated"));
-      
-      toast.success("Signup successful! Redirecting to dashboard...", {
-        duration: 1800,
-        position: "top-center",
-        style: { background: "linear-gradient(90deg,#fdf6e3,#e0f2fe)" },
-      });
-      setTimeout(() => navigate("/quiz"), 900);
-    } catch (err: unknown) {
+    const res = await api.post("/auth/signup", payload);
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+    window.dispatchEvent(new Event("user-updated"));
+    
+    toast.success("Signup successful! Redirecting to dashboard...", {
+      duration: 1800,
+      position: "top-center",
+      style: { background: "linear-gradient(90deg,#fdf6e3,#e0f2fe)" },
+    });
+    setTimeout(() => navigate("/quiz"), 900);
+  }catch (err: unknown) {
       interface ApiError {
         response?: {
           data?: {

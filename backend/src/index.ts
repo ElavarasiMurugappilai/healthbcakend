@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import authRoutes from "./routes/authRoutes";
+import profileRoutes from "./routes/profile";
+
 
 // Load environment variables
 dotenv.config();
@@ -40,8 +43,10 @@ app.get("/health", (req, res) => {
 });
 
 // ✅ Import and use auth routes
-import authRoutes from "./routes/authRoutes";
+
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", profileRoutes);
+
 
 // ✅ 404 handler
 app.use("*", (req, res) => {
