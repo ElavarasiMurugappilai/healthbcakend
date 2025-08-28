@@ -25,9 +25,17 @@ interface Profile {
   takeMeds?: boolean;
 }
 
+// User interface
+interface User {
+  name: string;
+  email: string;
+  avatar: string;
+}
+
 const DashboardPage: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User>({ name: "", email: "", avatar: "" });
 
   // State for filters/search
   const [searchValue, setSearchValue] = useState("");
@@ -41,19 +49,76 @@ const DashboardPage: React.FC = () => {
   // Fetch profile on mount
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const res = await api.get("/profile/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProfile(res.data);
-      } catch (err) {
-        console.error("Error fetching profile:", err);
-      } finally {
-        setLoading(false);
-      }
+              try {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            console.log("No token found, skipping profile fetch");
+            setLoading(false);
+            return;
+          }
+
+          const res = await api.get("/profile/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setProfile(res.data);
+        } catch (err) {
+          console.error("Error fetching profile:", err);
+        } finally {
+          setLoading(false);
+        }
     };
     fetchProfile();
+  }, []);
+
+  // Get user data from localStorage
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      console.log("🔍 DashboardPage: Raw stored user data:", storedUser);
+      
+      if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
+        const parsed = JSON.parse(storedUser);
+        console.log("🔍 DashboardPage: Parsed user data:", parsed);
+        
+        setUser({
+          name: parsed?.name || "",
+          email: parsed?.email || "",
+          avatar: parsed?.avatar || "",
+        });
+        
+        console.log("✅ DashboardPage: User state set to:", {
+          name: parsed?.name || "",
+          email: parsed?.email || "",
+          avatar: parsed?.avatar || "",
+        });
+      } else {
+        console.log("⚠️ DashboardPage: No valid user data found in localStorage");
+      }
+    } catch (error) {
+      console.error("❌ DashboardPage: Error parsing user from localStorage:", error);
+    }
+  }, []);
+
+  // Listen for user updates
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
+          const parsed = JSON.parse(storedUser);
+          setUser({
+            name: parsed?.name || "",
+            email: parsed?.email || "",
+            avatar: parsed?.avatar || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error updating user data:", error);
+      }
+    };
+
+    window.addEventListener("user-updated", handleUserUpdate);
+    return () => window.removeEventListener("user-updated", handleUserUpdate);
   }, []);
 
   // Compute visible sections based on profile
@@ -160,7 +225,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <>
-      <Welcome user={{ name: profile?.userId ?? "" }} setShowScheduleModal={setShowScheduleModal} />
+      <Welcome user={user} setShowScheduleModal={setShowScheduleModal} />
 
       {loading ? (
         <DashboardSkeleton />
