@@ -264,6 +264,7 @@ export default function App() {
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/quiz" element={<QuizPage />} />
+                  <Route path="/health-questionnaire" element={<Navigate to="/quiz" replace />} />
                   <Route path="*" element={<Navigate to="/login" replace />} />
         
                 </Routes>
@@ -305,7 +306,11 @@ export default function App() {
                   <div className="flex flex-col gap-2 w-full">
                     {user.name ? (
                       <>
-                        <Button onClick={() => setEditingProfile(true)}>Edit Profile</Button>
+                        <Button onClick={() => {
+                          setEditForm({ name: user.name, email: user.email });
+                          setEditAvatar(user.avatar);
+                          setEditingProfile(true);
+                        }}>Edit Profile</Button>
                         <Button variant="outline" onClick={handleLogout}>Logout</Button>
                       </>
                     ) : (
@@ -318,7 +323,10 @@ export default function App() {
                   className="flex flex-col gap-4 w-full"
                   onSubmit={e => {
                     e.preventDefault();
-                    setUser(u => ({ ...u, name: editForm.name, email: editForm.email, avatar: editAvatar }));
+                    const updatedUser = { ...user, name: editForm.name, email: editForm.email, avatar: editAvatar };
+                    setUser(updatedUser);
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                    window.dispatchEvent(new Event('user-updated'));
                     setEditingProfile(false);
                     setToast('Profile updated successfully!');
                     setTimeout(() => setToast(''), 2000);

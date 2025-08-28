@@ -4,10 +4,17 @@ import { Request, Response, NextFunction } from "express";
 // Standardize JWT secret usage across the app
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
-// Extend Express Request type to include user
-interface AuthRequest extends Request {
-  user?: any;
+// Extend Express Request type to include user using declaration merging
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
 }
+
+// Type alias for clarity
+type AuthRequest = Request;
 
 const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -16,7 +23,7 @@ const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => 
   const token = authHeader.split(" ")[1]; // "Bearer <token>"
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
     req.user = decoded;
     next();
   } catch (err) {
@@ -25,7 +32,7 @@ const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => 
 };
 
 // ✅ Fixed protectLite middleware with proper error handling
-export const protectLite = async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
+export const protectLite = async (req: Request, res: Response, next: NextFunction) => {
   try {
     console.log("🔐 protectLite middleware called for:", req.originalUrl);
     console.log("🔐 Headers:", {

@@ -104,7 +104,7 @@ export default function SignupPage() {
   return (
     <>
       <Toaster richColors />
-      <div className="auth-page h-screen w-screen relative overflow-hidden bg-gray-100 dark:bg-[#252545]">
+      <div className="auth-page min-h-screen w-screen relative overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-[#252545]">
         {/* Full Screen Background - Consistent with dashboard */}
         <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-blue-50 to-orange-50 dark:from-[#252545] dark:via-[#1e1e3a] dark:to-[#2a2a4a] animate-gradient-shift"></div>
         
@@ -147,35 +147,35 @@ export default function SignupPage() {
           </div>
         
         {/* Content Container */}
-        <div className="relative z-20 h-full flex flex-col lg:flex-row">
+        <div className="relative z-20 min-h-screen flex flex-col lg:flex-row">
           {/* Left Side - Welcome Content */}
-          <div className="flex-1 flex flex-col justify-center items-center text-center p-6 lg:p-8">
+          <div className="flex-1 flex flex-col justify-center items-center text-center p-4 sm:p-6 lg:p-8 min-h-[30vh] lg:min-h-screen">
             <div className="max-w-md">
-              <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-800 dark:text-white mb-4 leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-800 dark:text-white mb-2 sm:mb-3 leading-tight">
                 Track your health,{" "}
                 <span className="text-orange-600 dark:text-orange-400">achieve your goals</span> 🚀
               </h1>
-              <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
                 Join thousands of users managing their health journey with our comprehensive dashboard.
               </p>
             </div>
           </div>
 
           {/* Right Side - Signup Form */}
-          <div className="flex-1 flex items-center justify-center p-6 lg:p-8">
-            <div className="w-full max-w-md">
+          <div className="flex-1 flex items-start sm:items-center justify-center p-3 sm:p-4 lg:p-6 xl:p-8 py-6 sm:py-8 lg:py-12">
+            <div className="w-full max-w-sm sm:max-w-md">
               <Card className="w-full shadow-2xl border-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-2xl font-bold text-gray-800 dark:text-white">
+                <CardHeader className="text-center pb-2 sm:pb-3">
+                  <CardTitle className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">
                     Create Account
                   </CardTitle>
-                  <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                     Start your health journey today
                   </p>
                 </CardHeader>
                 
-                <CardContent className="space-y-4">
-                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <CardContent className="space-y-2 sm:space-y-3 px-3 sm:px-4 lg:px-6 pb-4 sm:pb-6">
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 sm:space-y-3">
                     {/* Name Field */}
                     <div className="space-y-1">
                       <Label htmlFor="name" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function SignupPage() {
                         id="name"
                         placeholder="Enter your full name"
                         {...register("name")}
-                        className="h-10 border-gray-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-orange-400 focus:ring-orange-500 dark:focus:ring-orange-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="h-8 sm:h-9 text-xs sm:text-sm border-gray-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-orange-400 focus:ring-orange-500 dark:focus:ring-orange-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                       {errors.name && (
                         <p className="text-xs text-red-600 dark:text-red-400">{errors.name.message}</p>
@@ -204,7 +204,7 @@ export default function SignupPage() {
                         type="email"
                         placeholder="Enter your email"
                         {...register("email")}
-                        className="h-10 border-gray-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-orange-400 focus:ring-orange-500 dark:focus:ring-orange-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="h-8 sm:h-9 text-xs sm:text-sm border-gray-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-orange-400 focus:ring-orange-500 dark:focus:ring-orange-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                       {errors.email && (
                         <p className="text-xs text-red-600 dark:text-red-400">{errors.email.message}</p>
@@ -223,16 +223,16 @@ export default function SignupPage() {
                           type={showPassword ? "text" : "password"}
                           placeholder="Create a strong password"
                           {...register("password")}
-                          className="h-10 pr-12 border-gray-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-orange-400 focus:ring-orange-500 dark:focus:ring-orange-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="h-8 sm:h-9 pr-10 text-xs sm:text-sm border-gray-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-orange-400 focus:ring-orange-500 dark:focus:ring-orange-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 sm:h-7 sm:w-7 p-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                           onClick={() => setShowPassword((v) => !v)}
                         >
-                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          {showPassword ? <EyeOff size={14} className="sm:w-4 sm:h-4" /> : <Eye size={14} className="sm:w-4 sm:h-4" />}
                         </Button>
                       </div>
                       {errors.password && (
@@ -244,15 +244,15 @@ export default function SignupPage() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full h-10 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full h-8 sm:h-9 text-xs sm:text-sm bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                       {loading ? "Creating Account..." : "Create Account"}
                     </Button>
                   </form>
 
                   {/* Toggle to Login */}
-                  <div className="text-center pt-2">
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-center pt-1 sm:pt-2">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       Already have an account?{" "}
                       <a 
                         href="/login" 

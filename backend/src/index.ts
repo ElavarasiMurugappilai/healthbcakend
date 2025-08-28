@@ -7,6 +7,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/authRoutes";
 import profileRoutes from "./routes/profile";
+import fitnessGoalRoutes from "./routes/fitnessGoalRoutes";
 
 // Load environment variables
 dotenv.config();
@@ -131,6 +132,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/goals", fitnessGoalRoutes);
 
 // Unknown API endpoint handler
 app.use("/api/*", (req, res) => {

@@ -34,7 +34,8 @@ import {
   LayoutDashboard,
   CalendarDays,
   Sun,
-  Moon
+  Moon,
+  ClipboardCheck
 } from "lucide-react"
 
 export const Icons = {
@@ -73,5 +74,6 @@ export const Icons = {
   layoutDashboard: LayoutDashboard,
   calendarDays: CalendarDays,
   sun: Sun,
-  moon: Moon
-} 
+  moon: Moon,
+  clipboardCheck: ClipboardCheck
+}

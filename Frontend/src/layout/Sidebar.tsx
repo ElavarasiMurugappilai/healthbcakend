@@ -66,7 +66,7 @@ const UserProfile = ({
   const isGuest = !displayUser.name && !displayUser.email;
   return (
     <Card
-      className="flex items-center gap-3 p-4 rounded-xl bg-sidebar-accent mt-auto cursor-pointer hover:shadow"
+      className="flex items-center gap-3 p-3 rounded-xl bg-sidebar-accent mt-auto cursor-pointer hover:shadow transition-all duration-200"
       onClick={() => (isGuest ? navigate('/login') : setShowProfileModal(true))}
       title={isGuest ? "Login" : "Profile"}
       tabIndex={0}
@@ -74,17 +74,17 @@ const UserProfile = ({
       aria-label={isGuest ? "Login" : "Profile"}
       onKeyDown={e => { if (e.key === "Enter" || e.key === " ") (isGuest ? navigate('/login') : setShowProfileModal(true)); }}
     >
-      <CardContent className="p-0 flex items-center gap-3 w-full">
-        <Avatar className="w-10 h-10">
+      <CardContent className="p-0 flex items-center gap-3 w-full min-w-0">
+        <Avatar className="w-10 h-10 flex-shrink-0">
           <AvatarImage 
             src={isGuest ? 'https://ui-avatars.com/api/?name=Guest&background=cccccc&color=555555' : displayUser.avatar || `https://ui-avatars.com/api/?name=${formattedName}`} 
             alt={isGuest ? 'Guest' : formattedName} 
           />
           <AvatarFallback>{isGuest ? 'Guest' : formattedName}</AvatarFallback>
         </Avatar>
-        <div className="text-left">
-          <div className="font-semibold text-sm text-sidebar-foreground">{isGuest ? 'Guest' : formattedName}</div>
-          <div className="text-xs text-muted-foreground">{isGuest ? 'Not logged in' : displayUser.email}</div>
+        <div className="text-left flex-1 min-w-0">
+          <div className="font-semibold text-sm text-sidebar-foreground truncate">{isGuest ? 'Guest' : formattedName}</div>
+          <div className="text-xs text-muted-foreground truncate">{isGuest ? 'Not logged in' : displayUser.email}</div>
         </div>
       </CardContent>
     </Card>

@@ -26,7 +26,7 @@ router.get("/verify", verifyToken);
 // ✅ GET /auth/me (get current user info)
 router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user?.id) {
+    if (!req.user || !req.user.id) {
       return res.status(401).json({ message: "Not authorized" });
     }
 

@@ -258,20 +258,20 @@ const QuizPage = () => {
 
   if (!authChecked && !forceShow) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-blue-50 to-orange-50 dark:from-[#252545] dark:via-[#1e1e3a] dark:to-[#2a2a4a]">
-        <div className="text-center max-w-md p-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
+      <div className="min-h-screen w-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-blue-50 to-orange-50 dark:from-[#252545] dark:via-[#1e1e3a] dark:to-[#2a2a4a] p-3 sm:p-4 overflow-y-auto">
+        <div className="text-center max-w-xs sm:max-w-md p-4 sm:p-6">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-orange-500 mx-auto mb-3 sm:mb-4"></div>
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
             Setting up your quiz...
           </h3>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300">
             {authRetryCount === 0 ? "Verifying your session..." :
              authRetryCount === 1 ? "Checking connection..." : "Almost ready..."}
           </p>
           {authRetryCount >= 2 && (
             <Button 
               onClick={() => { setForceShow(true); setAuthChecked(true); }}
-              className="mt-4 bg-orange-500 hover:bg-orange-600"
+              className="mt-3 sm:mt-4 bg-orange-500 hover:bg-orange-600 text-sm sm:text-base px-4 sm:px-6 h-8 sm:h-9"
             >
               Continue Anyway
             </Button>
@@ -282,7 +282,7 @@ const QuizPage = () => {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
+    <div className="relative min-h-screen w-screen overflow-x-hidden overflow-y-auto">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-blue-50 to-orange-50 dark:from-[#252545] dark:via-[#1e1e3a] dark:to-[#2a2a4a] animate-gradient-shift"></div>
 
@@ -292,14 +292,14 @@ const QuizPage = () => {
       <Heart className="absolute bottom-1/4 left-1/3 w-24 h-24 text-red-500/20 dark:text-red-400/20 animate-float-slow" />
 
       {forceShow && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-4 py-2 rounded-lg shadow-lg">
+        <div className="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-3 sm:px-4 py-1 sm:py-2 rounded-lg shadow-lg text-xs sm:text-sm">
           ⚠️ Offline mode - Data will sync later
         </div>
       )}
 
-      <div className="relative z-20 h-full flex flex-col md:flex-row">
-        {/* Left */}
-        <div className="flex flex-col justify-center items-center flex-1 p-6">
+      <div className="relative z-20 min-h-screen flex flex-col">
+        {/* Mobile Title - Show on small screens */}
+        <div className="md:hidden text-center p-3 sm:p-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={steps[currentStep].title}
@@ -307,79 +307,111 @@ const QuizPage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.3 }}
-              className="hidden md:block text-center mb-6"
             >
-              <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
                 {steps[currentStep].title}
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Fill in the details below</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Fill in the details below</p>
             </motion.div>
           </AnimatePresence>
-
-          <HealthWheel
-            currentStep={currentStep}
-            completedSteps={[]}
-            onSliceClick={(i) => setCurrentStep(i)}
-          />
         </div>
 
-        {/* Right */}
-        <div className="flex-1 flex flex-col justify-center items-center p-4 md:p-8">
-          <Card className="w-full max-w-xl h-[550px] shadow-xl border-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm flex flex-col">
-            <CardContent className="flex-1 overflow-y-auto scrollbar-hide px-6 py-4">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.25 }}
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col md:flex-row min-h-0">
+          {/* Left - Health Wheel (Hidden on mobile) */}
+          <div className="hidden md:flex flex-col justify-center items-center md:flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={steps[currentStep].title}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.3 }}
+                className="text-center mb-4 lg:mb-6"
+              >
+                <h2 className="text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100">
+                  {steps[currentStep].title}
+                </h2>
+                <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-400">Fill in the details below</p>
+              </motion.div>
+            </AnimatePresence>
+
+            <div className="w-full max-w-xs lg:max-w-sm">
+              <HealthWheel
+                currentStep={currentStep}
+                completedSteps={[]}
+                onSliceClick={(i) => setCurrentStep(i)}
+              />
+            </div>
+          </div>
+
+          {/* Right - Form Card */}
+          <div className="flex-1 flex flex-col p-3 sm:p-4 md:p-6 lg:p-8">
+            <Card className="w-full max-w-sm sm:max-w-md lg:max-w-lg h-[480px] shadow-xl border-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm flex flex-col">
+              <CardContent className="flex-1 overflow-y-auto scrollbar-hide px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentStep}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <CurrentStep
+                      formData={formData}
+                      updateFormData={updateFormData}
+                      handleConditionToggle={handleConditionToggle}
+                      handleExerciseTypeToggle={handleExerciseTypeToggle}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </CardContent>
+            </Card>
+
+            {/* Navigation Buttons - Under the card */}
+            <div className="flex justify-between w-full max-w-sm sm:max-w-md lg:max-w-lg mt-4 gap-2 sm:gap-3">
+              <Button
+                variant="outline"
+                disabled={currentStep === 0}
+                onClick={() => setCurrentStep((p) => p - 1)}
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9"
+              >
+                <ArrowLeft size={14} className="sm:w-4 sm:h-4" /> 
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Prev</span>
+              </Button>
+
+              {currentStep < steps.length - 1 ? (
+                <Button
+                  onClick={() => setCurrentStep((p) => p + 1)}
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                 >
-                  <CurrentStep
-                    formData={formData}
-                    updateFormData={updateFormData}
-                    handleConditionToggle={handleConditionToggle}
-                    handleExerciseTypeToggle={handleExerciseTypeToggle}
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </CardContent>
-          </Card>
-
-          {/* Navigation */}
-          <div className="flex justify-between w-full max-w-xl mt-6">
-            <Button
-              variant="outline"
-              disabled={currentStep === 0}
-              onClick={() => setCurrentStep((p) => p - 1)}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft size={16} /> Previous
-            </Button>
-
-            {currentStep < steps.length - 1 ? (
-              <Button
-                onClick={() => setCurrentStep((p) => p + 1)}
-                className="flex items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
-              >
-                Next <ArrowRight size={16} />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>Complete Setup <Check size={16} /></>
-                )}
-              </Button>
-            )}
+                  <span className="hidden sm:inline">Next</span>
+                  <span className="sm:hidden">Next</span>
+                  <ArrowRight size={14} className="sm:w-4 sm:h-4" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-w-[100px] sm:min-w-[140px]"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+                      <span className="hidden sm:inline">Saving...</span>
+                      <span className="sm:hidden">Save</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline">Complete Setup</span>
+                      <span className="sm:hidden">Complete</span>
+                      <Check size={14} className="sm:w-4 sm:h-4" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
