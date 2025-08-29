@@ -11,9 +11,8 @@ const helmet_1 = __importDefault(require("helmet"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const profile_1 = __importDefault(require("./routes/profile"));
+const measurements_1 = __importDefault(require("./routes/measurements"));
 const fitnessGoalRoutes_1 = __importDefault(require("./routes/fitnessGoalRoutes"));
-const healthQuestionnaireRoutes_1 = __importDefault(require("./routes/healthQuestionnaireRoutes"));
-const medicationSuggestionRoutes_1 = __importDefault(require("./routes/medicationSuggestionRoutes"));
 dotenv_1.default.config();
 const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
@@ -110,23 +109,20 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes_1.default);
 app.use("/api/profile", profile_1.default);
+app.use("/api/measurements", measurements_1.default);
 app.use("/api/goals", fitnessGoalRoutes_1.default);
-app.use("/api/health-questionnaire", healthQuestionnaireRoutes_1.default);
-app.use("/api/medication-suggestions", medicationSuggestionRoutes_1.default);
 app.use("/api/*", (req, res) => {
     console.log(`❓ API endpoint not found: ${req.originalUrl}`);
     res.status(404).json({
         message: `API endpoint ${req.originalUrl} not found`,
         availableEndpoints: [
+            "/api/auth/register",
             "/api/auth/login",
-            "/api/auth/signup",
             "/api/auth/verify",
             "/api/auth/me",
             "/api/profile/quiz",
-            "/api/profile/me",
-            "/api/health-questionnaire",
-            "/api/medication-suggestions/user",
-            "/api/medication-suggestions/status",
+            "/api/profile",
+            "/api/measurements",
         ],
     });
 });

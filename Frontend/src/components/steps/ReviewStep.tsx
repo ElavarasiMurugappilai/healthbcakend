@@ -56,29 +56,38 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
     </Card>
   );
 
-  const renderFitnessGoals = () => (
-    <Card className="border-orange-200 dark:border-orange-800">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
-          <Target size={20} />
-          Fitness Goals
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {formData.fitnessGoals && formData.fitnessGoals.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {formData.fitnessGoals.map((goal: string, index: number) => (
-              <Badge key={index} variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                {goal.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-600 dark:text-gray-400">No fitness goals selected</p>
-        )}
-      </CardContent>
-    </Card>
-  );
+  const renderFitnessGoals = () => {
+    // Handle both string and array formats for fitnessGoals
+    const goals = Array.isArray(formData.fitnessGoals) 
+      ? formData.fitnessGoals 
+      : formData.fitnessGoals 
+        ? [formData.fitnessGoals] 
+        : [];
+
+    return (
+      <Card className="border-orange-200 dark:border-orange-800">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+            <Target size={20} />
+            Fitness Goals
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {goals.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {goals.map((goal: string, index: number) => (
+                <Badge key={index} variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                  {goal.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600 dark:text-gray-400">No fitness goals selected</p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderHealthTracking = () => (
     <Card className="border-orange-200 dark:border-orange-800">

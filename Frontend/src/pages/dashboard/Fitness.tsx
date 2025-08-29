@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import API from "@/api";
 import type { FitnessGoal } from "@/types/fitness";
 import { toast } from "sonner";
+import FitnessLogger from "@/components/FitnessLogger";
+import { Plus } from "lucide-react";
 
 interface FitnessProps {
   setShowFitnessModal: (show: boolean) => void;
@@ -18,8 +20,10 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
   const totalLength = 251; // Circumference for r=40
 
   const [showModal, setShowModal] = useState(false);
-  const [goal, setGoal] = useState<FitnessGoal | null>(null);
+  const [goal, setGoal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [insights, setInsights] = useState<string[]>([]);
+  const [showLogger, setShowLogger] = useState(false);
 
   if (loading) {
     return (
@@ -46,9 +50,10 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
     let isMounted = true;
     const fetchGoals = async () => {
       try {
-        const res = await API.get<FitnessGoal>("/goals");
+        const res = await API.get("/fitness/goals");
         if (!isMounted) return;
-        setGoal(res.data);
+        setGoal(res.data.data);
+        setInsights(res.data.data.insights || []);
       } catch (e) {
         console.error(e);
         toast.error("Failed to load fitness goals");
@@ -87,8 +92,8 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
   // Update progress helper
   const updateProgress = async (partial: Partial<FitnessGoal["progress"]>) => {
     try {
-      const res = await API.patch("/goals/progress", partial);
-      setGoal(res.data);
+      const res = await API.patch("/fitness/goals/progress", partial);
+      setGoal(res.data.data);
     } catch (e) {
       console.error(e);
       toast.error("Unable to update progress");
@@ -111,21 +116,34 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
       >
 
       <Card
-        className="w-full h-80 bg-gradient-to-r from-indigo-950 to-[#1a2a5a] text-white cursor-pointer shadow-2xl hover:-translate-y-1 transition-all duration-200 border border-gray-200 dark:border-zinc-800 hover:shadow-3xl"
+        className="w-full h-80 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 border-0"
         onClick={() => setShowFitnessModal(true)}
       >
-        <CardHeader className="flex justify-between items-center">
-          <CardTitle>Fitness Goals</CardTitle>
-          <Button
-            variant="link"
-            className="text-xs p-0 text-white"
-            onClick={e => {
-              e.stopPropagation();
-              setShowModal(true);
-            }}
-          >
-            See all
-          </Button>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-lg font-medium">Fitness Goals</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs p-2 text-white hover:bg-white/20"
+              onClick={e => {
+                e.stopPropagation();
+                setShowLogger(true);
+              }}
+            >
+              <Plus size={16} />
+            </Button>
+            <Button
+              variant="link"
+              className="text-xs p-0 text-white/80 hover:text-white"
+              onClick={e => {
+                e.stopPropagation();
+                setShowModal(true);
+              }}
+            >
+              See all
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-full">
           <div className={`relative ${isFullWidth ? 'w-40 h-40' : 'w-32 h-32'}`}>
@@ -217,6 +235,17 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
           >
             Complete {goal?.workoutTarget ?? 5} Workouts ({goal?.progress?.workout ?? 0}/{goal?.workoutTarget ?? 5})
           </Button>
+
+          {/* Personalized Insights */}
+          {insights.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {insights.slice(0, 2).map((insight, index) => (
+                <div key={index} className="text-xs text-white/80 bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm">
+                  {insight}
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -303,6 +332,25 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* Fitness Logger Modal */}
+      <FitnessLogger
+        isOpen={showLogger}
+        onClose={() => setShowLogger(false)}
+        onLogSuccess={() => {
+          // Refresh fitness data after logging
+          const fetchGoals = async () => {
+            try {
+              const res = await API.get("/fitness/goals");
+              setGoal(res.data.data);
+              setInsights(res.data.data.insights || []);
+            } catch (e) {
+              console.error(e);
+            }
+          };
+          fetchGoals();
+        }}
+      />
     </motion.div>
   </div>
 );

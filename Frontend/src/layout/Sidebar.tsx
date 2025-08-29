@@ -36,7 +36,7 @@ const UserProfile = ({
 }) => {
   const navigate = useNavigate();
   
-  // Get user data from localStorage if not provided
+  // Get user data from localStorage if not provided, prioritizing quiz profile photo
   let displayUser = user;
   if (!user.name && !user.email) {
     try {
@@ -52,6 +52,19 @@ const UserProfile = ({
     } catch {
       displayUser = { name: "", email: "", avatar: "" };
     }
+  }
+  
+  // Check for profile photo from quiz data
+  try {
+    const quizData = localStorage.getItem("quizFormData");
+    if (quizData) {
+      const parsed = JSON.parse(quizData);
+      if (parsed?.profilePhoto) {
+        displayUser.avatar = parsed.profilePhoto;
+      }
+    }
+  } catch {
+    // Ignore parsing errors
   }
   
   // Capitalize first letter of each word in the name

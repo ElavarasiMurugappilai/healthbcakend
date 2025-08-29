@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useDateStore } from "@/store/useDateStore";
 import Welcome from "./dashboard/Welcome";
 import Fitness from "./dashboard/Fitness";
 import BloodGlucose from "./dashboard/BloodGlucose";
@@ -23,6 +22,8 @@ interface Profile {
   careTeam?: { name: string; role: string; img?: string; messages?: string[] }[];
   trackGlucose?: boolean;
   takeMeds?: boolean;
+  healthGoal?: string;
+  activityLevel?: string;
 }
 
 // User interface
@@ -30,6 +31,9 @@ interface User {
   name: string;
   email: string;
   avatar: string;
+  age?: number;
+  gender?: string;
+  goals?: string[];
 }
 
 const DashboardPage: React.FC = () => {
@@ -38,7 +42,6 @@ const DashboardPage: React.FC = () => {
   const [user, setUser] = useState<User>({ name: "", email: "", avatar: "" });
 
   // State for filters/search
-  const [searchValue, setSearchValue] = useState("");
   const [statusFilter, setStatusFilter] = useState("any");
 
   // State for visit scheduling modal
@@ -60,7 +63,21 @@ const DashboardPage: React.FC = () => {
           const res = await api.get("/profile/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
-          setProfile(res.data);
+          
+          // Update both profile and user data from backend response
+          if (res.data.profile) {
+            setProfile(res.data.profile);
+          }
+          if (res.data.user) {
+            setUser({
+              name: res.data.user.name || "",
+              email: res.data.user.email || "",
+              avatar: res.data.user.avatar || "",
+              age: res.data.user.age,
+              gender: res.data.user.gender,
+              goals: res.data.user.goals || []
+            });
+          }
         } catch (err) {
           console.error("Error fetching profile:", err);
         } finally {
@@ -124,7 +141,7 @@ const DashboardPage: React.FC = () => {
   // Compute visible sections based on profile
   const visibleSections = useMemo(
     () => ({
-      fitnessGoals: !!profile?.fitnessGoals || !!profile?.stepGoal?.length,
+      fitnessGoals: true, // Always show fitness card since it has its own backend data
       glucoseTrends: !!profile?.trackGlucose,
       medicationSchedule: !!profile?.takeMeds,
       careTeam: (profile?.careTeam ?? []).length > 0,
@@ -133,15 +150,11 @@ const DashboardPage: React.FC = () => {
   );
 
   // Filter medications & care team dynamically
-  const medications =
+  const filteredMedications =
     profile?.medications
       ?.filter(
         (med) =>
-          (statusFilter === "any" || med.status === statusFilter) &&
-          (med.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-            med.dosage.toLowerCase().includes(searchValue.toLowerCase()) ||
-            med.status.toLowerCase().includes(searchValue.toLowerCase()) ||
-            med.time.toLowerCase().includes(searchValue.toLowerCase()))
+          (statusFilter === "any" || med.status === statusFilter)
       )
       .map((med) => ({
         ...med,
@@ -150,12 +163,7 @@ const DashboardPage: React.FC = () => {
 
   const careTeam =
     profile?.careTeam
-      ?.filter(
-        (member) =>
-          member.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-          member.role.toLowerCase().includes(searchValue.toLowerCase())
-      )
-      .map((member) => ({
+      ?.map((member) => ({
         ...member,
         img: member.img ?? "", // Ensure img is always a string
       })) ?? [];
@@ -220,12 +228,12 @@ const DashboardPage: React.FC = () => {
     </div>
   );
 
-  // Global selectedDate from Zustand store
-  const selectedDate = useDateStore((state) => state.selectedDate);
+  // Global selectedDate from Zustand store (unused for now)
+  // const selectedDate = useDateStore((state) => state.selectedDate);
 
   return (
     <>
-      <Welcome user={user} setShowScheduleModal={setShowScheduleModal} />
+      <Welcome user={user} profile={profile || undefined} setShowScheduleModal={setShowScheduleModal} />
 
       {loading ? (
         <DashboardSkeleton />
@@ -235,9 +243,8 @@ const DashboardPage: React.FC = () => {
           <section className="flex flex-col w-10 lg:flex-row gap-2 mb-2 w-full">
             {visibleSections.fitnessGoals && (
               <Fitness
-                stepGoal={profile?.stepGoal?.[0] ?? 8000}
-                exercise={profile?.exercise ?? "none"}
-                fitnessGoals={profile?.fitnessGoals ?? "general_fitness"}
+                setShowFitnessModal={() => {}}
+                isFullWidth={false}
               />
             )}
             {visibleSections.glucoseTrends && <BloodGlucose glucoseData={glucoseData} barSize={barSize} />}
@@ -250,7 +257,7 @@ const DashboardPage: React.FC = () => {
             )}
             {visibleSections.medicationSchedule && (
               <MedicationSchedule
-                filteredMedications={medications}
+                filteredMedications={filteredMedications}
                 handleTake={handleTake}
                 statusFilter={statusFilter}
                 onStatusChange={setStatusFilter}

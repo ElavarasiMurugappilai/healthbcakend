@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes";
 import profileRoutes from "./routes/profile";
 import measurementsRoutes from "./routes/measurements";
 import fitnessGoalRoutes from "./routes/fitnessGoalRoutes";
+import fitnessRoutes from "./routes/fitness";
 
 // Load environment variables
 dotenv.config();
@@ -135,6 +136,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/measurements", measurementsRoutes);
 app.use("/api/goals", fitnessGoalRoutes);
+app.use("/api/fitness", fitnessRoutes);
 
 // Unknown API endpoint handler
 app.use("/api/*", (req, res) => {

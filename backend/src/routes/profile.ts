@@ -108,6 +108,40 @@ router.post('/quiz', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+// GET /profile/me - Get current user profile and settings (alias for dashboard compatibility)
+router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Get latest measurements for dashboard
+    const latestMeasurements = await (Measurement as any).getLatestByType(
+      req.user._id,
+      ['glucose', 'blood_pressure', 'heart_rate', 'weight', 'sleep', 'steps', 'water']
+    );
+
+    res.json({
+      success: true,
+      data: {
+        profile: req.user.profile,
+        user: req.user.getPublicProfile(),
+        latestMeasurements
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching profile data',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // GET /profile - Get user profile and settings
 router.get('/', authMiddleware, async (req: Request, res: Response) => {
   try {
@@ -137,6 +171,59 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Error fetching profile data',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// POST /profile/dashboard-quiz - Save dashboard customization quiz data
+router.post('/dashboard-quiz', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    const dashboardPreferences = req.body;
+    
+    // Update user profile with dashboard preferences
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          'profile.dashboardPreferences': dashboardPreferences,
+          'profile.dashboardQuizCompleted': true,
+          'profile.dashboardQuizCompletedAt': new Date(),
+          'profile.lastUpdated': new Date()
+        }
+      },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    console.log(`✅ Dashboard quiz completed for user: ${req.user.email}`);
+
+    res.json({
+      success: true,
+      message: 'Dashboard preferences saved successfully',
+      data: {
+        profile: updatedUser.profile,
+        user: updatedUser.getPublicProfile()
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Dashboard quiz save error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error saving dashboard preferences',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

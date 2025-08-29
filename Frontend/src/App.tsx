@@ -26,7 +26,7 @@ import NotificationsPage from "./pages/NotificationsPage";
 
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
-import QuizPage from "./pages/QuizPage";
+import EnhancedQuizPage from "./pages/EnhancedQuizPage";
 import OnboardingPage from "./pages/Onboarding";
 
 // Responsive window width hook (unused currently)
@@ -240,7 +240,7 @@ export default function App() {
           <main
             className={
               isAuthPage
-                ? "flex-1 min-h-screen flex items-center justify-center bg-background"
+                ? "w-full bg-background"
                 : "flex-1 p-2 sm:p-4 md:p-6 pb-8 overflow-y-auto space-y-3 bg-gray-200 dark:bg-[#18181b]"
             }
           >
@@ -251,7 +251,7 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -30 }}
                 transition={{ duration: 0.3 }}
-                style={{ height: "100%" }}
+                style={{ height: isAuthPage ? "auto" : "100%" }}
               >
                 <Routes location={location} key={location.pathname}>
                   <Route path="/dashboard" element={<DashboardPage />} />
@@ -263,7 +263,8 @@ export default function App() {
                   <Route path="/" element={<OnboardingPage />} />
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/login" element={<LoginPage />} />
-                  <Route path="/quiz" element={<QuizPage />} />
+                  <Route path="/quiz" element={<EnhancedQuizPage />} />
+                  <Route path="/dashboard-quiz" element={<EnhancedQuizPage />} />
                   <Route path="/health-questionnaire" element={<Navigate to="/quiz" replace />} />
                   <Route path="*" element={<Navigate to="/login" replace />} />
         

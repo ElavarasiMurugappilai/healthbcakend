@@ -4,45 +4,45 @@ declare const _default: mongoose.Model<{
     updatedAt: NativeDate;
 } & {
     name: string;
+    conditions: string[];
     email: string;
     password: string;
-    conditions: string[];
     goals: string[];
     consent: boolean;
     age?: number | undefined;
     gender?: "Male" | "Female" | "Non-binary" | "Prefer not to say" | "Other" | undefined;
-    primaryGoal?: string | undefined;
     notes?: string | undefined;
+    primaryGoal?: string | undefined;
     profilePhoto?: string | undefined;
 }, {}, {}, {}, mongoose.Document<unknown, {}, {
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
     name: string;
+    conditions: string[];
     email: string;
     password: string;
-    conditions: string[];
     goals: string[];
     consent: boolean;
     age?: number | undefined;
     gender?: "Male" | "Female" | "Non-binary" | "Prefer not to say" | "Other" | undefined;
-    primaryGoal?: string | undefined;
     notes?: string | undefined;
+    primaryGoal?: string | undefined;
     profilePhoto?: string | undefined;
 }> & {
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
     name: string;
+    conditions: string[];
     email: string;
     password: string;
-    conditions: string[];
     goals: string[];
     consent: boolean;
     age?: number | undefined;
     gender?: "Male" | "Female" | "Non-binary" | "Prefer not to say" | "Other" | undefined;
-    primaryGoal?: string | undefined;
     notes?: string | undefined;
+    primaryGoal?: string | undefined;
     profilePhoto?: string | undefined;
 } & {
     _id: mongoose.Types.ObjectId;
@@ -53,45 +53,45 @@ declare const _default: mongoose.Model<{
     updatedAt: NativeDate;
 } & {
     name: string;
+    conditions: string[];
     email: string;
     password: string;
-    conditions: string[];
     goals: string[];
     consent: boolean;
     age?: number | undefined;
     gender?: "Male" | "Female" | "Non-binary" | "Prefer not to say" | "Other" | undefined;
-    primaryGoal?: string | undefined;
     notes?: string | undefined;
+    primaryGoal?: string | undefined;
     profilePhoto?: string | undefined;
 }, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
     name: string;
+    conditions: string[];
     email: string;
     password: string;
-    conditions: string[];
     goals: string[];
     consent: boolean;
     age?: number | undefined;
     gender?: "Male" | "Female" | "Non-binary" | "Prefer not to say" | "Other" | undefined;
-    primaryGoal?: string | undefined;
     notes?: string | undefined;
+    primaryGoal?: string | undefined;
     profilePhoto?: string | undefined;
 }>> & mongoose.FlatRecord<{
     createdAt: NativeDate;
     updatedAt: NativeDate;
 } & {
     name: string;
+    conditions: string[];
     email: string;
     password: string;
-    conditions: string[];
     goals: string[];
     consent: boolean;
     age?: number | undefined;
     gender?: "Male" | "Female" | "Non-binary" | "Prefer not to say" | "Other" | undefined;
-    primaryGoal?: string | undefined;
     notes?: string | undefined;
+    primaryGoal?: string | undefined;
     profilePhoto?: string | undefined;
 }> & {
     _id: mongoose.Types.ObjectId;
