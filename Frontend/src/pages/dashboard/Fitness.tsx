@@ -1,12 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { motion } from "framer-motion";
 import API from "@/api";
-import type { FitnessGoal } from "@/types/fitness";
 import { toast } from "sonner";
-import FitnessLogger from "@/components/FitnessLogger";
 import { Plus } from "lucide-react";
 
 interface FitnessProps {
@@ -15,97 +12,92 @@ interface FitnessProps {
 }
 
 const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = false }) => {
-  // Animation state
   const [progress, setProgress] = useState(0);
+  const [completedWorkouts, setCompletedWorkouts] = useState(0);
+  const [targetWorkouts, setTargetWorkouts] = useState(5);
+  const [loading, setLoading] = useState(true);
   const totalLength = 251; // Circumference for r=40
 
-  const [showModal, setShowModal] = useState(false);
-  const [goal, setGoal] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [insights, setInsights] = useState<string[]>([]);
-  const [showLogger, setShowLogger] = useState(false);
+  // Fetch workout logs from backend
+  useEffect(() => {
+    const fetchWorkoutLogs = async () => {
+      try {
+        const response = await API.get("/api/fitness/logs");
+        console.log("API Response:", response.data);
+        const logs = response.data.logs || [];
+        const target = response.data.targetWorkouts || 5;
+        
+        console.log("Logs count:", logs.length, "Target:", target);
+        setCompletedWorkouts(logs.length);
+        setTargetWorkouts(target);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch workout logs:", error);
+        // Set some default values so card still shows
+        setCompletedWorkouts(0);
+        setTargetWorkouts(5);
+        setLoading(false);
+      }
+    };
+    
+    fetchWorkoutLogs();
+  }, []);
+
+  // Calculate and animate progress
+  useEffect(() => {
+    const targetProgress = Math.round((completedWorkouts / targetWorkouts) * 100);
+    
+    let current = progress;
+    const animateProgress = () => {
+      if (current < targetProgress) {
+        current += 1;
+        setProgress(current);
+        setTimeout(animateProgress, 12);
+      }
+    };
+    
+    if (targetProgress !== progress) {
+      animateProgress();
+    }
+  }, [completedWorkouts, targetWorkouts, progress]);
+
+  // Log new workout
+  const handleLogWorkout = async () => {
+    try {
+      const response = await API.post("/api/fitness/logs", {
+        type: "workout",
+        date: new Date().toISOString(),
+        duration: 30 // default duration
+      });
+      
+      console.log("Workout logged:", response.data);
+      
+      // Immediately update local state
+      setCompletedWorkouts(prev => prev + 1);
+      
+      // Also refetch data to ensure sync
+      const refreshResponse = await API.get("/api/fitness/logs");
+      const logs = refreshResponse.data.logs || [];
+      setCompletedWorkouts(logs.length);
+      
+      toast.success("Workout logged! 🎉");
+    } catch (error) {
+      console.error("Failed to log workout:", error);
+      toast.error("Failed to log workout");
+    }
+  };
 
   if (loading) {
     return (
       <div className={`${isFullWidth ? 'w-full' : 'flex-1 lg:flex-1'} min-w-0 mb-2 lg:mb-0`}>
-        <Card className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white shadow-xl">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-            </div>
+        <Card className="w-full h-80 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 border-0">
+          <CardContent className="flex items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
           </CardContent>
         </Card>
       </div>
     );
   }
-
-  // Calculate progress percentage based on completed workouts
-  const progressPercentage = useMemo(() => {
-    if (!goal) return 0;
-    return Math.round(((goal.progress?.workout ?? 0) / (goal.workoutTarget || 1)) * 100);
-  }, [goal]);
-
-  // Fetch goals on mount
-  useEffect(() => {
-    let isMounted = true;
-    const fetchGoals = async () => {
-      try {
-        const res = await API.get("/fitness/goals");
-        if (!isMounted) return;
-        setGoal(res.data.data);
-        setInsights(res.data.data.insights || []);
-      } catch (e) {
-        console.error(e);
-        toast.error("Failed to load fitness goals");
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    fetchGoals();
-    return () => { isMounted = false; };
-  }, []);
-
-  useEffect(() => {
-    // Animate progress to the calculated percentage
-    let current = progress;
-    const target = progressPercentage;
-    let animationId: NodeJS.Timeout;
-    
-    const step = () => {
-      if (current < target) {
-        current += 1;
-        setProgress(current);
-        animationId = setTimeout(step, 12); // Animation speed
-      }
-    };
-    
-    // Only animate if target is different from current progress
-    if (target !== progress) {
-      step();
-    }
-    
-    return () => {
-      if (animationId) clearTimeout(animationId);
-    };
-  }, [progressPercentage, progress]);
-
-  // Update progress helper
-  const updateProgress = async (partial: Partial<FitnessGoal["progress"]>) => {
-    try {
-      const res = await API.patch("/fitness/goals/progress", partial);
-      setGoal(res.data.data);
-    } catch (e) {
-      console.error(e);
-      toast.error("Unable to update progress");
-    }
-  };
-
-  const handleWorkoutComplete = async () => {
-    if (!goal) return;
-    const newWorkoutCount = (goal.progress?.workout ?? 0) + 1;
-    await updateProgress({ workout: newWorkoutCount });
-    toast.success('Workout marked as complete! 🎉');
-  };
   
   return (
     <div className={`${isFullWidth ? 'w-full' : 'flex-1 lg:flex-1'} min-w-0 mb-2 lg:mb-0`}>
@@ -114,37 +106,35 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-
-      <Card
-        className="w-full h-80 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 border-0"
-        onClick={() => setShowFitnessModal(true)}
-      >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-medium">Fitness Goals</CardTitle>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs p-2 text-white hover:bg-white/20"
-              onClick={e => {
-                e.stopPropagation();
-                setShowLogger(true);
-              }}
-            >
-              <Plus size={16} />
-            </Button>
-            <Button
-              variant="link"
-              className="text-xs p-0 text-white/80 hover:text-white"
-              onClick={e => {
-                e.stopPropagation();
-                setShowModal(true);
-              }}
-            >
-              See all
-            </Button>
-          </div>
-        </CardHeader>
+        <Card
+          className="w-full h-80 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 border-0"
+          onClick={() => setShowFitnessModal(true)}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-lg font-medium">Fitness Goals</CardTitle>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs p-2 text-white hover:bg-white/20"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleLogWorkout();
+                }}
+              >
+                <Plus size={16} />
+              </Button>
+              <Button
+                variant="link"
+                className="text-xs p-0 text-white/80 hover:text-white"
+                onClick={e => {
+                  e.stopPropagation();
+                }}
+              >
+                See all
+              </Button>
+            </div>
+          </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-full">
           <div className={`relative ${isFullWidth ? 'w-40 h-40' : 'w-32 h-32'}`}>
             {/* Background and animated progress ring */}
@@ -222,138 +212,16 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
             className="mt-6 w-full bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105"
             onClick={e => {
               e.stopPropagation();
-              if (!goal || (goal.progress?.workout ?? 0) < (goal.workoutTarget || 5)) {
-                handleWorkoutComplete();
-                
-                // If modal is open, close and reopen it to show updated state
-                if (showModal) {
-                  setShowModal(false);
-                  setTimeout(() => setShowModal(true), 100);
-                }
-              }
+              handleLogWorkout();
             }}
           >
-            Complete {goal?.workoutTarget ?? 5} Workouts ({goal?.progress?.workout ?? 0}/{goal?.workoutTarget ?? 5})
+            Complete {targetWorkouts} Workouts {completedWorkouts}/{targetWorkouts}
           </Button>
-
-          {/* Personalized Insights */}
-          {insights.length > 0 && (
-            <div className="mt-4 space-y-2">
-              {insights.slice(0, 2).map((insight, index) => (
-                <div key={index} className="text-xs text-white/80 bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm">
-                  {insight}
-                </div>
-              ))}
-            </div>
-          )}
         </CardContent>
       </Card>
-
-      <AnimatePresence>
-        {showModal && (
-          <Dialog open={showModal} onOpenChange={setShowModal}>
-            <DialogContent key={`fitness-modal-${goal?.progress?.workout ?? 0}`} className="sm:max-w-md bg-white dark:bg-gray-800 border-0 shadow-2xl">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Fitness Progress
-                </DialogTitle>
-                <div className="text-center text-gray-600 dark:text-gray-400 mt-2">
-                  {(goal?.progress?.workout ?? 0) >= (goal?.workoutTarget ?? 5) ? (
-                    <span className="text-green-600 dark:text-green-400 font-semibold">
-                      🎉 Congratulations! You've completed all {goal?.workoutTarget ?? 5} workouts this week!
-                    </span>
-                  ) : (
-                    <span>
-                      You have completed <span className="font-bold text-indigo-600 dark:text-indigo-400">{goal?.progress?.workout ?? 0} out of {goal?.workoutTarget ?? 5} workouts</span> this week! Keep it up!
-                    </span>
-                  )}
-                </div>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="grid gap-4">
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🔥</span>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Calories Burned</span>
-                    </div>
-                    <span className="font-bold text-lg text-red-600 dark:text-red-400">{goal?.progress?.calories ?? 0} / {goal?.caloriesTarget ?? 500} kcal</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">👣</span>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Steps</span>
-                    </div>
-                    <span className="font-bold text-lg text-blue-600 dark:text-blue-400">{goal?.progress?.steps ?? 0} / {goal?.stepsTarget ?? 8000}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">⏱️</span>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Active Minutes</span>
-                    </div>
-                    <span className="font-bold text-lg text-green-600 dark:text-green-400">{goal?.progress?.workout ?? 0} / {goal?.workoutTarget ?? 30} min</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">💧</span>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Water Intake</span>
-                    </div>
-                    <span className="font-bold text-lg text-purple-600 dark:text-purple-400">{goal?.progress?.water ?? 0} / {goal?.waterTarget ?? 2000} ml</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🏋️</span>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Workouts Completed</span>
-                    </div>
-                    <span className="font-bold text-lg text-yellow-600 dark:text-yellow-400">{goal?.progress?.workout ?? 0}/{goal?.workoutTarget ?? 5}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">🎯</span>
-                      <span className="font-medium text-gray-700 dark:text-gray-300">Weekly Goal</span>
-                    </div>
-                    <span className="font-bold text-lg text-indigo-600 dark:text-indigo-400">{goal?.workoutTarget ?? 5} Workouts</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <Button 
-                  onClick={() => setShowModal(false)}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
-                >
-                  Close
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </AnimatePresence>
-
-      {/* Fitness Logger Modal */}
-      <FitnessLogger
-        isOpen={showLogger}
-        onClose={() => setShowLogger(false)}
-        onLogSuccess={() => {
-          // Refresh fitness data after logging
-          const fetchGoals = async () => {
-            try {
-              const res = await API.get("/fitness/goals");
-              setGoal(res.data.data);
-              setInsights(res.data.data.insights || []);
-            } catch (e) {
-              console.error(e);
-            }
-          };
-          fetchGoals();
-        }}
-      />
-    </motion.div>
-  </div>
-);
+      </motion.div>
+    </div>
+  );
 };
 
 export default Fitness;
