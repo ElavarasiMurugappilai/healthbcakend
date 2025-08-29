@@ -22,7 +22,7 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
   useEffect(() => {
     const fetchWorkoutLogs = async () => {
       try {
-        const response = await API.get("/api/fitness/logs");
+        const response = await API.get("/fitness/logs");
         console.log("API Response:", response.data);
         const logs = response.data.logs || [];
         const target = response.data.targetWorkouts || 5;
@@ -64,7 +64,7 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
   // Log new workout
   const handleLogWorkout = async () => {
     try {
-      const response = await API.post("/api/fitness/logs", {
+      const response = await API.post("/fitness/logs", {
         type: "workout",
         date: new Date().toISOString(),
         duration: 30 // default duration
@@ -76,7 +76,7 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
       setCompletedWorkouts(prev => prev + 1);
       
       // Also refetch data to ensure sync
-      const refreshResponse = await API.get("/api/fitness/logs");
+      const refreshResponse = await API.get("/fitness/logs");
       const logs = refreshResponse.data.logs || [];
       setCompletedWorkouts(logs.length);
       
