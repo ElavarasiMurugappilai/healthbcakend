@@ -7,6 +7,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/authRoutes";
 import profileRoutes from "./routes/profile";
+import measurementsRoutes from "./routes/measurements";
 import fitnessGoalRoutes from "./routes/fitnessGoalRoutes";
 
 // Load environment variables
@@ -132,6 +133,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/measurements", measurementsRoutes);
 app.use("/api/goals", fitnessGoalRoutes);
 
 // Unknown API endpoint handler
@@ -140,12 +142,13 @@ app.use("/api/*", (req, res) => {
   res.status(404).json({
     message: `API endpoint ${req.originalUrl} not found`,
     availableEndpoints: [
+      "/api/auth/register",
       "/api/auth/login",
-      "/api/auth/signup",
       "/api/auth/verify",
       "/api/auth/me",
       "/api/profile/quiz",
-      "/api/profile/me",
+      "/api/profile",
+      "/api/measurements",
     ],
   });
 });

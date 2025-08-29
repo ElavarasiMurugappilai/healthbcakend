@@ -196,13 +196,13 @@ const QuizPage = () => {
         const response = await API.post<ApiResponse<{ profile: UserProfile; user: User }>>("/profile/quiz", formData);
         console.log("✅ Quiz submitted:", response.data);
 
-        if (response.data.profile) {
-          localStorage.setItem("profile", JSON.stringify(response.data.profile));
-          console.log("✅ Profile saved to localStorage:", response.data.profile);
+        if (response.data.data.profile) {
+          localStorage.setItem("profile", JSON.stringify(response.data.data.profile));
+          console.log("✅ Profile saved to localStorage:", response.data.data.profile);
         }
-        if (response.data.user) {
-          console.log("✅ User data received from backend:", response.data.user);
-          localStorage.setItem("user", JSON.stringify(response.data.user));
+        if (response.data.data.user) {
+          console.log("✅ User data received from backend:", response.data.data.user);
+          localStorage.setItem("user", JSON.stringify(response.data.data.user));
           console.log("✅ User data saved to localStorage");
           window.dispatchEvent(new Event("user-updated"));
           console.log("✅ user-updated event dispatched");
@@ -420,3 +420,7 @@ const QuizPage = () => {
 };
 
 export default QuizPage;
+
+
+
+C:\Users\elava\OneDrive\Desktop\yoga\healthbcakend\Frontend

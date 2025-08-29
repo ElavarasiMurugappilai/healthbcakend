@@ -33,7 +33,9 @@ import {
 const SignupSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one lowercase letter, one uppercase letter, and one number"),
 });
 
 type SignupForm = z.infer<typeof SignupSchema>;
@@ -65,9 +67,9 @@ export default function SignupPage() {
       password: data.password,
     };
 
-    const res = await api.post("/auth/signup", payload);
-    saveToken(res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+    const res = await api.post("/auth/register", payload);
+    saveToken(res.data.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.data.user));
     window.dispatchEvent(new Event("user-updated"));
     
     toast.success("Signup successful! Redirecting to dashboard...", {
@@ -221,7 +223,7 @@ export default function SignupPage() {
                         <Input
                           id="password"
                           type={showPassword ? "text" : "password"}
-                          placeholder="Create a strong password"
+                          placeholder="e.g., MyPass123 (uppercase, lowercase, number)"
                           {...register("password")}
                           className="h-8 sm:h-9 pr-10 text-xs sm:text-sm border-gray-300 dark:border-gray-600 focus:border-orange-500 dark:focus:border-orange-400 focus:ring-orange-500 dark:focus:ring-orange-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                         />

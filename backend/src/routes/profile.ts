@@ -1,13 +1,200 @@
-import { Router } from "express";
-import { protectLite } from "../middleware/authMiddleware";
-import { upsertQuiz, getMyProfile } from "../controllers/profileController"; // ✅ correct filename
+import express, { Request, Response } from 'express';
+import User from '../models/User';
+import Measurement from '../models/Measurement';
+import { authMiddleware } from '../middleware/auth';
+import { profileValidation, handleValidationErrors, sanitizeQuizPayload } from '../utils/validation';
 
-const router = Router();
+const router = express.Router();
 
-// Save or update quiz data
-router.post("/quiz", protectLite, upsertQuiz);
+// POST /profile/quiz - Resilient quiz endpoint that supports offline-first usage
+router.post('/quiz', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
 
-// Get logged-in user profile
-router.get("/me", protectLite, getMyProfile);
+    // Sanitize and validate the payload
+    const sanitizedPayload = sanitizeQuizPayload(req.body);
+    
+    // Extract initial measurements if provided
+    const { initialMeasurements, ...profileData } = sanitizedPayload;
+    
+    // Update user profile with upsert operation (resilient to partial payloads)
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          ...Object.keys(profileData).reduce((acc, key) => {
+            if (profileData[key] !== undefined && profileData[key] !== null) {
+              acc[`profile.${key}`] = profileData[key];
+            }
+            return acc;
+          }, {} as any),
+          'profile.lastUpdated': new Date(),
+          'profile.completedAt': new Date()
+        }
+      },
+      { 
+        new: true, 
+        runValidators: true,
+        upsert: false // Don't create new user, just update existing
+      }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Save initial measurements if provided
+    const savedMeasurements = [];
+    if (initialMeasurements && Array.isArray(initialMeasurements)) {
+      for (const measurement of initialMeasurements) {
+        try {
+          const newMeasurement = new Measurement({
+            userId: req.user._id,
+            type: measurement.type,
+            value: measurement.value,
+            unit: measurement.unit,
+            timestamp: measurement.timestamp || new Date(),
+            notes: measurement.notes,
+            source: measurement.source || 'quiz',
+            metadata: measurement.metadata
+          });
+          
+          const saved = await newMeasurement.save();
+          savedMeasurements.push(saved);
+        } catch (measurementError) {
+          console.warn('⚠️ Failed to save measurement:', measurementError);
+          // Continue processing other measurements
+        }
+      }
+    }
+
+    console.log(`✅ Quiz data updated for user: ${req.user.email}`);
+    if (savedMeasurements.length > 0) {
+      console.log(`✅ Saved ${savedMeasurements.length} initial measurements`);
+    }
+
+    // Return profile and minimal user object for frontend localStorage update
+    res.json({
+      success: true,
+      message: 'Quiz data saved successfully',
+      data: {
+        profile: updatedUser.profile,
+        user: {
+          _id: updatedUser._id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          isVerified: updatedUser.isVerified,
+          createdAt: updatedUser.createdAt,
+          updatedAt: updatedUser.updatedAt
+        },
+        measurements: savedMeasurements
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Quiz update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error saving quiz data',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET /profile - Get user profile and settings
+router.get('/', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Get latest measurements for dashboard
+    const latestMeasurements = await (Measurement as any).getLatestByType(
+      req.user._id,
+      ['glucose', 'blood_pressure', 'heart_rate', 'weight', 'sleep', 'steps', 'water']
+    );
+
+    res.json({
+      success: true,
+      data: {
+        profile: req.user.profile,
+        user: req.user.getPublicProfile(),
+        latestMeasurements
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching profile data',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// PUT /profile - Update profile data
+router.put('/', authMiddleware, profileValidation, handleValidationErrors, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    const sanitizedPayload = sanitizeQuizPayload(req.body);
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          ...Object.keys(sanitizedPayload).reduce((acc, key) => {
+            if (sanitizedPayload[key] !== undefined && sanitizedPayload[key] !== null) {
+              acc[`profile.${key}`] = sanitizedPayload[key];
+            }
+            return acc;
+          }, {} as any),
+          'profile.lastUpdated': new Date()
+        }
+      },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    console.log(`✅ Profile updated for user: ${req.user.email}`);
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        profile: updatedUser.profile,
+        user: updatedUser.getPublicProfile()
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Profile update error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating profile',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
 
 export default router;

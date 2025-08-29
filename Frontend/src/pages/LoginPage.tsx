@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "../components/ui/switch";
 import { 
   Eye,
   EyeOff,
@@ -28,7 +27,10 @@ import { Toaster, toast } from "sonner";
 
 const LoginSchema = z.object({
   email: z.string().email("Enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one lowercase letter, one uppercase letter, and one number"),
+  rememberMe: z.boolean().optional(),
 });
 
 type LoginForm = z.infer<typeof LoginSchema>;
@@ -37,7 +39,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(LoginSchema) as Resolver<LoginForm>,
@@ -49,17 +50,17 @@ export default function LoginPage() {
   try {
     const res = await api.post("/auth/login", data);
 
-    // ✅ Normalize user object
+    // Normalize user object
     const userData = {
-      name: res.data.user?.name || "User",
-      email: res.data.user?.email || "",
-      avatar: res.data.user?.avatar || `https://ui-avatars.com/api/?name=${res.data.user?.name || "User"}`,
+      name: res.data.data.user?.name || "User",
+      email: res.data.data.user?.email || "",
+      avatar: res.data.data.user?.avatar || `https://ui-avatars.com/api/?name=${res.data.data.user?.name || "User"}`,
     };
 
-    saveToken(res.data.token);
+    saveToken(res.data.data.token);
     localStorage.setItem("user", JSON.stringify(userData));
 
-    if (remember) localStorage.setItem("remember", "1");
+    if (data.rememberMe) localStorage.setItem("remember", "1");
     else localStorage.removeItem("remember");
 
     // let App.tsx know user changed

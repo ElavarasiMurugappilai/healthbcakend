@@ -1,113 +1,126 @@
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Slider } from "@/components/ui/slider";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Calendar, Ruler, Weight, Activity } from "lucide-react";
 
 interface ProfileStepProps {
   formData: any;
-  updateFormData: (key: string, value: any) => void;
-  handleConditionToggle: (condition: string) => void;
+  updateFormData: (field: string, value: any) => void;
 }
 
-export default function ProfileStep({ formData, updateFormData, handleConditionToggle }: ProfileStepProps) {
+export default function ProfileStep({ formData, updateFormData }: ProfileStepProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <Label htmlFor="age">Age</Label>
-        <Input
-          type="number"
-          id="age"
-          value={formData.age}
-          onChange={(e) => updateFormData("age", e.target.value)}
-        />
-      </div>
-
-      <div>
-        <Label>Gender</Label>
-        <Select value={formData.gender} onValueChange={(val) => updateFormData("gender", val)}>
-          <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="male">Male</SelectItem>
-            <SelectItem value="female">Female</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label>Weight (kg)</Label>
-        <Input
-          type="number"
-          value={formData.weight}
-          onChange={(e) => updateFormData("weight", e.target.value)}
-        />
-      </div>
-
-      <div>
-        <Label>Height (cm)</Label>
-        <Input
-          type="number"
-          value={formData.height}
-          onChange={(e) => updateFormData("height", e.target.value)}
-        />
-      </div>
-
-      <Separator className="col-span-2 my-2" />
-
-      <div className="col-span-2">
-        <Label>Health Conditions</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {["Diabetes", "Hypertension", "Asthma"].map((c) => (
-            <div key={c} className="flex items-center gap-2">
-              <Checkbox checked={formData.conditions.includes(c)} onCheckedChange={() => handleConditionToggle(c)} />
-              <span>{c}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="allergies">Allergies</Label>
-        <Input
-          type="text"
-          id="allergies"
-          value={formData.allergies}
-          onChange={(e) => updateFormData("allergies", e.target.value)}
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <Label>Smoker</Label>
-        <Switch checked={formData.smoker} onCheckedChange={(val) => updateFormData("smoker", val)} />
-      </div>
-
-      <div className="col-span-2">
-        <Label>Alcohol Consumption</Label>
-        <RadioGroup value={formData.alcohol} onValueChange={(val) => updateFormData("alcohol", val)} className="flex space-x-4 mt-2">
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="none" id="alc-none" />
-            <Label htmlFor="alc-none">None</Label>
+    <div className="space-y-6">
+      <Card className="border-orange-200 dark:border-orange-800">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+            <User size={20} />
+            Personal Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Age */}
+          <div className="space-y-2">
+            <Label htmlFor="age" className="flex items-center gap-2">
+              <Calendar size={16} className="text-orange-500" />
+              Age
+            </Label>
+            <Input
+              id="age"
+              type="number"
+              placeholder="Enter your age"
+              value={formData.personalInfo?.age || ""}
+              onChange={(e) => updateFormData("personalInfo.age", parseInt(e.target.value) || "")}
+              className="focus:border-orange-500 focus:ring-orange-500"
+              min="1"
+              max="120"
+            />
           </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="occasional" id="alc-occasional" />
-            <Label htmlFor="alc-occasional">Occasional</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="regular" id="alc-regular" />
-            <Label htmlFor="alc-regular">Regular</Label>
-          </div>
-        </RadioGroup>
-      </div>
 
-      <div className="col-span-2">
-        <Label>Sleep Hours</Label>
-        <Slider value={formData.sleepHours} max={12} min={0} step={1} onValueChange={(val) => updateFormData("sleepHours", val)} />
-        <p className="text-sm text-gray-500 mt-1">{formData.sleepHours[0]} hrs</p>
-      </div>
+          {/* Gender */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <User size={16} className="text-orange-500" />
+              Gender
+            </Label>
+            <Select
+              value={formData.personalInfo?.gender || ""}
+              onValueChange={(value) => updateFormData("personalInfo.gender", value)}
+            >
+              <SelectTrigger className="focus:border-orange-500 focus:ring-orange-500">
+                <SelectValue placeholder="Select your gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Height */}
+          <div className="space-y-2">
+            <Label htmlFor="height" className="flex items-center gap-2">
+              <Ruler size={16} className="text-orange-500" />
+              Height (cm)
+            </Label>
+            <Input
+              id="height"
+              type="number"
+              placeholder="Enter your height in cm"
+              value={formData.personalInfo?.height || ""}
+              onChange={(e) => updateFormData("personalInfo.height", parseInt(e.target.value) || "")}
+              className="focus:border-orange-500 focus:ring-orange-500"
+              min="50"
+              max="300"
+            />
+          </div>
+
+          {/* Weight */}
+          <div className="space-y-2">
+            <Label htmlFor="weight" className="flex items-center gap-2">
+              <Weight size={16} className="text-orange-500" />
+              Weight (kg)
+            </Label>
+            <Input
+              id="weight"
+              type="number"
+              placeholder="Enter your weight in kg"
+              value={formData.personalInfo?.weight || ""}
+              onChange={(e) => updateFormData("personalInfo.weight", parseFloat(e.target.value) || "")}
+              className="focus:border-orange-500 focus:ring-orange-500"
+              min="20"
+              max="500"
+              step="0.1"
+            />
+          </div>
+
+          {/* Activity Level */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Activity size={16} className="text-orange-500" />
+              Activity Level
+            </Label>
+            <Select
+              value={formData.personalInfo?.activityLevel || ""}
+              onValueChange={(value) => updateFormData("personalInfo.activityLevel", value)}
+            >
+              <SelectTrigger className="focus:border-orange-500 focus:ring-orange-500">
+                <SelectValue placeholder="Select your activity level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sedentary">Sedentary (little to no exercise)</SelectItem>
+                <SelectItem value="light">Light (light exercise 1-3 days/week)</SelectItem>
+                <SelectItem value="moderate">Moderate (moderate exercise 3-5 days/week)</SelectItem>
+                <SelectItem value="active">Active (hard exercise 6-7 days/week)</SelectItem>
+                <SelectItem value="very-active">Very Active (very hard exercise, physical job)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

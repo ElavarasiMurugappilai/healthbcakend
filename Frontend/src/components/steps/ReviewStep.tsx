@@ -1,116 +1,234 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { User, Target, Activity, Pill, Stethoscope, CheckCircle } from "lucide-react";
 
 interface ReviewStepProps {
   formData: any;
+  updateFormData: (field: string, value: any) => void;
 }
 
 export default function ReviewStep({ formData }: ReviewStepProps) {
-  const trophies = [
-    {
-      key: "profile",
-      title: "Personal Info",
-      emoji: "🎯",
-      completed: !!formData.age && !!formData.gender,
-      details: [
-        `Age: ${formData.age || "Not specified"}`,
-        `Gender: ${formData.gender || "Not specified"}`,
-        `Weight: ${formData.weight || "Not specified"} ${formData.units.weight}`,
-        `Height: ${formData.height || "Not specified"} ${formData.units.height}`,
-      ],
-    },
-    {
-      key: "fitness",
-      title: "Fitness Goals",
-      emoji: "💪",
-      completed: !!formData.fitnessGoals,
-      details: [
-        `Exercise: ${formData.exercise || "Not specified"}`,
-        `Duration: ${formData.exerciseDuration?.[0] || "Not specified"} min`,
-        `Water: ${formData.waterIntake?.[0] || "Not specified"}L`,
-        `Steps: ${formData.stepGoal?.[0] || "Not specified"} steps`,
-      ],
-    },
-    {
-      key: "tracking",
-      title: "Health Tracking",
-      emoji: "📊",
-      completed:
-        formData.trackGlucose ||
-        formData.trackBP ||
-        formData.trackHR ||
-        formData.trackSleep ||
-        formData.trackWeight,
-      details: [
-        `Glucose: ${formData.trackGlucose ? "Yes" : "No"}`,
-        `BP: ${formData.trackBP ? "Yes" : "No"}`,
-        `HR: ${formData.trackHR ? "Yes" : "No"}`,
-        `Sleep: ${formData.trackSleep ? "Yes" : "No"}`,
-        `Weight: ${formData.trackWeight ? "Yes" : "No"}`,
-      ],
-    },
-    {
-      key: "meds",
-      title: "Medications",
-      emoji: "💊",
-      completed: formData.takeMeds,
-      details: [
-        `Taking: ${formData.takeMeds ? "Yes" : "No"}`,
-        formData.takeMeds
-          ? `Reminders: ${formData.medicationReminders ? "On" : "Off"}`
-          : "Not specified",
-      ],
-    },
-    {
-      key: "prefs",
-      title: "Preferences",
-      emoji: "🔔",
-      completed: formData.notificationsEnabled || formData.joinChallenges,
-      details: [
-        `Challenges: ${formData.joinChallenges ? "Yes" : "No"}`,
-        `Difficulty: ${formData.challengeDifficulty || "Not specified"}`,
-        `Reward: ${formData.rewardType || "Not specified"}`,
-        `Notifications: ${formData.notificationsEnabled ? "On" : "Off"}`,
-      ],
-    },
-  ];
+  const getActivityLevelLabel = (level: string) => {
+    const levels = {
+      sedentary: "Sedentary (little/no exercise)",
+      lightly_active: "Lightly Active (light exercise 1-3 days/week)",
+      moderately_active: "Moderately Active (moderate exercise 3-5 days/week)",
+      very_active: "Very Active (hard exercise 6-7 days/week)",
+      extremely_active: "Extremely Active (very hard exercise, physical job)"
+    };
+    return levels[level as keyof typeof levels] || level;
+  };
+
+  const renderPersonalInfo = () => (
+    <Card className="border-orange-200 dark:border-orange-800">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+          <User size={20} />
+          Personal Information
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Age:</span>
+            <p className="font-medium">{formData.age || "Not specified"}</p>
+          </div>
+          <div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Gender:</span>
+            <p className="font-medium capitalize">{formData.gender || "Not specified"}</p>
+          </div>
+          <div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Height:</span>
+            <p className="font-medium">{formData.height ? `${formData.height} cm` : "Not specified"}</p>
+          </div>
+          <div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Weight:</span>
+            <p className="font-medium">{formData.weight ? `${formData.weight} kg` : "Not specified"}</p>
+          </div>
+        </div>
+        {formData.activityLevel && (
+          <div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Activity Level:</span>
+            <p className="font-medium">{getActivityLevelLabel(formData.activityLevel)}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderFitnessGoals = () => (
+    <Card className="border-orange-200 dark:border-orange-800">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+          <Target size={20} />
+          Fitness Goals
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {formData.fitnessGoals && formData.fitnessGoals.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {formData.fitnessGoals.map((goal: string, index: number) => (
+              <Badge key={index} variant="secondary" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                {goal.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+              </Badge>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400">No fitness goals selected</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderHealthTracking = () => (
+    <Card className="border-orange-200 dark:border-orange-800">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+          <Activity size={20} />
+          Health Tracking & Conditions
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Health Conditions */}
+        <div>
+          <h4 className="font-medium mb-2">Health Conditions:</h4>
+          {formData.healthConditions && formData.healthConditions.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {formData.healthConditions.map((condition: string, index: number) => (
+                <Badge key={index} variant="outline" className="border-red-200 text-red-700 dark:border-red-800 dark:text-red-300">
+                  {condition.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600 dark:text-gray-400">No health conditions specified</p>
+          )}
+        </div>
+
+        {/* Tracking Preferences */}
+        <div>
+          <h4 className="font-medium mb-2">Tracking Preferences:</h4>
+          {formData.trackingPreferences && formData.trackingPreferences.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {formData.trackingPreferences.map((preference: string, index: number) => (
+                <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  {preference.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-600 dark:text-gray-400">No tracking preferences selected</p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderMedications = () => (
+    <Card className="border-orange-200 dark:border-orange-800">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+          <Pill size={20} />
+          Medications
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {formData.medications && formData.medications.length > 0 ? (
+          <div className="space-y-3">
+            {formData.medications.map((medication: any, index: number) => (
+              <div key={index} className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">{medication.name}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {medication.dosage} - {medication.frequency}
+                    </p>
+                    {medication.prescribedBy && (
+                      <p className="text-sm text-gray-500">Prescribed by: {medication.prescribedBy}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400">No medications added</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderCareTeam = () => (
+    <Card className="border-orange-200 dark:border-orange-800">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+          <Stethoscope size={20} />
+          Care Team
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {formData.careTeam && formData.careTeam.length > 0 ? (
+          <div className="space-y-3">
+            {formData.careTeam.map((doctor: any, index: number) => (
+              <div key={index} className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">Dr. {doctor.name}</h4>
+                    <p className="text-sm text-orange-600 dark:text-orange-400">{doctor.specialty}</p>
+                    {doctor.clinic && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{doctor.clinic}</p>
+                    )}
+                    {doctor.phone && (
+                      <p className="text-sm text-gray-500">{doctor.phone}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400">No healthcare providers added</p>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">🏆 Your Trophy Cabinet</h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Each badge represents a milestone you’ve completed in your health journey
-        </p>
-      </div>
+      {/* Summary Header */}
+      <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-green-600 dark:text-green-400">
+            <CheckCircle size={20} />
+            Health Profile Summary
+          </CardTitle>
+          <p className="text-sm text-green-700 dark:text-green-300">
+            Review your information before submitting. You can go back to edit any section if needed.
+          </p>
+        </CardHeader>
+      </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {trophies.map((trophy) => (
-          <Card
-            key={trophy.key}
-            className={cn(
-              "p-4 flex flex-col items-center text-center transition-all",
-              trophy.completed
-                ? "border-green-500 shadow-lg bg-green-50 dark:bg-green-900/20"
-                : "border-gray-300 dark:border-gray-700"
-            )}
-          >
-            <div className="text-4xl mb-2">{trophy.emoji}</div>
-            <h3 className="font-semibold">{trophy.title}</h3>
-            {trophy.completed && (
-              <div className="flex items-center text-green-600 mt-1 text-sm">
-                <Check size={16} className="mr-1" /> Completed
-              </div>
-            )}
-            <CardContent className="mt-3 space-y-1 text-sm text-gray-600 dark:text-gray-400">
-              {trophy.details.map((d, i) => (
-                <p key={i}>{d}</p>
-              ))}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Review Sections */}
+      {renderPersonalInfo()}
+      {renderFitnessGoals()}
+      {renderHealthTracking()}
+      {renderMedications()}
+      {renderCareTeam()}
+
+      {/* Completion Note */}
+      <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20">
+        <CardContent className="pt-6">
+          <div className="text-center">
+            <CheckCircle className="mx-auto h-12 w-12 text-blue-600 dark:text-blue-400 mb-3" />
+            <h3 className="text-lg font-medium text-blue-900 dark:text-blue-100 mb-2">
+              Ready to Submit
+            </h3>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Your health profile is complete. Click "Submit" to save your information and start your health journey.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

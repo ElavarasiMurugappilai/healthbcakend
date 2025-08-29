@@ -1,65 +1,231 @@
-// backend/src/routes/authRoutes.ts
-import express, { Request, Response } from "express";
-import authMiddleware from "../middleware/authMiddleware";
-import { signup, login, refreshToken, verifyToken } from "../controllers/authController";
-import User from "../models/userModel";
+import express, { Request, Response } from 'express';
+import crypto from 'crypto';
+import User from '../models/User';
+import { authMiddleware } from '../middleware/auth';
+import { generateToken } from '../middleware/auth';
+import { 
+  registerValidation, 
+  loginValidation, 
+  handleValidationErrors 
+} from '../utils/validation';
 
 const router = express.Router();
 
-// Extend Express Request with user
-interface AuthRequest extends Request {
-  user?: { id: string };
-}
-
-// ✅ POST /auth/signup
-router.post("/signup", signup);
-
-// ✅ POST /auth/login  
-router.post("/login", login);
-
-// ✅ POST /auth/refresh (for future token refresh)
-router.post("/refresh", refreshToken);
-
-// ✅ GET /auth/verify (check if token is valid)
-router.get("/verify", verifyToken);
-
-// ✅ GET /auth/me (get current user info)
-router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
+// POST /auth/register
+router.post('/register', registerValidation, handleValidationErrors, async (req: Request, res: Response) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Not authorized" });
+    const { email, password, name } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email'
+      });
     }
 
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    // Create verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    console.log("✅ Retrieved user profile:", req.user.id);
-
-    res.json({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      age: user.age,
-      gender: user.gender,
-      conditions: user.conditions,
-      goals: user.goals,
-      avatar: user.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}`,
-      createdAt: user.createdAt
+    // Create new user
+    const user = new User({
+      email,
+      password,
+      name,
+      verificationToken,
+      isVerified: process.env.NODE_ENV === 'development' // Auto-verify in development
     });
-  } catch (err: any) {
-    console.error("❌ Error fetching user:", err);
-    res.status(500).json({ message: "Error fetching user profile" });
+
+    await user.save();
+
+    // Generate JWT token
+    const token = generateToken(user._id.toString(), user.email);
+
+    console.log(`✅ User registered: ${email}`);
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      data: {
+        user: user.getPublicProfile(),
+        token,
+        ...(process.env.NODE_ENV === 'development' && {
+          verificationToken // Include in development for testing
+        })
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating user',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
-// ✅ Health check for auth routes
-router.get("/health", (_req: Request, res: Response) => {
-  res.json({ 
-    status: "OK", 
+// POST /auth/login
+router.post('/login', loginValidation, handleValidationErrors, async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check password
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check if user is verified
+    if (!user.isVerified) {
+      return res.status(401).json({
+        success: false,
+        message: 'Please verify your email before logging in',
+        requiresVerification: true
+      });
+    }
+
+    // Generate JWT token
+    const token = generateToken(user._id.toString(), user.email);
+
+    console.log(`✅ User logged in: ${email}`);
+
+    res.json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        user: user.getPublicProfile(),
+        token
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error during login',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET /auth/verify
+router.get('/verify', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Token is valid',
+      data: {
+        user: req.user.getPublicProfile()
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Token verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying token',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// POST /auth/verify-email (verify email with token)
+router.post('/verify-email', async (req: Request, res: Response) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification token is required'
+      });
+    }
+
+    const user = await User.findOne({ verificationToken: token });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+
+    console.log(`✅ Email verified for user: ${user.email}`);
+
+    res.json({
+      success: true,
+      message: 'Email verified successfully'
+    });
+  } catch (error: any) {
+    console.error('❌ Email verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying email',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// GET /auth/me (get current user)
+router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        user: req.user.getPublicProfile()
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Get user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching user data',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Health check
+router.get('/health', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    message: 'Auth service is healthy',
     timestamp: new Date().toISOString(),
-    routes: ["/signup", "/login", "/refresh", "/verify", "/me"]
+    endpoints: [
+      'POST /auth/register',
+      'POST /auth/login', 
+      'GET /auth/verify',
+      'POST /auth/verify-email',
+      'GET /auth/me'
+    ]
   });
 });
 

@@ -1,124 +1,87 @@
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Slider } from "@/components/ui/slider";
-import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Dumbbell, Target, Heart, Zap, Scale, Trophy } from "lucide-react";
 
 interface FitnessStepProps {
   formData: any;
-  updateFormData: (key: string, value: any) => void;
-  handleExerciseTypeToggle: (type: string) => void;
+  updateFormData: (field: string, value: any) => void;
 }
 
-export default function FitnessStep({
-  formData,
-  updateFormData,
-  handleExerciseTypeToggle,
-}: FitnessStepProps) {
+export default function FitnessStep({ formData, updateFormData }: FitnessStepProps) {
+  const fitnessGoals = [
+    { id: "weight_loss", label: "Weight Loss", icon: Scale, description: "Lose weight and maintain a healthy BMI" },
+    { id: "weight_gain", label: "Weight Gain", icon: Dumbbell, description: "Build muscle mass and gain healthy weight" },
+    { id: "muscle_building", label: "Muscle Building", icon: Dumbbell, description: "Increase muscle strength and definition" },
+    { id: "cardiovascular_health", label: "Cardiovascular Health", icon: Heart, description: "Improve heart health and endurance" },
+    { id: "flexibility", label: "Flexibility & Mobility", icon: Zap, description: "Enhance flexibility and joint mobility" },
+    { id: "endurance", label: "Endurance", icon: Target, description: "Build stamina and athletic performance" },
+    { id: "general_fitness", label: "General Fitness", icon: Trophy, description: "Overall health and wellness maintenance" },
+    { id: "stress_management", label: "Stress Management", icon: Heart, description: "Use exercise to reduce stress and anxiety" }
+  ];
+
+  const handleGoalToggle = (goalId: string) => {
+    const currentGoals = formData.fitnessGoals || [];
+    const updatedGoals = currentGoals.includes(goalId)
+      ? currentGoals.filter((g: string) => g !== goalId)
+      : [...currentGoals, goalId];
+    updateFormData("fitnessGoals", updatedGoals);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Exercise Frequency */}
-      <div>
-        <Label>Exercise Frequency</Label>
-        <RadioGroup
-          value={formData.exercise}
-          onValueChange={(val) => updateFormData("exercise", val)}
-          className="flex space-x-4 mt-2"
-        >
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="none" id="ex-none" />
-            <Label htmlFor="ex-none">None</Label>
+      <Card className="border-orange-200 dark:border-orange-800">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
+            <Target size={20} />
+            Fitness Goals
+          </CardTitle>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Select your primary fitness and health goals (you can choose multiple)
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {fitnessGoals.map((goal) => {
+              const Icon = goal.icon;
+              const isSelected = (formData.fitnessGoals || []).includes(goal.id);
+              
+              return (
+                <div
+                  key={goal.id}
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                    isSelected
+                      ? "border-orange-500 bg-orange-50 dark:bg-orange-950/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600"
+                  }`}
+                  onClick={() => handleGoalToggle(goal.id)}
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      checked={isSelected}
+                      onChange={() => handleGoalToggle(goal.id)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icon size={18} className={isSelected ? "text-orange-600" : "text-gray-500"} />
+                        <Label className={`font-medium cursor-pointer ${
+                          isSelected ? "text-orange-600 dark:text-orange-400" : "text-gray-700 dark:text-gray-300"
+                        }`}>
+                          {goal.label}
+                        </Label>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {goal.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="occasional" id="ex-occasional" />
-            <Label htmlFor="ex-occasional">Occasional</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="regular" id="ex-regular" />
-            <Label htmlFor="ex-regular">Regular</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      {/* Exercise Types */}
-      <div>
-        <Label>Exercise Types</Label>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          {["Walking", "Running", "Cycling", "Swimming", "Yoga", "Gym"].map((type) => (
-            <div key={type} className="flex items-center gap-2">
-              <Checkbox
-                checked={formData.exerciseTypes.includes(type)}
-                onCheckedChange={() => handleExerciseTypeToggle(type)}
-              />
-              <span>{type}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Exercise Duration */}
-      <div>
-        <Label>Exercise Duration (minutes)</Label>
-        <Slider
-          value={formData.exerciseDuration}
-          onValueChange={(val) => updateFormData("exerciseDuration", val)}
-          min={0}
-          max={120}
-          step={5}
-          className="mt-2"
-        />
-        <p className="text-sm text-gray-500 mt-1">{formData.exerciseDuration[0]} min</p>
-      </div>
-
-      {/* Fitness Goals */}
-      <div>
-        <Label>Fitness Goals</Label>
-        <Select
-          value={formData.fitnessGoals}
-          onValueChange={(val) => updateFormData("fitnessGoals", val)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select your goal" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="general_fitness">General Fitness</SelectItem>
-            <SelectItem value="weight_loss">Weight Loss</SelectItem>
-            <SelectItem value="muscle_gain">Muscle Gain</SelectItem>
-            <SelectItem value="endurance">Endurance</SelectItem>
-            <SelectItem value="flexibility">Flexibility</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Water Goal */}
-      <div>
-        <Label>Daily Water Goal</Label>
-        <Slider
-          value={formData.waterIntake}
-          onValueChange={(val) => updateFormData("waterIntake", val)}
-          min={0}
-          max={6}
-          step={0.5}
-          className="mt-2"
-        />
-        <p className="text-sm text-gray-500 mt-1">
-          Daily water goal: {formData.waterIntake[0]}L
-        </p>
-      </div>
-
-      {/* Step Goal */}
-      <div>
-        <Label>Daily Step Goal</Label>
-        <Slider
-          value={formData.stepGoal}
-          onValueChange={(val) => updateFormData("stepGoal", val)}
-          min={1000}
-          max={20000}
-          step={500}
-          className="mt-2"
-        />
-        <p className="text-sm text-gray-500 mt-1">{formData.stepGoal[0]} steps</p>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
-import { Link } from "react-router-dom";
 
 interface WelcomeProps {
   user: { name: string; email?: string; avatar?: string };
@@ -67,16 +66,6 @@ const Welcome: React.FC<WelcomeProps> = ({ user, setShowScheduleModal }) => {
           </div>
           <div className="hidden md:block h-10 w-px bg-gray-300" />
 
-          {/* Health Questionnaire button */}
-          <Link to="/health-questionnaire">
-            <Button
-              variant="outline"
-              className="rounded-full px-6 py-2 font-semibold w-full sm:w-auto border-blue-500 text-blue-500 hover:bg-blue-50"
-            >
-              <Icons.clipboardCheck className="w-4 h-4 mr-2" />
-              Health Questionnaire
-            </Button>
-          </Link>
           
           {/* Schedule button */}
           <Button
