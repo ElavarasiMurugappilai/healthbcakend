@@ -49,6 +49,14 @@ const DashboardPage: React.FC = () => {
   const [scheduleForm, setScheduleForm] = useState({ date: "", time: "", reason: "" });
   const [toast, setToast] = useState("");
 
+  // State for enabled cards (load from localStorage)
+  const [enabledCards, setEnabledCards] = useState({
+    showFitness: false,
+    showGlucose: false,
+    showCareTeam: false,
+    showMedications: false,
+  });
+
   // Fetch profile on mount
   useEffect(() => {
     const fetchProfile = async () => {
@@ -138,10 +146,27 @@ const DashboardPage: React.FC = () => {
     return () => window.removeEventListener("user-updated", handleUserUpdate);
   }, []);
 
+  // Load enabled cards from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("dashboardEnabledCards");
+      if (stored) {
+        setEnabledCards(JSON.parse(stored));
+      }
+    } catch (e) {
+      setEnabledCards({
+        showFitness: false,
+        showGlucose: false,
+        showCareTeam: false,
+        showMedications: false,
+      });
+    }
+  }, []);
+
   // Compute visible sections based on profile
   const visibleSections = useMemo(
     () => ({
-      fitnessGoals: true, // Always show fitness card since it has its own backend data
+       // Always show fitness card since it has its own backend data
       glucoseTrends: !!profile?.trackGlucose,
       medicationSchedule: !!profile?.takeMeds,
       careTeam: (profile?.careTeam ?? []).length > 0,
@@ -239,23 +264,21 @@ const DashboardPage: React.FC = () => {
         <DashboardSkeleton />
       ) : (
         <>
-          {/* Fitness Goals + Glucose Trends */}
+          {/* Only render cards the user selected in the quiz */}
           <section className="flex flex-col w-10 lg:flex-row gap-2 mb-2 w-full">
-            {visibleSections.fitnessGoals && (
-              <Fitness
-                setShowFitnessModal={() => {}}
-                isFullWidth={false}
-              />
+            {enabledCards.showFitness && (
+              <Fitness setShowFitnessModal={() => {}} isFullWidth={false} />
             )}
-            {visibleSections.glucoseTrends && <BloodGlucose glucoseData={glucoseData} barSize={barSize} />}
+            {enabledCards.showGlucose && (
+              <BloodGlucose glucoseData={glucoseData} barSize={barSize} />
+            )}
           </section>
 
-          {/* Care Team + Medications */}
           <section className="flex flex-col lg:flex-row gap-2 w-full mb-6">
-            {visibleSections.careTeam && (
+            {enabledCards.showCareTeam && (
               <MyCareTeam filteredCareTeam={careTeam} setSelectedMember={() => {}} setShowCareTeamModal={() => {}} />
             )}
-            {visibleSections.medicationSchedule && (
+            {enabledCards.showMedications && (
               <MedicationSchedule
                 filteredMedications={filteredMedications}
                 handleTake={handleTake}

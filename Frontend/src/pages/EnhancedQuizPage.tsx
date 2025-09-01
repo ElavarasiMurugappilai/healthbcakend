@@ -14,6 +14,7 @@ import FitnessActivityStep from "@/components/steps/FitnessActivityStep";
 import HealthTrackingStep from "@/components/steps/HealthTrackingStep";
 import DashboardLayoutStep from "@/components/steps/DashboardLayoutStep";
 import MedicationStep from "@/components/steps/MedicationStep";
+import DashboardSelectionStep from "@/components/steps/DashboardSelection";
 
 import API from "../api";
 
@@ -60,6 +61,12 @@ interface DashboardQuizData {
   doctorMedicationSuggestions: string;
   pharmacyIntegration: string;
   medicationGoal: string;
+
+  // Optional fields
+  showFitness?: boolean;
+  showGlucose?: boolean;
+  showCareTeam?: boolean;
+  showMedications?: boolean;
 }
 
 const QUIZ_KEYS = {
@@ -116,7 +123,13 @@ const EnhancedQuizPage = () => {
     trackSideEffects: "",
     doctorMedicationSuggestions: "",
     pharmacyIntegration: "",
-    medicationGoal: ""
+    medicationGoal: "",
+
+    // Optional fields
+    showFitness: true,
+    showGlucose: true,
+    showCareTeam: true,
+    showMedications: true,
   });
 
   const steps = [
@@ -149,6 +162,12 @@ const EnhancedQuizPage = () => {
       description: "Medication management",
       component: MedicationStep,
       color: "green"
+    },
+    {
+      title: "Choose Your Dashboard",
+      description: "Select which cards to show on your dashboard",
+      component: DashboardSelectionStep,
+      color: "teal"
     }
   ];
 
@@ -217,19 +236,28 @@ const EnhancedQuizPage = () => {
     try {
       // Save profile and dashboard preferences
       const profileResponse = await API.post("/profile/dashboard-quiz", formData);
-      
+
       if (profileResponse.data.success) {
         // Create fitness goals based on quiz responses
         const fitnessResponse = await API.post("/fitness/goals", formData);
-        
+
         if (fitnessResponse.data.success) {
+          // Save dashboard card choices
+          const enabledCards = {
+            showFitness: !!formData.showFitness,
+            showGlucose: !!formData.showGlucose,
+            showCareTeam: !!formData.showCareTeam,
+            showMedications: !!formData.showMedications,
+          };
+          localStorage.setItem("dashboardEnabledCards", JSON.stringify(enabledCards));
+
           toast.success("Dashboard preferences and fitness goals saved successfully!");
-          
+
           // Mark quiz as completed
           localStorage.setItem(QUIZ_KEYS.completedAt, new Date().toISOString());
           localStorage.removeItem(QUIZ_KEYS.pending);
           localStorage.removeItem(QUIZ_KEYS.data);
-          
+
           // Navigate to dashboard
           navigate("/dashboard");
         } else {
