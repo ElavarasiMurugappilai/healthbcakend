@@ -36,25 +36,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const MedicationSuggestionSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    doctorId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    doctorName: { type: String, required: true },
-    doctorRole: { type: String, required: true },
-    condition: { type: String, required: true },
-    medications: [
-        {
-            name: { type: String, required: true },
-            dosage: { type: String, required: true },
-            frequency: { type: String, required: true },
-            duration: { type: String, required: true },
-            notes: { type: String }
-        }
-    ],
+    doctorId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Doctor", required: true },
+    medicationName: { type: String, required: true },
+    dosage: { type: String, required: true },
+    frequency: { type: String, required: true },
+    reason: { type: String },
     status: {
         type: String,
-        enum: ["pending", "accepted", "rejected"],
-        default: "pending"
+        enum: ['pending', 'accepted', 'rejected'],
+        default: 'pending'
     },
-    reasonForSuggestion: { type: String, required: true }
+    suggestedAt: { type: Date, default: Date.now },
+    respondedAt: { type: Date },
 }, { timestamps: true });
+MedicationSuggestionSchema.index({ userId: 1, status: 1 });
+MedicationSuggestionSchema.index({ doctorId: 1, status: 1 });
 exports.default = mongoose_1.default.model("MedicationSuggestion", MedicationSuggestionSchema);
 //# sourceMappingURL=MedicationSuggestion.js.map

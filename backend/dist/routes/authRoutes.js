@@ -96,7 +96,7 @@ router.post('/login', validation_1.loginValidation, validation_1.handleValidatio
         });
     }
 });
-router.get('/verify', auth_1.authMiddleware, async (req, res) => {
+router.get('/verify', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -155,7 +155,7 @@ router.post('/verify-email', async (req, res) => {
         });
     }
 });
-router.get('/me', auth_1.authMiddleware, async (req, res) => {
+router.get('/me', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({

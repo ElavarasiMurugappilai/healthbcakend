@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken';
 import User, { IUser } from '../models/User';
 
 // Extend Request interface to include user
+export interface AuthRequest extends Request {
+  user?: IUser;
+}
+
 declare global {
   namespace Express {
     interface Request {
@@ -30,18 +34,25 @@ export const verifyToken = (token: string): JWTPayload => {
   return jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload;
 };
 
-export const authMiddleware = async (
-  req: Request,
+export const authenticateToken = async (
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
+    console.log(` Auth middleware: ${req.method} ${req.originalUrl}`);
+    console.log(` Headers:`, {
+      authorization: req.headers.authorization ? 'present' : 'missing',
+      authPreview: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'none'
+    });
+    
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log(` Auth failed: No valid token provided`);
       res.status(401).json({
         success: false,
-        message: 'Access denied. No token provided or invalid format.'
+        message: 'Access denied. No valid token provided.'
       });
       return;
     }
@@ -70,7 +81,8 @@ export const authMiddleware = async (
         return;
       }
 
-      if (!user.isVerified) {
+      // Skip verification check in development mode
+      if (!user.isVerified && process.env.NODE_ENV !== 'development') {
         res.status(401).json({
           success: false,
           message: 'Account not verified. Please verify your email.'

@@ -10,6 +10,11 @@ import profileRoutes from "./routes/profile";
 import measurementsRoutes from "./routes/measurements";
 import fitnessGoalRoutes from "./routes/fitnessGoalRoutes";
 import fitnessRoutes from "./routes/fitness";
+import doctorRoutes from "./routes/doctorRoutes";
+import medicationRoutes from "./routes/medicationRoutes";
+import careTeamRoutes from "./routes/careTeamRoutes";
+import medicationSuggestionRoutes from "./routes/medicationSuggestionRoutes";
+import { seedSystemDoctors } from "./utils/seedDoctors";
 
 // Load environment variables
 dotenv.config();
@@ -39,6 +44,9 @@ const connectDB = async (retryCount = 0): Promise<void> => {
       socketTimeoutMS: 45000,
     });
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+    
+    // Seed system doctors after successful DB connection
+    await seedSystemDoctors();
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error("❌ MongoDB Connection Failed:", errorMessage);
@@ -137,6 +145,10 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/measurements", measurementsRoutes);
 app.use("/api/goals", fitnessGoalRoutes);
 app.use("/api/fitness", fitnessRoutes);
+app.use("/api/doctors", doctorRoutes);
+app.use("/api/medications", medicationRoutes);
+app.use("/api/care-team", careTeamRoutes);
+app.use("/api/medication", medicationSuggestionRoutes);
 
 // Unknown API endpoint handler
 app.use("/api/*", (req, res) => {

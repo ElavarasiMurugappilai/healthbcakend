@@ -1,13 +1,13 @@
 import express, { Request, Response } from 'express';
 import User from '../models/User';
 import Measurement from '../models/Measurement';
-import { authMiddleware } from '../middleware/auth';
+import { authenticateToken } from '../middleware/auth';
 import { profileValidation, handleValidationErrors, sanitizeQuizPayload } from '../utils/validation';
 
 const router = express.Router();
 
 // POST /profile/quiz - Resilient quiz endpoint that supports offline-first usage
-router.post('/quiz', authMiddleware, async (req: Request, res: Response) => {
+router.post('/quiz', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -109,7 +109,7 @@ router.post('/quiz', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // GET /profile/me - Get current user profile and settings (alias for dashboard compatibility)
-router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+router.get('/me', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -143,7 +143,7 @@ router.get('/me', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // GET /profile - Get user profile and settings
-router.get('/', authMiddleware, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -177,7 +177,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // POST /profile/dashboard-quiz - Save dashboard customization quiz data
-router.post('/dashboard-quiz', authMiddleware, async (req: Request, res: Response) => {
+router.post('/dashboard-quiz', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -230,7 +230,7 @@ router.post('/dashboard-quiz', authMiddleware, async (req: Request, res: Respons
 });
 
 // PUT /profile - Update profile data
-router.put('/', authMiddleware, profileValidation, handleValidationErrors, async (req: Request, res: Response) => {
+router.put('/', authenticateToken, profileValidation, handleValidationErrors, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({

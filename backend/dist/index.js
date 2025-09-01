@@ -13,6 +13,11 @@ const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const profile_1 = __importDefault(require("./routes/profile"));
 const measurements_1 = __importDefault(require("./routes/measurements"));
 const fitnessGoalRoutes_1 = __importDefault(require("./routes/fitnessGoalRoutes"));
+const fitness_1 = __importDefault(require("./routes/fitness"));
+const doctorRoutes_1 = __importDefault(require("./routes/doctorRoutes"));
+const medicationRoutes_1 = __importDefault(require("./routes/medicationRoutes"));
+const chatRoutes_1 = __importDefault(require("./routes/chatRoutes"));
+const seedDoctors_1 = require("./utils/seedDoctors");
 dotenv_1.default.config();
 const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
@@ -33,6 +38,7 @@ const connectDB = async (retryCount = 0) => {
             socketTimeoutMS: 45000,
         });
         console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        await (0, seedDoctors_1.seedSystemDoctors)();
     }
     catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -111,6 +117,10 @@ app.use("/api/auth", authRoutes_1.default);
 app.use("/api/profile", profile_1.default);
 app.use("/api/measurements", measurements_1.default);
 app.use("/api/goals", fitnessGoalRoutes_1.default);
+app.use("/api/fitness", fitness_1.default);
+app.use("/api/doctors", doctorRoutes_1.default);
+app.use("/api/medications", medicationRoutes_1.default);
+app.use("/api/chat", chatRoutes_1.default);
 app.use("/api/*", (req, res) => {
     console.log(`❓ API endpoint not found: ${req.originalUrl}`);
     res.status(404).json({

@@ -47,19 +47,20 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
   useEffect(() => {
     const targetProgress = Math.round((completedWorkouts / targetWorkouts) * 100);
     
-    let current = progress;
-    const animateProgress = () => {
-      if (current < targetProgress) {
-        current += 1;
-        setProgress(current);
-        setTimeout(animateProgress, 12);
-      }
-    };
-    
     if (targetProgress !== progress) {
+      let current = progress;
+      const animateProgress = () => {
+        if (current < targetProgress) {
+          current += 1;
+          setProgress(current);
+          if (current < targetProgress) {
+            setTimeout(animateProgress, 12);
+          }
+        }
+      };
       animateProgress();
     }
-  }, [completedWorkouts, targetWorkouts, progress]);
+  }, [completedWorkouts, targetWorkouts]); // Removed 'progress' from dependencies
 
   // Log new workout
   const handleLogWorkout = async () => {

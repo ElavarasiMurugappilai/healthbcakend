@@ -1,12 +1,12 @@
 import express, { Request, Response } from 'express';
 import Measurement from '../models/Measurement';
-import { authMiddleware } from '../middleware/auth';
+import { authenticateToken } from '../middleware/auth';
 import { measurementValidation, handleValidationErrors, bloodPressureValidation } from '../utils/validation';
 
 const router = express.Router();
 
 // POST /measurements - Create new measurement entry
-router.post('/', authMiddleware, measurementValidation, handleValidationErrors, bloodPressureValidation, async (req: Request, res: Response) => {
+router.post('/', authenticateToken, measurementValidation, handleValidationErrors, bloodPressureValidation, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -48,7 +48,7 @@ router.post('/', authMiddleware, measurementValidation, handleValidationErrors, 
 });
 
 // POST /measurements/batch - Create multiple measurements
-router.post('/batch', authMiddleware, async (req: Request, res: Response) => {
+router.post('/batch', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -115,7 +115,7 @@ router.post('/batch', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // GET /measurements - Query measurements with filters
-router.get('/', authMiddleware, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -187,7 +187,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // GET /measurements/latest - Get latest measurements by type
-router.get('/latest', authMiddleware, async (req: Request, res: Response) => {
+router.get('/latest', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -225,7 +225,7 @@ router.get('/latest', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // GET /measurements/stats - Get measurement statistics
-router.get('/stats', authMiddleware, async (req: Request, res: Response) => {
+router.get('/stats', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -315,7 +315,7 @@ router.get('/stats', authMiddleware, async (req: Request, res: Response) => {
 });
 
 // DELETE /measurements/:id - Delete a measurement
-router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({

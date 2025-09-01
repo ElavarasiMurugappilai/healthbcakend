@@ -2,18 +2,13 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IMedicationSuggestion extends Document {
     userId: Schema.Types.ObjectId;
     doctorId: Schema.Types.ObjectId;
-    doctorName: string;
-    doctorRole: string;
-    condition: string;
-    medications: Array<{
-        name: string;
-        dosage: string;
-        frequency: string;
-        duration: string;
-        notes?: string;
-    }>;
-    status: "pending" | "accepted" | "rejected";
-    reasonForSuggestion: string;
+    medicationName: string;
+    dosage: string;
+    frequency: string;
+    reason?: string;
+    status: 'pending' | 'accepted' | 'rejected';
+    suggestedAt: Date;
+    respondedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }

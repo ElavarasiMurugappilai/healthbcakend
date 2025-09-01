@@ -8,7 +8,7 @@ const Measurement_1 = __importDefault(require("../models/Measurement"));
 const auth_1 = require("../middleware/auth");
 const validation_1 = require("../utils/validation");
 const router = express_1.default.Router();
-router.post('/', auth_1.authMiddleware, validation_1.measurementValidation, validation_1.handleValidationErrors, validation_1.bloodPressureValidation, async (req, res) => {
+router.post('/', auth_1.authenticateToken, validation_1.measurementValidation, validation_1.handleValidationErrors, validation_1.bloodPressureValidation, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -44,7 +44,7 @@ router.post('/', auth_1.authMiddleware, validation_1.measurementValidation, vali
         });
     }
 });
-router.post('/batch', auth_1.authMiddleware, async (req, res) => {
+router.post('/batch', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -104,7 +104,7 @@ router.post('/batch', auth_1.authMiddleware, async (req, res) => {
         });
     }
 });
-router.get('/', auth_1.authMiddleware, async (req, res) => {
+router.get('/', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -159,7 +159,7 @@ router.get('/', auth_1.authMiddleware, async (req, res) => {
         });
     }
 });
-router.get('/latest', auth_1.authMiddleware, async (req, res) => {
+router.get('/latest', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -190,7 +190,7 @@ router.get('/latest', auth_1.authMiddleware, async (req, res) => {
         });
     }
 });
-router.get('/stats', auth_1.authMiddleware, async (req, res) => {
+router.get('/stats', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -268,7 +268,7 @@ router.get('/stats', auth_1.authMiddleware, async (req, res) => {
         });
     }
 });
-router.delete('/:id', auth_1.authMiddleware, async (req, res) => {
+router.delete('/:id', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({

@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import crypto from 'crypto';
 import User from '../models/User';
-import { authMiddleware } from '../middleware/auth';
+import { authenticateToken } from '../middleware/auth';
 import { generateToken } from '../middleware/auth';
 import { 
   registerValidation, 
@@ -121,7 +121,7 @@ router.post('/login', loginValidation, handleValidationErrors, async (req: Reque
 });
 
 // GET /auth/verify
-router.get('/verify', authMiddleware, async (req: Request, res: Response) => {
+router.get('/verify', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -188,7 +188,7 @@ router.post('/verify-email', async (req: Request, res: Response) => {
 });
 
 // GET /auth/me (get current user)
-router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+router.get('/me', authenticateToken, async (req: any, res: Response) => {
   try {
     if (!req.user) {
       return res.status(401).json({

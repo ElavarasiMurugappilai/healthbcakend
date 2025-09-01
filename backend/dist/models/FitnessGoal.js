@@ -38,13 +38,25 @@ const FitnessGoalSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     stepsTarget: { type: Number, default: 8000 },
     caloriesTarget: { type: Number, default: 500 },
-    workoutTarget: { type: Number, default: 30 },
+    workoutTarget: { type: Number, default: 5 },
     waterTarget: { type: Number, default: 2000 },
+    primaryFitnessGoal: { type: String, default: "general_fitness" },
+    exerciseDaysPerWeek: { type: Number, default: 3 },
+    preferredActivities: [{ type: String }],
+    exerciseDuration: { type: String, default: "30min" },
+    workoutDifficulty: { type: String, default: "beginner" },
     progress: {
         steps: { type: Number, default: 0 },
         calories: { type: Number, default: 0 },
         workout: { type: Number, default: 0 },
         water: { type: Number, default: 0 },
+    },
+    weeklyStats: {
+        totalSteps: { type: Number, default: 0 },
+        totalCalories: { type: Number, default: 0 },
+        totalWorkouts: { type: Number, default: 0 },
+        totalWater: { type: Number, default: 0 },
+        weekStartDate: { type: Date, default: Date.now },
     },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("FitnessGoal", FitnessGoalSchema);

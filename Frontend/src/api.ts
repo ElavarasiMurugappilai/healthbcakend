@@ -16,9 +16,21 @@ API.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Debug JWT token payload
+    if (token && config.method?.toUpperCase() === 'POST') {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('🔍 JWT Payload for POST request:', payload);
+      } catch (e) {
+        console.warn('⚠️ Could not decode JWT payload:', e);
+      }
+    }
+
     console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
       fullUrl: `${config.baseURL}${config.url}`,
       hasAuth: !!token,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+      authHeader: config.headers.Authorization ? 'set' : 'missing',
       data: config.data,
     });
 
@@ -64,10 +76,14 @@ API.interceptors.response.use(
 
       const token = localStorage.getItem("token");
       const refreshToken = localStorage.getItem("refreshToken");
+      const currentPath = window.location.pathname;
 
       if (!token || !refreshToken) {
         console.log("❌ No valid tokens, redirecting to login");
-        handleAuthFailure();
+        // Don't call handleAuthFailure on quiz page - let quiz handle it
+        if (currentPath !== "/quiz") {
+          handleAuthFailure();
+        }
         return Promise.reject(error);
       }
 
@@ -88,7 +104,10 @@ API.interceptors.response.use(
         return API(originalRequest);
       } catch (refreshError) {
         console.error("❌ Refresh failed, forcing logout:", refreshError);
-        handleAuthFailure();
+        // Don't call handleAuthFailure on quiz page - let quiz handle it
+        if (currentPath !== "/quiz") {
+          handleAuthFailure();
+        }
         return Promise.reject(error);
       }
     }
@@ -111,6 +130,13 @@ function handleAuthFailure() {
   console.log("🧹 Clearing invalid auth data");
 
   const currentPath = window.location.pathname;
+  
+  // Don't clear tokens or redirect if user is on quiz page - let the quiz handle it
+  if (currentPath === "/quiz") {
+    console.log("⚠️ Auth failure on quiz page - not clearing tokens, letting quiz handle it");
+    return;
+  }
+
   if (!["/login", "/signup", "/"].includes(currentPath)) {
     localStorage.setItem("returnUrl", currentPath);
   }

@@ -5,11 +5,23 @@ export interface IFitnessGoal extends Document {
     caloriesTarget: number;
     workoutTarget: number;
     waterTarget: number;
+    primaryFitnessGoal: string;
+    exerciseDaysPerWeek: number;
+    preferredActivities: string[];
+    exerciseDuration: string;
+    workoutDifficulty: string;
     progress: {
         steps: number;
         calories: number;
         workout: number;
         water: number;
+    };
+    weeklyStats: {
+        totalSteps: number;
+        totalCalories: number;
+        totalWorkouts: number;
+        totalWater: number;
+        weekStartDate: Date;
     };
 }
 declare const _default: mongoose.Model<IFitnessGoal, {}, {}, {}, mongoose.Document<unknown, {}, IFitnessGoal> & IFitnessGoal & {

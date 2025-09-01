@@ -1,5 +1,5 @@
 import express from "express";
-import { authMiddleware } from "../middleware/auth";
+import { authenticateToken } from "../middleware/auth";
 import {
   createFitnessGoals,
   getFitnessGoals,
@@ -10,17 +10,17 @@ import {
 const router = express.Router();
 
 // Create/update fitness goals from quiz data
-router.post("/goals", authMiddleware, createFitnessGoals);
+router.post("/goals", authenticateToken, createFitnessGoals);
 
 // Get fitness goals and progress
-router.get("/goals", authMiddleware, getFitnessGoals);
+router.get("/goals", authenticateToken, getFitnessGoals);
 
 // Log fitness activity
-router.post("/log", authMiddleware, logFitnessActivity);
-router.post("/logs", authMiddleware, logFitnessActivity);
+router.post("/log", authenticateToken, logFitnessActivity);
+router.post("/logs", authenticateToken, logFitnessActivity);
 
 // Get fitness logs
-router.get("/logs", authMiddleware, async (req, res) => {
+router.get("/logs", authenticateToken, async (req, res) => {
   try {
     // Return dynamic data that changes
     const currentDate = new Date();
@@ -48,6 +48,6 @@ router.get("/logs", authMiddleware, async (req, res) => {
 });
 
 // Update fitness progress (for manual updates)
-router.patch("/goals/progress", authMiddleware, updateFitnessProgress);
+router.patch("/goals/progress", authenticateToken, updateFitnessProgress);
 
 export default router;

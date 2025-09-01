@@ -78,7 +78,7 @@ const Welcome: React.FC<WelcomeProps> = ({ user, profile, setShowScheduleModal }
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-4">
         <div className="text-center lg:text-left">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold">
-            {greeting}, {formattedName} {emoji}
+            {greeting}, {formattedName}
           </h1>
           {personalizedMessage && (
             <p className="text-lg text-muted-foreground mt-2">{personalizedMessage}</p>

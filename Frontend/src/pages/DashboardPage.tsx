@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useMemo } from "react";
 import Welcome from "./dashboard/Welcome";
 import Fitness from "./dashboard/Fitness";
@@ -55,6 +56,8 @@ const DashboardPage: React.FC = () => {
     showGlucose: false,
     showCareTeam: false,
     showMedications: false,
+    showWater: false,
+    showSleep: false,
   });
 
   // Fetch profile on mount
@@ -159,16 +162,20 @@ const DashboardPage: React.FC = () => {
         showGlucose: false,
         showCareTeam: false,
         showMedications: false,
+        showWater: false,
+        showSleep: false,
       });
     }
   }, []);
 
-  // Compute visible sections based on profile
+  // Compute visible sections based on actual user data
   const visibleSections = useMemo(
     () => ({
-       // Always show fitness card since it has its own backend data
+      // Always show fitness card since it has its own backend data
       glucoseTrends: !!profile?.trackGlucose,
-      medicationSchedule: !!profile?.takeMeds,
+      // Only show medication card if user has accepted medications
+      medicationSchedule: (profile?.medications ?? []).length > 0,
+      // Only show care team card if user has selected doctors
       careTeam: (profile?.careTeam ?? []).length > 0,
     }),
     [profile]

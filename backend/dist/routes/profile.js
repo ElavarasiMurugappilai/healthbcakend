@@ -9,7 +9,7 @@ const Measurement_1 = __importDefault(require("../models/Measurement"));
 const auth_1 = require("../middleware/auth");
 const validation_1 = require("../utils/validation");
 const router = express_1.default.Router();
-router.post('/quiz', auth_1.authMiddleware, async (req, res) => {
+router.post('/quiz', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -93,7 +93,7 @@ router.post('/quiz', auth_1.authMiddleware, async (req, res) => {
         });
     }
 });
-router.get('/me', auth_1.authMiddleware, async (req, res) => {
+router.get('/me', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -120,7 +120,7 @@ router.get('/me', auth_1.authMiddleware, async (req, res) => {
         });
     }
 });
-router.get('/', auth_1.authMiddleware, async (req, res) => {
+router.get('/', auth_1.authenticateToken, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({
@@ -147,7 +147,49 @@ router.get('/', auth_1.authMiddleware, async (req, res) => {
         });
     }
 });
-router.put('/', auth_1.authMiddleware, validation_1.profileValidation, validation_1.handleValidationErrors, async (req, res) => {
+router.post('/dashboard-quiz', auth_1.authenticateToken, async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Authentication required'
+            });
+        }
+        const dashboardPreferences = req.body;
+        const updatedUser = await User_1.default.findByIdAndUpdate(req.user._id, {
+            $set: {
+                'profile.dashboardPreferences': dashboardPreferences,
+                'profile.dashboardQuizCompleted': true,
+                'profile.dashboardQuizCompletedAt': new Date(),
+                'profile.lastUpdated': new Date()
+            }
+        }, { new: true, runValidators: true }).select('-password');
+        if (!updatedUser) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+        console.log(`✅ Dashboard quiz completed for user: ${req.user.email}`);
+        res.json({
+            success: true,
+            message: 'Dashboard preferences saved successfully',
+            data: {
+                profile: updatedUser.profile,
+                user: updatedUser.getPublicProfile()
+            }
+        });
+    }
+    catch (error) {
+        console.error('❌ Dashboard quiz save error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error saving dashboard preferences',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+});
+router.put('/', auth_1.authenticateToken, validation_1.profileValidation, validation_1.handleValidationErrors, async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).json({

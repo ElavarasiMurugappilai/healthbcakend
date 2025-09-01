@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.adminMiddleware = exports.optionalAuthMiddleware = exports.authMiddleware = exports.verifyToken = exports.generateToken = void 0;
+exports.adminMiddleware = exports.optionalAuthMiddleware = exports.authenticateToken = exports.verifyToken = exports.generateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = __importDefault(require("../models/User"));
 const generateToken = (userId, email) => {
@@ -14,13 +14,19 @@ const verifyToken = (token) => {
     return jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
 };
 exports.verifyToken = verifyToken;
-const authMiddleware = async (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
     try {
+        console.log(` Auth middleware: ${req.method} ${req.originalUrl}`);
+        console.log(` Headers:`, {
+            authorization: req.headers.authorization ? 'present' : 'missing',
+            authPreview: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'none'
+        });
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            console.log(` Auth failed: No valid token provided`);
             res.status(401).json({
                 success: false,
-                message: 'Access denied. No token provided or invalid format.'
+                message: 'Access denied. No valid token provided.'
             });
             return;
         }
@@ -42,7 +48,7 @@ const authMiddleware = async (req, res, next) => {
                 });
                 return;
             }
-            if (!user.isVerified) {
+            if (!user.isVerified && process.env.NODE_ENV !== 'development') {
                 res.status(401).json({
                     success: false,
                     message: 'Account not verified. Please verify your email.'
@@ -82,7 +88,7 @@ const authMiddleware = async (req, res, next) => {
         });
     }
 };
-exports.authMiddleware = authMiddleware;
+exports.authenticateToken = authenticateToken;
 const optionalAuthMiddleware = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
