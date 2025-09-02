@@ -6,6 +6,8 @@ import { Icons } from "@/components/ui/icons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import API from "@/api"; // Adjust the import based on your project structure
+import { useGlobalState } from "@/context/globalState"; // Adjust based on your project structure
 
 type CareTeamMember = {
   name: string;
@@ -36,6 +38,7 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
   const [chatMember, setChatMember] = useState<CareTeamMember | null>(null);
   const [team, setTeam] = useState(filteredCareTeam);
   const [showAllModal, setShowAllModal] = useState(false);
+  const { globalState, setGlobalState } = useGlobalState();
 
   // When chatMember is set, mark as read
   useEffect(() => {
@@ -43,6 +46,26 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
       setTeam(prev => prev.map(m => m.name === chatMember.name ? { ...m, unread: false, badge: undefined } : m));
     }
   }, [chatMember]);
+
+  // Fetch selected doctors on mount
+  useEffect(() => {
+    const fetchSelectedDoctors = async () => {
+      try {
+        const response = await API.get('/doctors/selected');
+        const doctors = response.data.selectedDoctors;
+
+        // Update local state or global state
+        setGlobalState((prevState: any) => ({
+          ...prevState,
+          selectedDoctors: doctors,
+        }));
+      } catch (error) {
+        console.error('Failed to fetch selected doctors:', error);
+      }
+    };
+
+    fetchSelectedDoctors();
+  }, [setGlobalState]);
 
   return (
     <div className="flex-1 min-w-0 mb-2 lg:mb-0 h-[420px]">
@@ -196,4 +219,4 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
   );
 };
 
-export default MyCareTeam; 
+export default MyCareTeam;

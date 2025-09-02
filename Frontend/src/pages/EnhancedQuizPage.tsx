@@ -2,29 +2,52 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { User, Target, Activity, Dumbbell, Droplets, Star, Check, ArrowLeft, ArrowRight, Heart, Zap, Users, Pill } from 'lucide-react';
+import { User, Target, Users, Pill, Activity, Dumbbell, Droplets, Star, Check, Plus, ArrowLeft, ArrowRight, Heart, Zap, Stethoscope } from 'lucide-react';
 import API from '../api';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { useGlobalState } from "../context/globalState"; // Correct relative path
+import { Button } from '../components/ui/button';
+import { Card, CardContent } from '../components/ui/card';
+import { Progress } from '../components/ui/progress';
 import { Switch } from '../components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '../components/ui/slider';
+import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 
 interface QuizData {
-  dateOfBirth?: string;
-  gender?: string;
+  dateOfBirth: string;
+  gender: string;
   dashboardStyle: string;
   fitnessGoal: string;
   activityLevel: string;
   stepTarget: number;
+  selectedDoctors: any[];
+  personalDoctors: any[];
+  pendingMedications: any[];
+  acceptedMedications: any[];
   selectedCards: string[];
 }
 
+interface Doctor {
+  _id: string;
+  name: string;
+  specialization: string;
+  photo?: string;
+  rating?: number;
+  experience?: number;
+  isSystemDoctor: boolean;
+}
+
+interface Medication {
+  _id: string;
+  name: string;
+  dosage: string;
+  frequency: string;
+  suggestedBy: string;
+  reason?: string;
+}
 
 const QUIZ_STORAGE_KEY = "healthapp.quiz.data";
 
@@ -32,6 +55,8 @@ const EnhancedQuizPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [systemDoctors, setSystemDoctors] = useState<Doctor[]>([]);
+  const [pendingMedications, setPendingMedications] = useState<Medication[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
 
   const [formData, setFormData] = useState<QuizData>({
@@ -41,13 +66,22 @@ const EnhancedQuizPage = () => {
     fitnessGoal: "",
     activityLevel: "",
     stepTarget: 8000,
+    selectedDoctors: [],
+    personalDoctors: [],
+    pendingMedications: [],
+    acceptedMedications: [],
     selectedCards: ["fitness", "glucose"],
   });
+
+  // Use global state and setter
+  const { setGlobalState } = useGlobalState();
 
   const quizSteps = [
     { id: 1, title: "Personal Profile", icon: User, description: "Basic information and preferences" },
     { id: 2, title: "Fitness & Health Goals", icon: Target, description: "Set your health objectives" },
-    { id: 3, title: "Dashboard Selection", icon: Activity, description: "Choose your dashboard cards" },
+    { id: 3, title: "Health Tracking & Doctors", icon: Users, description: "Connect with healthcare providers" },
+    { id: 4, title: "Medication Management", icon: Pill, description: "Manage your medications" },
+    { id: 5, title: "Dashboard Selection", icon: Activity, description: "Choose your dashboard cards" },
   ];
 
   const fitnessGoals = [
@@ -75,7 +109,7 @@ const EnhancedQuizPage = () => {
     { id: "sleep", title: "Sleep Tracking", icon: Star, description: "Monitor sleep patterns" },
   ];
 
-  // Check auth on component mount
+  // Load system doctors and check auth on component mount
   useEffect(() => {
     const initializeQuiz = async () => {
       // Check authentication
@@ -85,29 +119,86 @@ const EnhancedQuizPage = () => {
         return;
       }
 
-      // Load saved quiz data from localStorage
       try {
+        // Load saved quiz data from localStorage
         const savedData = localStorage.getItem(QUIZ_STORAGE_KEY);
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           setFormData(prev => ({ ...prev, ...parsedData }));
         }
-      } catch (error) {
-        console.error('Error loading saved quiz data:', error);
-      }
 
-      setAuthChecked(true);
+        // Fetch system doctors
+        const doctorsResponse = await API.get('/doctors/system');
+        setSystemDoctors(doctorsResponse.data);
+
+        // Fetch pending medications
+        const medicationsResponse = await API.get('/medications/pending');
+        setPendingMedications(medicationsResponse.data);
+
+        setAuthChecked(true);
+      } catch (error) {
+        console.error('Error initializing quiz:', error);
+        toast.error('Failed to load quiz data');
+      }
     };
 
     initializeQuiz();
   }, [navigate]);
 
-  const updateFormData = (field: string, value: any) => {
-    const updatedData = { ...formData, [field]: value };
-    setFormData(updatedData);
-    localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(updatedData));
+  const saveFitnessGoal = async (goal: string) => {
+    try {
+      // Save to the database
+      await API.post('/fitness/goal', { fitnessGoal: goal });
+
+      // Update global state (e.g., using context or Redux)
+      setGlobalState((prevState) => ({
+        ...prevState,
+        fitnessGoal: goal,
+      }));
+
+      toast.success('Fitness goal updated successfully!');
+    } catch (error) {
+      console.error('Failed to save fitness goal:', error);
+      toast.error('Failed to update fitness goal.');
+    }
   };
 
+  const saveSelectedDoctors = async (doctors: any[]) => {
+    try {
+      // Save to the database
+      await API.post('/doctors/selected', { selectedDoctors: doctors });
+
+      // Update global state (e.g., using context or Redux)
+      setGlobalState((prevState) => ({
+        ...prevState,
+        selectedDoctors: doctors,
+      }));
+
+      toast.success('Selected doctors updated successfully!');
+    } catch (error) {
+      console.error('Failed to save selected doctors:', error);
+      toast.error('Failed to update selected doctors.');
+    }
+  };
+
+  // Update the `updateFormData` function to handle fitness goal selection
+  const updateFormData = (field: string, value: any) => {
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+
+    // Save to localStorage for persistence
+    localStorage.setItem(QUIZ_STORAGE_KEY, JSON.stringify(newFormData));
+
+    // Save fitness goal to the database and update global state
+    if (field === 'fitnessGoal') {
+      saveFitnessGoal(value);
+    }
+
+    // Save selected doctors to the database and update global state
+    if (field === 'selectedDoctors') {
+      saveSelectedDoctors(value);
+    }
+  };
 
   const nextStep = () => {
     if (currentStep < quizSteps.length - 1) {
@@ -124,48 +215,13 @@ const EnhancedQuizPage = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Check if user is still authenticated before proceeding
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Session expired. Please login again.");
-        navigate("/login");
-        return;
-      }
-
       // Save profile and dashboard preferences
-      try {
-        // Clean form data - remove empty strings that cause validation errors
-        const cleanedFormData = { ...formData };
-        if (cleanedFormData.dateOfBirth === '') {
-          cleanedFormData.dateOfBirth = undefined;
-        }
-        if (cleanedFormData.gender === '') {
-          cleanedFormData.gender = undefined;
-        }
-        
-        await API.post("/profile/quiz", cleanedFormData);
-        
-        // Save dashboard card selections to localStorage
-        const dashboardEnabledCards = {
-          showFitness: formData.selectedCards.includes('fitness'),
-          showGlucose: formData.selectedCards.includes('glucose'),
-          showMedications: formData.selectedCards.includes('medications'),
-          showCareTeam: formData.selectedCards.includes('care-team'),
-          showWater: formData.selectedCards.includes('water'),
-          showSleep: formData.selectedCards.includes('sleep'),
-        };
-        localStorage.setItem('dashboardEnabledCards', JSON.stringify(dashboardEnabledCards));
-        
+      const profileResponse = await API.post("/profile/dashboard-quiz", formData);
+
+      if (profileResponse.data.success) {
         toast.success("Quiz completed successfully!");
         localStorage.removeItem(QUIZ_STORAGE_KEY);
-        
-        // Force navigation to dashboard
-        setTimeout(() => {
-          navigate("/dashboard", { replace: true });
-        }, 100);
-      } catch (error) {
-        console.error("Error saving profile:", error);
-        toast.error("Failed to save quiz data");
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Error submitting quiz:", error);
@@ -192,10 +248,10 @@ const EnhancedQuizPage = () => {
   const floatingIcons = [
     { icon: Heart, delay: 0, duration: 6 },
     { icon: Activity, delay: 1, duration: 8 },
-    { icon: Dumbbell, delay: 2, duration: 7 },
-    { icon: Target, delay: 3, duration: 9 },
-    { icon: Star, delay: 4, duration: 6 },
-    { icon: Zap, delay: 5, duration: 8 },
+    { icon: Stethoscope, delay: 2, duration: 7 },
+    { icon: Pill, delay: 3, duration: 9 },
+    { icon: Users, delay: 4, duration: 6 },
+    { icon: Target, delay: 5, duration: 8 },
   ];
 
   // Step Components
@@ -318,7 +374,113 @@ const EnhancedQuizPage = () => {
     </div>
   );
 
+  const DoctorsStep = ({ formData, updateFormData }: any) => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-medium mb-4">System Doctors</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {systemDoctors.map((doctor) => (
+            <Card
+              key={doctor._id}
+              className={`cursor-pointer transition-all ${
+                formData.selectedDoctors.includes(doctor._id)
+                  ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
+              onClick={() => {
+                const selected = formData.selectedDoctors.includes(doctor._id)
+                  ? formData.selectedDoctors.filter((id: string) => id !== doctor._id)
+                  : [...formData.selectedDoctors, doctor._id];
+                updateFormData('selectedDoctors', selected);
+              }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <Stethoscope className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">{doctor.name}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{doctor.specialization}</p>
+                    {doctor.rating && (
+                      <div className="flex items-center mt-1">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                        <span className="text-sm ml-1">{doctor.rating}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-medium">Personal Doctors</h3>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Doctor
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Personal Doctor</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="doctorName">Name</Label>
+                  <Input id="doctorName" placeholder="Doctor's name" />
+                </div>
+                <div>
+                  <Label htmlFor="specialization">Specialization</Label>
+                  <Input id="specialization" placeholder="e.g., Cardiologist" />
+                </div>
+                <Button className="w-full">Add Doctor</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    </div>
+  );
+
+  const MedicationsStep = (_props: any) => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-medium mb-4">Pending Medication Suggestions</h3>
+        {pendingMedications.length === 0 ? (
+          <p className="text-gray-600 dark:text-gray-400">No pending medication suggestions.</p>
+        ) : (
+          <div className="space-y-4">
+            {pendingMedications.map((medication) => (
+              <Card key={medication._id} className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-medium">{medication.name}</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {medication.dosage} - {medication.frequency}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">Suggested by: {medication.suggestedBy}</p>
+                    {medication.reason && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{medication.reason}</p>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline">Decline</Button>
+                    <Button size="sm">Accept</Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   const DashboardSelectionStep = ({ formData, updateFormData }: any) => (
     <div className="space-y-6">
@@ -364,13 +526,15 @@ const EnhancedQuizPage = () => {
   const stepComponents = [
     PersonalProfileStep,
     FitnessGoalsStep,
+    DoctorsStep,
+    MedicationsStep,
     DashboardSelectionStep,
   ];
 
   const CurrentStepComponent = stepComponents[currentStep];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 relative">
       {/* Floating animated icons */}
       {floatingIcons.map((item, index) => {
         const IconComponent = item.icon;
@@ -395,7 +559,8 @@ const EnhancedQuizPage = () => {
         );
       })}
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      {/* Main Content */}
+      <div className="relative z-10 container mx-auto px-4 py-8 h-screen overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">

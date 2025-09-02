@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import API from "@/api";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus } from "lucide-react"; 
+import { useGlobalState } from "@/context/globalState"; // Adjust based on the actual location
+
+// FIX: Remove or correct the import if the file does not exist
 
 interface FitnessProps {
   setShowFitnessModal: (show: boolean) => void;
@@ -17,6 +20,9 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
   const [targetWorkouts, setTargetWorkouts] = useState(5);
   const [loading, setLoading] = useState(true);
   const totalLength = 251; // Circumference for r=40
+
+  // Destructure setGlobalState from useGlobalState
+  const { setGlobalState } = useGlobalState();
 
   // Fetch workout logs from backend
   useEffect(() => {
@@ -41,6 +47,26 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
     };
     
     fetchWorkoutLogs();
+  }, []);
+
+  // Fetch fitness goal from backend
+  useEffect(() => {
+    const fetchFitnessGoal = async () => {
+      try {
+        const response = await API.get('/fitness/goal');
+        const goal = response.data.fitnessGoal;
+
+        // Use setGlobalState to update the global state
+        setGlobalState((prevState: any) => ({
+          ...prevState,
+          fitnessGoal: goal,
+        }));
+      } catch (error) {
+        console.error('Failed to fetch fitness goal:', error);
+      }
+    };
+
+    fetchFitnessGoal();
   }, []);
 
   // Calculate and animate progress

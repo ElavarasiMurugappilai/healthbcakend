@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { User, Target, Users, Pill, Activity, Dumbbell, Droplets, Star, Check, Plus, ArrowLeft, ArrowRight, Heart, Zap, Stethoscope } from 'lucide-react';
-import API from '../utils/api';
+import API from '../api';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Progress } from '../components/ui/progress';
@@ -396,7 +396,7 @@ const EnhancedQuizPage = () => {
     </div>
   );
 
-  const MedicationsStep = ({ formData, updateFormData }: any) => (
+  const MedicationsStep = (_props: any) => (
     <div className="space-y-6">
       <div>
         <h3 className="font-medium mb-4">Pending Medication Suggestions</h3>
@@ -507,7 +507,7 @@ const EnhancedQuizPage = () => {
         );
       })}
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-8 max-h-screen overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
