@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
 export interface IDoctor extends Document {
     name: string;
+    email?: string;
     specialization: string;
     photo?: string;
     rating?: number;
     experience?: number;
-    isSystemDoctor: boolean;
+    isSystemApproved: boolean;
     addedBy?: Schema.Types.ObjectId;
     createdAt: Date;
     updatedAt: Date;

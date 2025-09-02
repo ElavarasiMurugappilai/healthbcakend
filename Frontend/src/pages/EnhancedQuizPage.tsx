@@ -37,7 +37,7 @@ interface Doctor {
   photo?: string;
   rating?: number;
   experience?: number;
-  isSystemDoctor: boolean;
+  isSystemApproved: boolean;
 }
 
 interface Medication {
@@ -55,9 +55,13 @@ const EnhancedQuizPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [systemDoctors, setSystemDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [pendingMedications, setPendingMedications] = useState<Medication[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
+  const [personalDoctorName, setPersonalDoctorName] = useState('');
+  const [personalDoctorSpecialization, setPersonalDoctorSpecialization] = useState('');
+  const [isAddDoctorDialogOpen, setIsAddDoctorDialogOpen] = useState(false);
+
 
   const [formData, setFormData] = useState<QuizData>({
     dateOfBirth: "",
@@ -70,11 +74,76 @@ const EnhancedQuizPage = () => {
     personalDoctors: [],
     pendingMedications: [],
     acceptedMedications: [],
-    selectedCards: ["fitness", "glucose"],
+    selectedCards: ["fitness", "bloodGlucose"],
   });
 
   // Use global state and setter
   const { setGlobalState } = useGlobalState();
+
+  // Handle medication acceptance
+  const handleMedicationAccept = async (medication: Medication) => {
+    try {
+      const response = await API.post('/medications/accept', { medication });
+      if (response.data.success) {
+        toast.success('Medication accepted and added to schedule');
+        // Remove from pending medications
+        setPendingMedications(prev => prev.filter(med => med._id !== medication._id));
+        // Add to accepted medications in form data
+        updateFormData('acceptedMedications', [...formData.acceptedMedications, medication]);
+      }
+    } catch (error) {
+      console.error('Error accepting medication:', error);
+      toast.error('Failed to accept medication');
+    }
+  };
+
+  // Handle medication decline
+  const handleMedicationDecline = async (medication: Medication) => {
+    try {
+      const response = await API.post('/medications/decline', { 
+        medicationId: medication._id,
+        reason: 'User declined'
+      });
+      if (response.data.success) {
+        toast.success('Medication declined');
+        // Remove from pending medications
+        setPendingMedications(prev => prev.filter(med => med._id !== medication._id));
+      }
+    } catch (error) {
+      console.error('Error declining medication:', error);
+      toast.error('Failed to decline medication');
+    }
+  };
+
+  // Handle adding personal doctor
+  const handleAddPersonalDoctor = async () => {
+    if (!personalDoctorName.trim() || !personalDoctorSpecialization.trim()) {
+      toast.error('Please fill in both name and specialization');
+      return;
+    }
+
+    try {
+      const response = await API.post('/doctors/personal', {
+        name: personalDoctorName.trim(),
+        specialization: personalDoctorSpecialization.trim()
+      });
+      
+      if (response.data.success) {
+        const newDoctor = response.data.data;
+        // Add to personal doctors in form data
+        updateFormData('personalDoctors', [...formData.personalDoctors, newDoctor]);
+        toast.success('Personal doctor added successfully');
+        
+        // Reset form and close dialog
+        setPersonalDoctorName('');
+        setPersonalDoctorSpecialization('');
+        setIsAddDoctorDialogOpen(false);
+      }
+    } catch (error) {
+      console.error('Error adding personal doctor:', error);
+      toast.error('Failed to add personal doctor');
+    }
+  };
 
   const quizSteps = [
     { id: 1, title: "Personal Profile", icon: User, description: "Basic information and preferences" },
@@ -102,11 +171,9 @@ const EnhancedQuizPage = () => {
 
   const dashboardCards = [
     { id: "fitness", title: "Fitness Goals", icon: Dumbbell, description: "Track your fitness progress" },
-    { id: "glucose", title: "Glucose Monitoring", icon: Droplets, description: "Monitor blood glucose levels" },
-    { id: "medications", title: "Medication Schedule", icon: Pill, description: "Manage your medications" },
-    { id: "care-team", title: "My Care Team", icon: Users, description: "Connect with your doctors" },
-    { id: "water", title: "Water Intake", icon: Droplets, description: "Track daily water consumption" },
-    { id: "sleep", title: "Sleep Tracking", icon: Star, description: "Monitor sleep patterns" },
+    { id: "bloodGlucose", title: "Blood Glucose", icon: Droplets, description: "Monitor blood glucose levels" },
+    { id: "medicationSchedule", title: "Medication Schedule", icon: Pill, description: "Manage your medications" },
+    { id: "careTeam", title: "My Care Team", icon: Users, description: "Connect with your doctors" },
   ];
 
   // Load system doctors and check auth on component mount
@@ -124,16 +191,70 @@ const EnhancedQuizPage = () => {
         const savedData = localStorage.getItem(QUIZ_STORAGE_KEY);
         if (savedData) {
           const parsedData = JSON.parse(savedData);
+          
+          // Validate and fix selectedCards to only include valid enum values
+          const validCardIds = ['fitness', 'bloodGlucose', 'careTeam', 'medicationSchedule'];
+          if (parsedData.selectedCards) {
+            parsedData.selectedCards = parsedData.selectedCards
+              .map((card: string) => card === 'glucose' ? 'bloodGlucose' : card)
+              .filter((card: string) => validCardIds.includes(card));
+          }
+          
           setFormData(prev => ({ ...prev, ...parsedData }));
         }
 
-        // Fetch system doctors
-        const doctorsResponse = await API.get('/doctors/system');
-        setSystemDoctors(doctorsResponse.data);
+        // Fetch system doctors with fallback
+        try {
+          const doctorsResponse = await API.get('/doctors/system');
+          if (doctorsResponse.data.success) {
+            setDoctors(doctorsResponse.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch system doctors, using fallback:', error);
+          // Fallback mock data to prevent quiz from breaking
+          const fallbackDoctors = [
+            {
+              _id: 'fallback-1',
+              name: 'Dr. Sarah Johnson',
+              specialization: 'Cardiologist',
+              rating: 4.8,
+              experience: 10,
+              photo: undefined,
+              isSystemApproved: true
+            },
+            {
+              _id: 'fallback-2', 
+              name: 'Dr. Michael Chen',
+              specialization: 'Endocrinologist',
+              rating: 4.7,
+              experience: 8,
+              photo: undefined,
+              isSystemApproved: true
+            },
+            {
+              _id: 'fallback-3',
+              name: 'Dr. Emily Rodriguez',
+              specialization: 'General Practitioner',
+              rating: 4.9,
+              experience: 12,
+              photo: undefined,
+              isSystemApproved: true
+            }
+          ];
+          setDoctors(fallbackDoctors);
+          toast.error('Failed to load system doctors, using default options');
+        }
 
-        // Fetch pending medications
-        const medicationsResponse = await API.get('/medications/pending');
-        setPendingMedications(medicationsResponse.data);
+        // Fetch pending medications with fallback
+        try {
+          const medicationsResponse = await API.get('/medications/pending');
+          if (medicationsResponse.data.success) {
+            setPendingMedications(medicationsResponse.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch pending medications:', error);
+          setPendingMedications([]); // Empty array fallback
+        }
 
         setAuthChecked(true);
       } catch (error) {
@@ -148,7 +269,7 @@ const EnhancedQuizPage = () => {
   const saveFitnessGoal = async (goal: string) => {
     try {
       // Save to the database
-      await API.post('/fitness/goal', { fitnessGoal: goal });
+      await API.post('/goals', { fitnessGoal: goal });
 
       // Update global state (e.g., using context or Redux)
       setGlobalState((prevState) => ({
@@ -215,10 +336,52 @@ const EnhancedQuizPage = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      console.log("📤 Frontend sending quiz data:", JSON.stringify(formData, null, 2));
+      
       // Save profile and dashboard preferences
-      const profileResponse = await API.post("/profile/dashboard-quiz", formData);
+      const payload = {
+        ...formData,
+        selectedDoctors: formData.selectedDoctors
+      };
+      const profileResponse = await API.post("/profile/dashboard-quiz", payload);
+
+      // Also save selected doctors to the dedicated endpoint
+      if (formData.selectedDoctors.length > 0) {
+        try {
+          await API.post("/doctors/selected", { selectedDoctors: formData.selectedDoctors });
+          console.log("✅ Selected doctors saved successfully");
+        } catch (doctorError) {
+          console.error("❌ Failed to save selected doctors:", doctorError);
+          // Don't fail the entire submission if this fails
+        }
+      }
 
       if (profileResponse.data.success) {
+        // Update localStorage user object with quiz preferences
+        const existingUser = localStorage.getItem("user");
+        if (existingUser && existingUser !== "undefined" && existingUser !== "null") {
+          try {
+            const parsedUser = JSON.parse(existingUser);
+            const updatedUser = {
+              ...parsedUser,
+              selectedCards: formData.selectedCards,
+              selectedDoctors: formData.selectedDoctors,
+              dashboardStyle: formData.dashboardStyle,
+              fitnessGoal: formData.fitnessGoal,
+              activityLevel: formData.activityLevel,
+              stepTarget: formData.stepTarget
+            };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            
+            // Dispatch event to update dashboard
+            window.dispatchEvent(new Event("user-updated"));
+            
+            console.log("✅ Updated localStorage user with quiz data:", updatedUser);
+          } catch (error) {
+            console.error("❌ Error updating localStorage user:", error);
+          }
+        }
+        
         toast.success("Quiz completed successfully!");
         localStorage.removeItem(QUIZ_STORAGE_KEY);
         navigate("/dashboard");
@@ -374,12 +537,12 @@ const EnhancedQuizPage = () => {
     </div>
   );
 
-  const DoctorsStep = ({ formData, updateFormData }: any) => (
+  const DoctorsStep = ({ formData, updateFormData }: { formData: QuizData; updateFormData: (key: keyof QuizData, value: any) => void }) => (
     <div className="space-y-6">
       <div>
         <h3 className="font-medium mb-4">System Doctors</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {systemDoctors.map((doctor) => (
+          {doctors.map((doctor) => (
             <Card
               key={doctor._id}
               className={`cursor-pointer transition-all ${
@@ -419,7 +582,7 @@ const EnhancedQuizPage = () => {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-medium">Personal Doctors</h3>
-          <Dialog>
+          <Dialog open={isAddDoctorDialogOpen} onOpenChange={setIsAddDoctorDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <Plus className="w-4 h-4 mr-2" />
@@ -433,22 +596,61 @@ const EnhancedQuizPage = () => {
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="doctorName">Name</Label>
-                  <Input id="doctorName" placeholder="Doctor's name" />
+                  <Input 
+                    id="doctorName" 
+                    placeholder="Doctor's name" 
+                    value={personalDoctorName}
+                    onChange={(e) => setPersonalDoctorName(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="specialization">Specialization</Label>
-                  <Input id="specialization" placeholder="e.g., Cardiologist" />
+                  <Input 
+                    id="specialization" 
+                    placeholder="e.g., Cardiologist" 
+                    value={personalDoctorSpecialization}
+                    onChange={(e) => setPersonalDoctorSpecialization(e.target.value)}
+                  />
                 </div>
-                <Button className="w-full">Add Doctor</Button>
+                <Button 
+                  className="w-full" 
+                  onClick={handleAddPersonalDoctor}
+                  disabled={!personalDoctorName.trim() || !personalDoctorSpecialization.trim()}
+                >
+                  Add Doctor
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
+        
+        {/* Display Personal Doctors */}
+        {formData.personalDoctors.length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-medium mb-2">Your Personal Doctors</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {formData.personalDoctors.map((doctor) => (
+                <Card key={doctor._id} className="p-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                      <Stethoscope className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-sm">{doctor.name}</h5>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{doctor.specialization}</p>
+                      <Badge variant="outline" className="text-xs mt-1">Personal</Badge>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 
-  const MedicationsStep = (_props: any) => (
+  const MedicationsStep = () => (
     <div className="space-y-6">
       <div>
         <h3 className="font-medium mb-4">Pending Medication Suggestions</h3>
@@ -456,7 +658,7 @@ const EnhancedQuizPage = () => {
           <p className="text-gray-600 dark:text-gray-400">No pending medication suggestions.</p>
         ) : (
           <div className="space-y-4">
-            {pendingMedications.map((medication) => (
+            {pendingMedications.map((medication: Medication) => (
               <Card key={medication._id} className="p-4">
                 <div className="flex justify-between items-start">
                   <div>
@@ -470,8 +672,19 @@ const EnhancedQuizPage = () => {
                     )}
                   </div>
                   <div className="flex space-x-2">
-                    <Button size="sm" variant="outline">Decline</Button>
-                    <Button size="sm">Accept</Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleMedicationDecline(medication)}
+                    >
+                      Decline
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => handleMedicationAccept(medication)}
+                    >
+                      Accept
+                    </Button>
                   </div>
                 </div>
               </Card>
@@ -499,7 +712,7 @@ const EnhancedQuizPage = () => {
                 }`}
                 onClick={() => {
                   const selected = formData.selectedCards.includes(card.id)
-                    ? formData.selectedCards.filter((id: string) => id !== card.id)
+                    ? formData.selectedCards.filter((id) => id !== card.id)
                     : [...formData.selectedCards, card.id];
                   updateFormData('selectedCards', selected);
                 }}

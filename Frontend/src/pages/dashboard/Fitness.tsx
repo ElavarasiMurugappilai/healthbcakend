@@ -53,7 +53,7 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
   useEffect(() => {
     const fetchFitnessGoal = async () => {
       try {
-        const response = await API.get('/fitness/goal');
+        const response = await API.get('/goals');
         const goal = response.data.fitnessGoal;
 
         // Use setGlobalState to update the global state

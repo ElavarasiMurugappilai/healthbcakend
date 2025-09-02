@@ -102,11 +102,14 @@ router.get('/me', auth_1.authenticateToken, async (req, res) => {
             });
         }
         const latestMeasurements = await Measurement_1.default.getLatestByType(req.user._id, ['glucose', 'blood_pressure', 'heart_rate', 'weight', 'sleep', 'steps', 'water']);
+        const userWithDoctors = await User_1.default.findById(req.user._id)
+            .select('-password')
+            .populate('selectedDoctors', 'name specialization photo rating experience');
         res.json({
             success: true,
             data: {
                 profile: req.user.profile,
-                user: req.user.getPublicProfile(),
+                user: userWithDoctors?.getPublicProfile() || req.user.getPublicProfile(),
                 latestMeasurements
             }
         });
@@ -149,28 +152,51 @@ router.get('/', auth_1.authenticateToken, async (req, res) => {
 });
 router.post('/dashboard-quiz', auth_1.authenticateToken, async (req, res) => {
     try {
+        console.log('📥 Dashboard quiz request received');
+        console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
+        console.log('📥 User:', req.user?.email);
         if (!req.user) {
+            console.log('❌ No authenticated user found');
             return res.status(401).json({
                 success: false,
                 message: 'Authentication required'
             });
         }
-        const dashboardPreferences = req.body;
+        const { selectedCards, selectedDoctors, ...dashboardPreferences } = req.body;
+        console.log('📝 Selected cards:', selectedCards);
+        console.log('📝 Dashboard preferences:', dashboardPreferences);
+        if (selectedCards && !Array.isArray(selectedCards)) {
+            console.log('❌ selectedCards is not an array:', typeof selectedCards);
+            return res.status(400).json({
+                success: false,
+                message: 'selectedCards must be an array'
+            });
+        }
+        console.log('💾 Updating user profile...');
         const updatedUser = await User_1.default.findByIdAndUpdate(req.user._id, {
             $set: {
                 'profile.dashboardPreferences': dashboardPreferences,
+                'profile.selectedCards': selectedCards || [],
                 'profile.dashboardQuizCompleted': true,
                 'profile.dashboardQuizCompletedAt': new Date(),
-                'profile.lastUpdated': new Date()
+                'profile.lastUpdated': new Date(),
+                'selectedCards': selectedCards || [],
+                'selectedDoctors': selectedDoctors || [],
+                'dashboardStyle': dashboardPreferences.dashboardStyle,
+                'fitnessGoal': dashboardPreferences.fitnessGoal,
+                'activityLevel': dashboardPreferences.activityLevel,
+                'stepTarget': dashboardPreferences.stepTarget
             }
-        }, { new: true, runValidators: true }).select('-password');
+        }, { new: true, runValidators: true }).select('-password').populate('selectedDoctors', 'name specialization photo rating experience');
         if (!updatedUser) {
+            console.log('❌ User not found in database');
             return res.status(404).json({
                 success: false,
                 message: 'User not found'
             });
         }
         console.log(`✅ Dashboard quiz completed for user: ${req.user.email}`);
+        console.log('✅ Updated profile selectedCards:', updatedUser.profile?.selectedCards);
         res.json({
             success: true,
             message: 'Dashboard preferences saved successfully',
@@ -182,6 +208,7 @@ router.post('/dashboard-quiz', auth_1.authenticateToken, async (req, res) => {
     }
     catch (error) {
         console.error('❌ Dashboard quiz save error:', error);
+        console.error('❌ Error stack:', error.stack);
         res.status(500).json({
             success: false,
             message: 'Error saving dashboard preferences',

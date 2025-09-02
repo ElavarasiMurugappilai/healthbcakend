@@ -36,11 +36,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const DoctorSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
+    email: { type: String },
     specialization: { type: String, required: true },
     photo: { type: String, default: null },
     rating: { type: Number, min: 1, max: 5, default: 4.5 },
     experience: { type: Number, default: 5 },
-    isSystemDoctor: { type: Boolean, default: false },
+    isSystemApproved: { type: Boolean, default: true },
     addedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("Doctor", DoctorSchema);

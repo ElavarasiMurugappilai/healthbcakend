@@ -4,11 +4,8 @@ export interface IMedicationSuggestion extends Document {
     doctorId: Schema.Types.ObjectId;
     medicationName: string;
     dosage: string;
-    frequency: string;
-    reason?: string;
-    status: 'pending' | 'accepted' | 'rejected';
-    suggestedAt: Date;
-    respondedAt?: Date;
+    instructions: string;
+    accepted: boolean;
     createdAt: Date;
     updatedAt: Date;
 }

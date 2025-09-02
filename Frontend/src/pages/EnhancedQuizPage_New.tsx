@@ -69,7 +69,7 @@ const EnhancedQuizPage = () => {
     personalDoctors: [],
     pendingMedications: [],
     acceptedMedications: [],
-    selectedCards: ["fitness", "glucose"],
+    selectedCards: ["fitness", "bloodGlucose"],
   });
 
   const quizSteps = [
@@ -98,7 +98,7 @@ const EnhancedQuizPage = () => {
 
   const dashboardCards = [
     { id: "fitness", title: "Fitness Goals", icon: Dumbbell, description: "Track your fitness progress" },
-    { id: "glucose", title: "Glucose Monitoring", icon: Droplets, description: "Monitor blood glucose levels" },
+    { id: "bloodGlucose", title: "Glucose Monitoring", icon: Droplets, description: "Monitor blood glucose levels" },
     { id: "medications", title: "Medication Schedule", icon: Pill, description: "Manage your medications" },
     { id: "care-team", title: "My Care Team", icon: Users, description: "Connect with your doctors" },
     { id: "water", title: "Water Intake", icon: Droplets, description: "Track daily water consumption" },

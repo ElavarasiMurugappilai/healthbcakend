@@ -51,6 +51,7 @@ interface IProfile {
     };
     careTeam?: ICareTeamMember[];
     selectedDoctors?: string[];
+    selectedCards?: string[];
     completedAt?: Date;
     lastUpdated?: Date;
 }

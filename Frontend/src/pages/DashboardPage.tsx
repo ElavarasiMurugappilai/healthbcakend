@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Welcome from "./dashboard/Welcome";
 import Fitness from "./dashboard/Fitness";
 import BloodGlucose from "./dashboard/BloodGlucose";
@@ -25,6 +24,7 @@ interface Profile {
   takeMeds?: boolean;
   healthGoal?: string;
   activityLevel?: string;
+  selectedCards?: string[];
 }
 
 // User interface
@@ -35,12 +35,29 @@ interface User {
   age?: number;
   gender?: string;
   goals?: string[];
+  selectedCards?: string[];
+  selectedDoctors?: {
+    _id?: string;
+    name: string;
+    specialization?: string;
+    photo?: string;
+    rating?: number;
+    experience?: number;
+  }[];
 }
 
 const DashboardPage: React.FC = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User>({ name: "", email: "", avatar: "" });
+  const [selectedDoctorObjects, setSelectedDoctorObjects] = useState<{
+    _id?: string;
+    name: string;
+    specialization?: string;
+    photo?: string;
+    rating?: number;
+    experience?: number;
+  }[]>([]);
 
   // State for filters/search
   const [statusFilter, setStatusFilter] = useState("any");
@@ -50,15 +67,6 @@ const DashboardPage: React.FC = () => {
   const [scheduleForm, setScheduleForm] = useState({ date: "", time: "", reason: "" });
   const [toast, setToast] = useState("");
 
-  // State for enabled cards (load from localStorage)
-  const [enabledCards, setEnabledCards] = useState({
-    showFitness: false,
-    showGlucose: false,
-    showCareTeam: false,
-    showMedications: false,
-    showWater: false,
-    showSleep: false,
-  });
 
   // Fetch profile on mount
   useEffect(() => {
@@ -86,8 +94,15 @@ const DashboardPage: React.FC = () => {
               avatar: res.data.user.avatar || "",
               age: res.data.user.age,
               gender: res.data.user.gender,
-              goals: res.data.user.goals || []
+              goals: res.data.user.goals || [],
+              selectedCards: res.data.user.selectedCards || [],
+              selectedDoctors: res.data.user.selectedDoctors || []
             });
+            
+            // Set doctor objects for MyCareTeam component
+            if (res.data.user.selectedDoctors) {
+              setSelectedDoctorObjects([...res.data.user.selectedDoctors]);
+            }
           }
         } catch (err) {
           console.error("Error fetching profile:", err);
@@ -112,6 +127,7 @@ const DashboardPage: React.FC = () => {
           name: parsed?.name || "",
           email: parsed?.email || "",
           avatar: parsed?.avatar || "",
+          selectedCards: parsed?.selectedCards || []
         });
         
         console.log("✅ DashboardPage: User state set to:", {
@@ -138,6 +154,7 @@ const DashboardPage: React.FC = () => {
             name: parsed?.name || "",
             email: parsed?.email || "",
             avatar: parsed?.avatar || "",
+            selectedCards: parsed?.selectedCards || []
           });
         }
       } catch (error) {
@@ -149,37 +166,7 @@ const DashboardPage: React.FC = () => {
     return () => window.removeEventListener("user-updated", handleUserUpdate);
   }, []);
 
-  // Load enabled cards from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("dashboardEnabledCards");
-      if (stored) {
-        setEnabledCards(JSON.parse(stored));
-      }
-    } catch (e) {
-      setEnabledCards({
-        showFitness: false,
-        showGlucose: false,
-        showCareTeam: false,
-        showMedications: false,
-        showWater: false,
-        showSleep: false,
-      });
-    }
-  }, []);
 
-  // Compute visible sections based on actual user data
-  const visibleSections = useMemo(
-    () => ({
-      // Always show fitness card since it has its own backend data
-      glucoseTrends: !!profile?.trackGlucose,
-      // Only show medication card if user has accepted medications
-      medicationSchedule: (profile?.medications ?? []).length > 0,
-      // Only show care team card if user has selected doctors
-      careTeam: (profile?.careTeam ?? []).length > 0,
-    }),
-    [profile]
-  );
 
   // Filter medications & care team dynamically
   const filteredMedications =
@@ -193,12 +180,6 @@ const DashboardPage: React.FC = () => {
         qty: (med as any).qty ?? "", // Provide qty or default to empty string
       })) ?? [];
 
-  const careTeam =
-    profile?.careTeam
-      ?.map((member) => ({
-        ...member,
-        img: member.img ?? "", // Ensure img is always a string
-      })) ?? [];
 
   // Glucose data (placeholder until you track actual readings)
   const glucoseData = [
@@ -272,20 +253,20 @@ const DashboardPage: React.FC = () => {
       ) : (
         <>
           {/* Only render cards the user selected in the quiz */}
-          <section className="flex flex-col w-10 lg:flex-row gap-2 mb-2 w-full">
-            {enabledCards.showFitness && (
+          <section className="flex flex-col lg:flex-row gap-2 mb-2 w-full">
+            {user?.selectedCards?.includes("fitness") && (
               <Fitness setShowFitnessModal={() => {}} isFullWidth={false} />
             )}
-            {enabledCards.showGlucose && (
+            {user?.selectedCards?.includes("bloodGlucose") && (
               <BloodGlucose glucoseData={glucoseData} barSize={barSize} />
             )}
           </section>
 
           <section className="flex flex-col lg:flex-row gap-2 w-full mb-6">
-            {enabledCards.showCareTeam && (
-              <MyCareTeam filteredCareTeam={careTeam} setSelectedMember={() => {}} setShowCareTeamModal={() => {}} />
+            {user?.selectedCards?.includes("careTeam") && (
+              <MyCareTeam selectedDoctors={selectedDoctorObjects} setSelectedMember={() => {}} setShowCareTeamModal={() => {}} />
             )}
-            {enabledCards.showMedications && (
+            {user?.selectedCards?.includes("medicationSchedule") && (
               <MedicationSchedule
                 filteredMedications={filteredMedications}
                 handleTake={handleTake}

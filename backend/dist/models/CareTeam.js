@@ -37,6 +37,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const CareTeamSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     doctorId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Doctor", required: true },
+    accepted: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 CareTeamSchema.index({ userId: 1, doctorId: 1 }, { unique: true });

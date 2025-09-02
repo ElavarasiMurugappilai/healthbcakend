@@ -3,111 +3,131 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateSuggestionStatus = exports.getUserSuggestions = exports.createSuggestion = void 0;
+exports.getMedicationSchedule = exports.acceptMedicationSuggestion = exports.getMedicationSuggestions = exports.suggestMedication = void 0;
 const MedicationSuggestion_1 = __importDefault(require("../models/MedicationSuggestion"));
-const UserProfile_1 = __importDefault(require("../models/UserProfile"));
-const createSuggestion = async (req, res) => {
+const MedicationSchedule_1 = __importDefault(require("../models/MedicationSchedule"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const suggestMedication = async (req, res) => {
     try {
+        const { userId, medicationName, dosage, instructions } = req.body;
         const doctorId = req.user?._id;
-        if (!doctorId) {
-            return res.status(401).json({ message: 'User not authenticated' });
+        if (!userId || !medicationName || !dosage || !instructions) {
+            return res.status(400).json({
+                error: "userId, medicationName, dosage, and instructions are required"
+            });
         }
-        const { userId, doctorName, doctorRole, condition, medications, reasonForSuggestion } = req.body;
-        if (!userId || !doctorName || !doctorRole || !condition || !medications || !reasonForSuggestion) {
-            return res.status(400).json({ message: 'Missing required fields' });
+        if (!mongoose_1.default.Types.ObjectId.isValid(userId) || !mongoose_1.default.Types.ObjectId.isValid(doctorId)) {
+            return res.status(400).json({ error: "Invalid user or doctor ID" });
         }
+        console.log(`📝 Doctor ${doctorId} suggesting medication ${medicationName} to user ${userId}`);
         const suggestion = new MedicationSuggestion_1.default({
             userId,
             doctorId,
-            doctorName,
-            doctorRole,
-            condition,
-            medications,
-            reasonForSuggestion,
-            status: 'pending'
+            medicationName,
+            dosage,
+            instructions,
+            accepted: false
         });
         await suggestion.save();
-        return res.status(201).json({
-            success: true,
-            data: suggestion
-        });
+        const populatedSuggestion = await MedicationSuggestion_1.default.findById(suggestion._id)
+            .populate("doctorId", "name specialization")
+            .populate("userId", "name email");
+        console.log(`✅ Medication suggestion created: ${medicationName}`);
+        res.json(populatedSuggestion);
     }
     catch (error) {
-        console.error('Error creating medication suggestion:', error);
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Error creating medication suggestion'
-        });
+        console.error("❌ Error creating medication suggestion:", error);
+        res.status(500).json({ error: "Failed to create medication suggestion" });
     }
 };
-exports.createSuggestion = createSuggestion;
-const getUserSuggestions = async (req, res) => {
+exports.suggestMedication = suggestMedication;
+const getMedicationSuggestions = async (req, res) => {
     try {
         const userId = req.user?._id;
         if (!userId) {
-            return res.status(401).json({ message: 'User not authenticated' });
+            return res.status(401).json({ error: "User not authenticated" });
         }
-        const suggestions = await MedicationSuggestion_1.default.find({ userId });
-        return res.status(200).json({
-            success: true,
-            data: suggestions
-        });
+        console.log(`📋 Fetching medication suggestions for user ${userId}`);
+        const suggestions = await MedicationSuggestion_1.default.find({
+            userId,
+            accepted: false
+        }).populate("doctorId", "name specialization photo")
+            .sort({ createdAt: -1 });
+        console.log(`✅ Found ${suggestions.length} pending medication suggestions`);
+        res.json(suggestions);
     }
     catch (error) {
-        console.error('Error fetching medication suggestions:', error);
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Error fetching medication suggestions'
-        });
+        console.error("❌ Error fetching medication suggestions:", error);
+        res.status(500).json({ error: "Failed to fetch medication suggestions" });
     }
 };
-exports.getUserSuggestions = getUserSuggestions;
-const updateSuggestionStatus = async (req, res) => {
+exports.getMedicationSuggestions = getMedicationSuggestions;
+const acceptMedicationSuggestion = async (req, res) => {
     try {
+        const { suggestionId, scheduleTime } = req.body;
         const userId = req.user?._id;
         if (!userId) {
-            return res.status(401).json({ message: 'User not authenticated' });
+            return res.status(401).json({ error: "User not authenticated" });
         }
-        const { suggestionId, status } = req.body;
-        if (!suggestionId || !status || !['accepted', 'rejected'].includes(status)) {
-            return res.status(400).json({ message: 'Invalid request data' });
+        if (!suggestionId || !scheduleTime) {
+            return res.status(400).json({
+                error: "suggestionId and scheduleTime are required"
+            });
         }
-        const suggestion = await MedicationSuggestion_1.default.findOne({ _id: suggestionId, userId });
+        if (!mongoose_1.default.Types.ObjectId.isValid(suggestionId)) {
+            return res.status(400).json({ error: "Invalid suggestion ID" });
+        }
+        console.log(`📝 User ${userId} accepting medication suggestion ${suggestionId}`);
+        const suggestion = await MedicationSuggestion_1.default.findById(suggestionId);
         if (!suggestion) {
-            return res.status(404).json({ message: 'Suggestion not found' });
+            return res.status(404).json({ error: "Medication suggestion not found" });
         }
-        suggestion.status = status;
+        if (suggestion.userId.toString() !== userId) {
+            return res.status(403).json({ error: "Not authorized to accept this suggestion" });
+        }
+        if (suggestion.accepted) {
+            return res.status(400).json({ error: "Medication suggestion already accepted" });
+        }
+        suggestion.accepted = true;
         await suggestion.save();
-        if (status === 'accepted') {
-            const userProfile = await UserProfile_1.default.findOne({ userId });
-            if (!userProfile) {
-                return res.status(404).json({ message: 'User profile not found' });
-            }
-            const newMedications = suggestion.medications.map(med => ({
-                name: med.name,
-                qty: med.dosage,
-                dosage: med.frequency,
-                status: 'Upcoming',
-                time: new Date().toLocaleTimeString()
-            }));
-            if (!userProfile.medications) {
-                userProfile.medications = [];
-            }
-            userProfile.medications = [...userProfile.medications, ...newMedications];
-            await userProfile.save();
-        }
-        return res.status(200).json({
-            success: true,
-            data: suggestion
+        const scheduleEntry = new MedicationSchedule_1.default({
+            userId,
+            medicationName: suggestion.medicationName,
+            dosage: suggestion.dosage,
+            scheduleTime,
+            isActive: true
+        });
+        await scheduleEntry.save();
+        console.log(`✅ Medication ${suggestion.medicationName} accepted and scheduled`);
+        res.json({
+            suggestion,
+            schedule: scheduleEntry
         });
     }
     catch (error) {
-        console.error('Error updating suggestion status:', error);
-        return res.status(500).json({
-            success: false,
-            message: error.message || 'Error updating suggestion status'
-        });
+        console.error("❌ Error accepting medication suggestion:", error);
+        res.status(500).json({ error: "Failed to accept medication suggestion" });
     }
 };
-exports.updateSuggestionStatus = updateSuggestionStatus;
+exports.acceptMedicationSuggestion = acceptMedicationSuggestion;
+const getMedicationSchedule = async (req, res) => {
+    try {
+        const userId = req.user?._id;
+        if (!userId) {
+            return res.status(401).json({ error: "User not authenticated" });
+        }
+        console.log(`📋 Fetching medication schedule for user ${userId}`);
+        const schedule = await MedicationSchedule_1.default.find({
+            userId,
+            isActive: true
+        }).sort({ scheduleTime: 1 });
+        console.log(`✅ Found ${schedule.length} scheduled medications`);
+        res.json(schedule);
+    }
+    catch (error) {
+        console.error("❌ Error fetching medication schedule:", error);
+        res.status(500).json({ error: "Failed to fetch medication schedule" });
+    }
+};
+exports.getMedicationSchedule = getMedicationSchedule;
 //# sourceMappingURL=medicationSuggestionController.js.map

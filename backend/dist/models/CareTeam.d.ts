@@ -2,8 +2,10 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ICareTeam extends Document {
     userId: Schema.Types.ObjectId;
     doctorId: Schema.Types.ObjectId;
-    addedAt: Date;
+    accepted: boolean;
     isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }
 declare const _default: mongoose.Model<ICareTeam, {}, {}, {}, mongoose.Document<unknown, {}, ICareTeam> & ICareTeam & {
     _id: mongoose.Types.ObjectId;

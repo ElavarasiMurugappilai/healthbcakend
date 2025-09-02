@@ -90,6 +90,11 @@ const ProfileSchema = new mongoose_1.Schema({
     },
     careTeam: [CareTeamMemberSchema],
     selectedDoctors: [{ type: String }],
+    selectedCards: {
+        type: [String],
+        enum: ['fitness', 'bloodGlucose', 'careTeam', 'medicationSchedule'],
+        default: []
+    },
     completedAt: { type: Date },
     lastUpdated: { type: Date, default: Date.now }
 }, {
@@ -119,6 +124,16 @@ const UserSchema = new mongoose_1.Schema({
         type: ProfileSchema,
         default: () => ({})
     },
+    selectedCards: {
+        type: [String],
+        enum: ['fitness', 'bloodGlucose', 'careTeam', 'medicationSchedule'],
+        default: []
+    },
+    selectedDoctors: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Doctor' }],
+    dashboardStyle: { type: String },
+    fitnessGoal: { type: String },
+    activityLevel: { type: String },
+    stepTarget: { type: Number },
     isVerified: {
         type: Boolean,
         default: false

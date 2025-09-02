@@ -12,7 +12,7 @@ interface DashboardLayoutStepProps {
 export default function DashboardLayoutStep({ formData, updateFormData }: DashboardLayoutStepProps) {
   const widgetOptions = [
     { id: "fitness", label: "Fitness & Activity", icon: Activity, description: "Step tracking, workout goals, exercise progress" },
-    { id: "glucose", label: "Blood Glucose", icon: Droplets, description: "Glucose monitoring and trends" },
+    { id: "bloodGlucose", label: "Blood Glucose", icon: Droplets, description: "Glucose monitoring and trends" },
     { id: "medications", label: "Medication Schedule", icon: Pill, description: "Medication reminders and tracking" },
     { id: "care_team", label: "Care Team", icon: Users, description: "Healthcare providers and contacts" },
     { id: "appointments", label: "Appointments", icon: Calendar, description: "Upcoming medical appointments" },

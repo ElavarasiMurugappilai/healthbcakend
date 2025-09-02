@@ -72,6 +72,9 @@ interface IProfile {
   careTeam?: ICareTeamMember[];
   selectedDoctors?: string[];
   
+  // Dashboard Preferences
+  selectedCards?: string[];
+  
   // Metadata
   completedAt?: Date;
   lastUpdated?: Date;
@@ -164,6 +167,13 @@ const ProfileSchema = new Schema({
   careTeam: [CareTeamMemberSchema],
   selectedDoctors: [{ type: String }],
   
+  // Dashboard Preferences
+  selectedCards: {
+    type: [String],
+    enum: ['fitness', 'bloodGlucose', 'careTeam', 'medicationSchedule'],
+    default: []
+  },
+  
   // Metadata
   completedAt: { type: Date },
   lastUpdated: { type: Date, default: Date.now }
@@ -195,6 +205,17 @@ const UserSchema = new Schema({
     type: ProfileSchema,
     default: () => ({})
   },
+  // Main user fields for quiz preferences (for easy access)
+  selectedCards: {
+    type: [String],
+    enum: ['fitness', 'bloodGlucose', 'careTeam', 'medicationSchedule'],
+    default: []
+  },
+  selectedDoctors: [{ type: Schema.Types.ObjectId, ref: 'Doctor' }],
+  dashboardStyle: { type: String },
+  fitnessGoal: { type: String },
+  activityLevel: { type: String },
+  stepTarget: { type: Number },
   isVerified: {
     type: Boolean,
     default: false
@@ -238,6 +259,7 @@ UserSchema.methods.getPublicProfile = function() {
   delete userObject.verificationToken;
   delete userObject.resetPasswordToken;
   delete userObject.resetPasswordExpires;
+  
   return userObject;
 };
 

@@ -10,7 +10,7 @@ interface HealthTrackingStepProps {
 
 export default function HealthTrackingStep({ formData, updateFormData }: HealthTrackingStepProps) {
   const trackingOptions = [
-    { id: "glucose", label: "Blood Glucose", icon: Droplets, description: "Monitor blood sugar levels" },
+    { id: "bloodGlucose", label: "Blood Glucose", icon: Droplets, description: "Monitor blood sugar levels" },
     { id: "blood_pressure", label: "Blood Pressure", icon: Heart, description: "Track systolic and diastolic pressure" },
     { id: "weight", label: "Weight", icon: Scale, description: "Monitor body weight changes" },
     { id: "heart_rate", label: "Heart Rate", icon: Heart, description: "Track resting and active heart rate" },
