@@ -146,7 +146,7 @@ const AI: React.FC = () => {
           <span>🤖</span> AI Insights
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-items-center">
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="sync" initial={false}>
             {insights.slice(startIdx, endIdx).map((insight, i) => (
               <FlipCard
                 key={startIdx + i}

@@ -160,7 +160,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
 
   const handleTakeMedication = (medicationId: string, time: string) => {
     const newLog: MedicationLog = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       medicationId,
       date: today,
       time,
@@ -172,7 +172,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
 
   const handleSkipMedication = (medicationId: string, time: string) => {
     const newLog: MedicationLog = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       medicationId,
       date: today,
       time,
@@ -186,7 +186,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
 
   const handleMissedMedication = (medicationId: string, time: string) => {
     const newLog: MedicationLog = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       medicationId,
       date: today,
       time,
@@ -256,7 +256,7 @@ const MedicationsPage: React.FC<MedicationsPageProps> = ({ searchValue }) => {
     }
 
     const medication: Medication = {
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: newMedication.name,
       dosage: newMedication.dosage,
       frequency: newMedication.frequency,

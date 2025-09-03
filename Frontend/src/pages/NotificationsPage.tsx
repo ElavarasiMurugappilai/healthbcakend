@@ -80,7 +80,7 @@
           setTimeout(() => {
             setNotifications(current => [
               {
-                id: Date.now(),
+                id: parseInt(`${Date.now()}-${Math.random().toString(36).substr(2, 9)}`),
                 type: randomType,
                 title: randomTitle,
                 desc: randomDesc,
@@ -127,7 +127,7 @@
         const randomDesc = sampleDescs[Math.floor(Math.random() * sampleDescs.length)];
         setNotifications(prev => [
           {
-            id: Date.now(),
+            id: parseInt(`${Date.now()}-${Math.random().toString(36).substr(2, 9)}`),
             type: randomType,
             title: randomTitle,
             desc: randomDesc,

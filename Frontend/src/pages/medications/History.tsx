@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icons } from "@/components/ui/icons";
+import API from "@/api";
 
 interface HistoryProps {
   medicationLogs: any[];
@@ -17,14 +18,64 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [currentMonth, setCurrentMonth] = useState<number>(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
-  
-  // Comprehensive sample data for different dates with various statuses
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [medicationHistory, setMedicationHistory] = useState<any[]>([]);
+  const [userMedications, setUserMedications] = useState<any[]>([]);
+
+  // Fetch medication history from backend
+  const fetchMedicationHistory = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [historyRes, medicationsRes] = await Promise.all([
+        API.get('/medications/history?limit=100'),
+        API.get('/medications/user')
+      ]);
+
+      if (historyRes.data.success) {
+        setMedicationHistory(historyRes.data.data);
+      }
+
+      if (medicationsRes.data.success) {
+        setUserMedications(medicationsRes.data.data);
+      }
+    } catch (err: any) {
+      console.error('Error fetching medication history:', err);
+      setError('Failed to load medication history');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMedicationHistory();
+  }, []);
+
+  // Transform backend data to match component format
+  const transformHistoryData = (history: any[]) => {
+    return history.map((item: any) => ({
+      id: item._id,
+      medicationId: item.medicationId?._id || item.medicationId,
+      date: new Date(item.updatedAt).toISOString().slice(0, 10),
+      time: new Date(item.scheduledTime || item.updatedAt).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+      }),
+      status: item.status,
+      notes: item.notes || `${item.status === 'taken' ? 'Taken' : item.status === 'missed' ? 'Missed' : item.status === 'accepted' ? 'Accepted' : item.status === 'rejected' ? 'Rejected' : 'Skipped'} medication`
+    }));
+  };
+
+  // Comprehensive sample data for different dates with various statuses (fallback)
   const enhancedMedicationLogs = [
     // July 2025 - Current month data
     { id: '1', medicationId: '1', date: '2025-07-29', time: '08:00', status: 'taken', notes: 'Taken with breakfast' },
     { id: '2', medicationId: '1', date: '2025-07-29', time: '20:00', status: 'taken', notes: 'Taken with dinner' },
-    { id: '3', medicationId: '2', date: '2025-07-29', time: '09:00', status: 'taken', notes: 'Taken with breakfast' },
-    { id: '4', medicationId: '3', date: '2025-07-29', time: '07:00', status: 'taken', notes: 'Taken on empty stomach' },
+    { id: '3', medicationId: '2', date: '2025-07-29', time: '09:00', status: 'accepted', notes: 'Accepted medication suggestion from Dr. Smith' },
+    { id: '4', medicationId: '3', date: '2025-07-29', time: '07:00', status: 'rejected', notes: 'Rejected medication suggestion - allergic reaction concern' },
     
     { id: '5', medicationId: '1', date: '2025-07-28', time: '08:00', status: 'missed', notes: 'Forgot to take' },
     { id: '6', medicationId: '1', date: '2025-07-28', time: '20:00', status: 'taken', notes: 'Taken with dinner' },
@@ -89,8 +140,9 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
     { id: '52', medicationId: '3', date: '2025-08-02', time: '07:00', status: 'skipped', notes: 'Skipped by user' }
   ];
   
-  // Use enhanced logs instead of original
-  const allLogs = [...medicationLogs, ...enhancedMedicationLogs];
+  // Use backend data if available, otherwise use sample data
+  const backendLogs = transformHistoryData(medicationHistory);
+  const allLogs = backendLogs.length > 0 ? [...medicationLogs, ...backendLogs] : [...medicationLogs, ...enhancedMedicationLogs];
   
   // Default medications data if none provided
   const defaultMedications = [
@@ -101,7 +153,15 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
     { id: '5', name: 'Atorvastatin', dosage: '20 mg', instructions: 'Take in the evening' }
   ];
   
-  const medicationsToUse = medications.length > 0 ? medications : defaultMedications;
+  // Use backend medications if available, otherwise use defaults
+  const backendMedications = userMedications.map((med: any) => ({
+    id: med._id,
+    name: med.name,
+    dosage: med.dosage,
+    instructions: med.instructions || 'Take as prescribed'
+  }));
+  const medicationsToUse = backendMedications.length > 0 ? backendMedications : 
+                          medications.length > 0 ? medications : defaultMedications;
   
   // Get unique dates from logs
   const uniqueDates = [...new Set(allLogs.map(log => log.date))].sort().reverse();
@@ -152,8 +212,12 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
     switch (status) {
       case 'taken':
         return <Icons.checkCircle className="w-4 h-4 text-green-500" />;
+      case 'accepted':
+        return <Icons.checkCircle className="w-4 h-4 text-blue-500" />;
       case 'missed':
         return <Icons.xCircle className="w-4 h-4 text-red-500" />;
+      case 'rejected':
+        return <Icons.xCircle className="w-4 h-4 text-red-600" />;
       case 'skipped':
         return <Icons.alertCircle className="w-4 h-4 text-yellow-500" />;
       default:
@@ -207,7 +271,9 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
                     log.status === 'taken' ? 'bg-green-500' :
+                    log.status === 'accepted' ? 'bg-blue-500' :
                     log.status === 'missed' ? 'bg-red-500' :
+                    log.status === 'rejected' ? 'bg-red-600' :
                     'bg-yellow-500'
                   }`}>
                     <Icons.pill className="w-3 h-3 text-white" />
@@ -243,12 +309,19 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
                       <Badge
                         variant={
                           log.status === 'taken' ? 'default' :
+                          log.status === 'accepted' ? 'default' :
                           log.status === 'missed' ? 'destructive' :
+                          log.status === 'rejected' ? 'destructive' :
                           'secondary'
                         }
-                        className="text-xs"
+                        className={`text-xs ${
+                          log.status === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                          log.status === 'rejected' ? 'bg-red-100 text-red-800' : ''
+                        }`}
                       >
-                        {getStatusText(log.status)}
+                        {log.status === 'accepted' ? '✅ Accepted' :
+                         log.status === 'rejected' ? '❌ Rejected' :
+                         getStatusText(log.status)}
                       </Badge>
                     </motion.div>
                   </div>
@@ -375,6 +448,40 @@ const History: React.FC<HistoryProps> = ({ medicationLogs, medications, getStatu
 
     </Card>
   );
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex items-center space-x-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          <span className="text-sm text-gray-600 dark:text-gray-300">Loading medication history...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-red-500">
+          <Icons.alertCircle className="w-12 h-12" />
+        </div>
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Error Loading History</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{error}</p>
+          <Button 
+            onClick={fetchMedicationHistory} 
+            className="mt-3"
+            size="sm"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6 ">

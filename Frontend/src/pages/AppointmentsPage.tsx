@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -194,7 +194,29 @@ const subtlePrimary =
   "transition-all duration-200 hover:scale-[1.02] focus:scale-[1.02] hover:bg-blue-600/90 focus:bg-blue-600/90";
 
 function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () => void; onBook: (appt: Appointment) => void }) {
-  const [form, setForm] = useState({ doctor: "", date: "", time: "", mode: "In-person" });
+  const [form, setForm] = useState({ doctor: "", doctorId: "", date: "", time: "", mode: "In-person" });
+  const [careTeamDoctors, setCareTeamDoctors] = useState<any[]>([]);
+  const [systemDoctors, setSystemDoctors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch care team and system doctors
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const [careTeamResponse, systemResponse] = await Promise.all([
+          API.get('/care-team'),
+          API.get('/doctors/system')
+        ]);
+        setCareTeamDoctors(careTeamResponse.data.data || []);
+        setSystemDoctors(systemResponse.data.data || []);
+      } catch (error) {
+        console.error('Failed to fetch doctors:', error);
+      }
+    };
+    if (open) {
+      fetchDoctors();
+    }
+  }, [open]);
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-[90vw] max-w-md sm:max-w-lg md:max-w-xl p-0 overflow-hidden">
@@ -232,25 +254,31 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
               <Label htmlFor="doctor" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Doctor Name *
               </Label>
-              <Select value={form.doctor} onValueChange={(value) => setForm(f => ({ ...f, doctor: value }))}>
+              <Select value={form.doctor} onValueChange={(value: string) => {
+                const selectedDoctor = [...careTeamDoctors, ...systemDoctors].find(d => d.name === value);
+                setForm(f => ({ ...f, doctor: value, doctorId: selectedDoctor?._id || '' }));
+              }}>
                 <SelectTrigger className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Select a doctor" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Dr. Smith">Dr. Smith - General Physician</SelectItem>
-                  <SelectItem value="Dr. Lee">Dr. Lee - Cardiologist</SelectItem>
-                  <SelectItem value="Dr. Patel">Dr. Patel - Endocrinologist</SelectItem>
-                  <SelectItem value="Dr. Gomez">Dr. Gomez - Neurologist</SelectItem>
-                  <SelectItem value="Dr. Brown">Dr. Brown - Dermatologist</SelectItem>
-                  <SelectItem value="Dr. Green">Dr. Green - Orthopedist</SelectItem>
-                  <SelectItem value="Dr. White">Dr. White - Psychiatrist</SelectItem>
-                  <SelectItem value="Dr. Nancy">Dr. Nancy - Pediatrician</SelectItem>
-                  <SelectItem value="Dr. Mike">Dr. Mike - Oncologist</SelectItem>
-                  <SelectItem value="Dr. Suba">Dr. Suba - Gastroenterologist</SelectItem>
-                  <SelectItem value="Dr. Raayan">Dr. Raayan - Urologist</SelectItem>
-                  <SelectItem value="Dr. Kavya">Dr. Kavya - Gynecologist</SelectItem>
-                  <SelectItem value="Dr. Nisanth">Dr. Nisanth - Ophthalmologist</SelectItem>
-                  <SelectItem value="Dr. Ramana">Dr. Ramana - Pulmonologist</SelectItem>
+                  {careTeamDoctors.length > 0 && (
+                    <>
+                      <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">Your Care Team</div>
+                      {careTeamDoctors.map((doctor) => (
+                        <SelectItem key={doctor._id} value={doctor.name}>
+                          {doctor.name} - {doctor.specialty}
+                        </SelectItem>
+                      ))}
+                      <div className="border-t my-1"></div>
+                    </>
+                  )}
+                  <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">System Doctors</div>
+                  {systemDoctors.map((doctor) => (
+                    <SelectItem key={doctor._id} value={doctor.name}>
+                      {doctor.name} - {doctor.specialty}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -309,14 +337,31 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
                 Cancel
               </Button>
               <Button
-                onClick={() => {
-                  onBook({ ...form, id: Date.now(), status: "Upcoming" } as Appointment);
-                  onClose();
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const appointmentData = {
+                      doctorId: form.doctorId,
+                      doctorName: form.doctor,
+                      date: form.date,
+                      time: form.time,
+                      type: form.mode.toLowerCase(),
+                      status: 'upcoming',
+                      notes: ''
+                    };
+                    await onBook(appointmentData as any);
+                    setForm({ doctor: "", doctorId: "", date: "", time: "", mode: "In-person" });
+                    onClose();
+                  } catch (error) {
+                    console.error('Failed to book appointment:', error);
+                  } finally {
+                    setLoading(false);
+                  }
                 }}
-                disabled={!form.doctor || !form.date || !form.time}
+                disabled={!form.doctor || !form.date || !form.time || loading}
                 className="flex-1 py-2.5 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                Book Appointment
+                {loading ? 'Booking...' : 'Book Appointment'}
               </Button>
             </DialogFooter>
           </motion.div>
@@ -648,7 +693,7 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
       setLoading(true);
       setError(null);
       const response = await API.get('/appointments');
-      setAppointments(response.data);
+      setAppointments(response.data.data);
     } catch (err: unknown) {
       console.error('Failed to fetch appointments:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load appointments';
@@ -671,7 +716,7 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
 
   const handleComplete = async (appointment: Appointment) => {
     try {
-      await API.patch(`/appointments/${appointment.id}`, { status: 'Completed' });
+      await API.patch(`/appointments/${appointment.id}/status`, { status: 'completed' });
       setAppointments(prev => 
         prev.map(a => 
           a.id === appointment.id 
@@ -704,11 +749,11 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
     }
   };
 
-  const handleBookAppointment = async (appointmentData: Omit<Appointment, 'id'>) => {
+  const handleBookAppointment = async (appointmentData: any) => {
     try {
-      const response = await API.post('/appointments/book', appointmentData);
-      setAppointments(prev => [...prev, response.data]);
-      return response.data;
+      const response = await API.post('/appointments', appointmentData);
+      setAppointments(prev => [...prev, response.data.data]);
+      return response.data.data;
     } catch (err: unknown) {
       console.error('Failed to book appointment:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to book appointment';
@@ -719,15 +764,15 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
 
   const handleRescheduleAppointment = async (appointmentId: string | number, rescheduleData: Partial<Appointment>) => {
     try {
-      const response = await API.patch(`/appointments/${appointmentId}`, rescheduleData);
+      const response = await API.put(`/appointments/${appointmentId}`, rescheduleData);
       setAppointments(prev => 
         prev.map(a => 
           a.id === appointmentId 
-            ? { ...a, ...response.data }
+            ? { ...a, ...response.data.data }
             : a
         )
       );
-      return response.data;
+      return response.data.data;
     } catch (err: unknown) {
       console.error('Failed to reschedule appointment:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to reschedule appointment';

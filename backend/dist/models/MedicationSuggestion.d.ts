@@ -4,10 +4,11 @@ export interface IMedicationSuggestion extends Document {
     doctorId: Schema.Types.ObjectId;
     medicationName: string;
     dosage: string;
-    instructions: string;
-    accepted: boolean;
+    frequency: string;
+    duration: string;
+    status: 'pending' | 'accepted' | 'rejected';
     createdAt: Date;
-    updatedAt: Date;
+    respondedAt?: Date;
 }
 declare const _default: mongoose.Model<IMedicationSuggestion, {}, {}, {}, mongoose.Document<unknown, {}, IMedicationSuggestion> & IMedicationSuggestion & {
     _id: mongoose.Types.ObjectId;

@@ -15,13 +15,21 @@ const measurements_1 = __importDefault(require("./routes/measurements"));
 const fitnessGoalRoutes_1 = __importDefault(require("./routes/fitnessGoalRoutes"));
 const fitness_1 = __importDefault(require("./routes/fitness"));
 const doctors_1 = __importDefault(require("./routes/doctors"));
-const medications_1 = __importDefault(require("./routes/medications"));
 const personal_doctors_1 = __importDefault(require("./routes/personal-doctors"));
 const careTeamRoutes_1 = __importDefault(require("./routes/careTeamRoutes"));
-const medicationSuggestionRoutes_1 = __importDefault(require("./routes/medicationSuggestionRoutes"));
+const medicationRoutes_1 = __importDefault(require("./routes/medicationRoutes"));
+const medications_1 = __importDefault(require("./routes/medications"));
+const medicationSuggestions_1 = __importDefault(require("./routes/medicationSuggestions"));
 const doctors_2 = __importDefault(require("./routes/doctors"));
-const medications_2 = __importDefault(require("./routes/medications"));
+const appointments_1 = __importDefault(require("./routes/appointments"));
+const challenges_1 = __importDefault(require("./routes/challenges"));
+const health_insights_1 = __importDefault(require("./routes/health-insights"));
+const healthMetrics_1 = __importDefault(require("./routes/healthMetrics"));
+const notifications_1 = __importDefault(require("./routes/notifications"));
 const seedDoctors_1 = require("./utils/seedDoctors");
+const seedMedications_1 = require("./utils/seedMedications");
+const seedChallenges_1 = require("./utils/seedChallenges");
+const seedHealthData_1 = require("./utils/seedHealthData");
 dotenv_1.default.config();
 const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
@@ -43,6 +51,9 @@ const connectDB = async (retryCount = 0) => {
         });
         console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
         await (0, seedDoctors_1.seedSystemDoctors)();
+        await (0, seedMedications_1.seedMedicationSuggestions)();
+        await (0, seedChallenges_1.seedChallenges)();
+        await (0, seedHealthData_1.seedHealthData)();
     }
     catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -70,6 +81,8 @@ const allowedOrigins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5174",
+    "http://localhost:5175",
+    "http://127.0.0.1:50935",
     process.env.FRONTEND_URL || "",
 ].filter(Boolean);
 const corsOptions = {
@@ -124,11 +137,16 @@ app.use("/api/goals", fitnessGoalRoutes_1.default);
 app.use("/api/fitness", fitness_1.default);
 app.use("/api/doctors", doctors_1.default);
 app.use("/api/doctors", personal_doctors_1.default);
-app.use("/api/medications", medications_1.default);
 app.use("/api/care-team", careTeamRoutes_1.default);
-app.use("/api/medication", medicationSuggestionRoutes_1.default);
+app.use("/api/care-team", medicationSuggestions_1.default);
+app.use("/api/medication", medicationRoutes_1.default);
+app.use("/api/medications", medications_1.default);
 app.use("/api/doctors", doctors_2.default);
-app.use("/api/medications", medications_2.default);
+app.use("/api/appointments", appointments_1.default);
+app.use("/api/challenges", challenges_1.default);
+app.use("/api/health-insights", health_insights_1.default);
+app.use("/api/health-metrics", healthMetrics_1.default);
+app.use("/api/notifications", notifications_1.default);
 app.use("/api/*", (req, res) => {
     console.log(`❓ API endpoint not found: ${req.originalUrl}`);
     res.status(404).json({
@@ -141,6 +159,26 @@ app.use("/api/*", (req, res) => {
             "/api/profile/quiz",
             "/api/profile",
             "/api/measurements",
+            "/api/goals",
+            "/api/fitness",
+            "/api/doctors/system",
+            "/api/doctors/selected",
+            "/api/care-team",
+            "/api/medication/suggest",
+            "/api/medication/suggestions",
+            "/api/medication/pending",
+            "/api/medication/accept",
+            "/api/medications/user",
+            "/api/medications/history",
+            "/api/medications/today",
+            "/api/medications/schedule",
+            "/api/appointments",
+            "/api/challenges",
+            "/api/health-insights",
+            "/api/health-metrics/metrics",
+            "/api/health-metrics/trends",
+            "/api/health-metrics/insights",
+            "/api/notifications",
         ],
     });
 });
@@ -167,14 +205,24 @@ app.use((err, req, res, next) => {
         ...(isDevelopment && { stack: errorStack }),
     });
 });
-const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log("\n🎉 =================================");
-    console.log("🚀 Server Status: ONLINE");
-    console.log(`🌐 Server URL: http://localhost:${PORT}`);
-    console.log(`📊 Health Check: http://localhost:${PORT}/health`);
-    console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
-    console.log(`🗄️  Database: ${mongoose_1.default.connection.readyState === 1 ? "Connected" : "Connecting..."}`);
-    console.log(`⚙️  Environment: ${process.env.NODE_ENV || "development"}`);
+const server = app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔗 MongoDB: ${process.env.MONGO_URI ? 'Connected' : 'Not configured'}`);
+    console.log(`🔐 JWT: ${process.env.JWT_SECRET ? 'Configured' : 'Not configured'}`);
+    console.log(`\n📋 Available API Endpoints:`);
+    console.log(`   Authentication: /api/auth/*`);
+    console.log(`   Profile & Quiz: /api/profile/*`);
+    console.log(`   Health Metrics: /api/health-metrics/*`);
+    console.log(`   Care Team: /api/care-team/*`);
+    console.log(`   Medications: /api/medication/*`);
+    console.log(`   Doctors: /api/doctors/*`);
+    console.log(`   Appointments: /api/appointments/*`);
+    console.log(`   Challenges: /api/challenges/*`);
+    console.log(`   Health Insights: /api/health-insights/*`);
+    console.log(`   Notifications: /api/notifications/*`);
+    console.log(`   Goals & Fitness: /api/goals/* & /api/fitness/*`);
+    console.log(`\n✅ Health Monitoring Backend Complete`);
     console.log("🎉 =================================\n");
 });
 const shutdown = (signal) => {

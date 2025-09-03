@@ -361,11 +361,24 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
       setLoading(true);
       setError(null);
       const response = await API.get('/challenges');
-      // Map API response to include icons and colors
-      const challengesWithIcons = response.data.map((challenge: any) => ({
-        ...challenge,
+      // Map API response to match frontend Challenge type
+      const challengesWithIcons = response.data.data.map((challenge: any) => ({
+        id: challenge.id,
+        title: challenge.name || 'Unnamed Challenge',
+        description: challenge.description || '',
+        type: mapChallengeType(challenge.type),
+        target: challenge.goal || 100,
+        current: challenge.progress || 0,
+        unit: challenge.unit || 'points',
         icon: getIconForChallenge(challenge.type),
-        color: getColorForChallenge(challenge.type)
+        color: getColorForChallenge(challenge.type),
+        points: challenge.reward ? parseInt(challenge.reward.split(' ')[0]) : 50,
+        isActive: challenge.status === 'active',
+        startDate: challenge.startDate || new Date().toISOString().split('T')[0],
+        endDate: challenge.endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        participants: 25, // Mock data
+        difficulty: getDifficultyFromType(challenge.type),
+        tip: getTipForChallenge(challenge.type)
       }));
       setChallenges(challengesWithIcons);
     } catch (err: unknown) {
@@ -396,9 +409,98 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
     }
   };
 
-  // Load challenges on component mount
+  // Helper function to map backend challenge types to frontend types
+  const mapChallengeType = (type: string): 'daily' | 'weekly' | 'monthly' => {
+    switch (type) {
+      case 'fitness':
+      case 'wellness':
+        return 'daily';
+      case 'nutrition':
+        return 'weekly';
+      default:
+        return 'monthly';
+    }
+  };
+
+  // Helper function to determine difficulty based on type
+  const getDifficultyFromType = (type: string): 'easy' | 'medium' | 'hard' => {
+    switch (type) {
+      case 'fitness':
+        return 'medium';
+      case 'wellness':
+        return 'easy';
+      case 'nutrition':
+        return 'hard';
+      default:
+        return 'medium';
+    }
+  };
+
+  // Helper function to get tips for challenges
+  const getTipForChallenge = (type: string): string => {
+    switch (type) {
+      case 'fitness':
+        return 'Start with small goals and gradually increase your activity level.';
+      case 'wellness':
+        return 'Consistency is key. Try to maintain healthy habits daily.';
+      case 'nutrition':
+        return 'Focus on whole foods and balanced meals for better results.';
+      default:
+        return 'Stay motivated and track your progress regularly.';
+    }
+  };
+
+  // Fetch leaderboard from API
+  const fetchLeaderboard = async () => {
+    try {
+      const response = await API.get('/challenges/leaderboard?limit=10');
+      if (response.data.success) {
+        const leaderboardData = response.data.data.map((entry: any) => ({
+          id: entry._id,
+          name: entry.name,
+          avatar: entry.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.name}`,
+          points: entry.totalPoints,
+          rank: entry.rank,
+          challengesCompleted: entry.challengesCompleted
+        }));
+        setLeaderboard(leaderboardData);
+      }
+    } catch (err: unknown) {
+      console.error('Failed to fetch leaderboard:', err);
+      // Use fallback data if API fails
+      setLeaderboard([
+        {
+          id: '1',
+          name: 'Sarah Johnson',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+          points: 2840,
+          rank: 1,
+          challengesCompleted: 23
+        },
+        {
+          id: '2',
+          name: 'Mike Chen',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike',
+          points: 2650,
+          rank: 2,
+          challengesCompleted: 21
+        },
+        {
+          id: '3',
+          name: 'Emma Davis',
+          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma',
+          points: 2420,
+          rank: 3,
+          challengesCompleted: 19
+        }
+      ]);
+    }
+  };
+
+  // Load challenges and leaderboard on component mount
   useEffect(() => {
     fetchChallenges();
+    fetchLeaderboard();
   }, []);
 
   const [badges, setBadges] = useState<Badge[]>([
@@ -442,48 +544,7 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
     }
   ]);
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([
-    {
-      id: '1',
-      name: 'Sarah Johnson',
-      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      points: 2840,
-      rank: 1,
-      challengesCompleted: 23
-    },
-    {
-      id: '2',
-      name: 'Mike Chen',
-      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      points: 2650,
-      rank: 2,
-      challengesCompleted: 21
-    },
-    {
-      id: '3',
-      name: 'Emma Davis',
-      avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      points: 2420,
-      rank: 3,
-      challengesCompleted: 19
-    },
-    {
-      id: '4',
-      name: 'Alex Thompson',
-      avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
-      points: 2180,
-      rank: 4,
-      challengesCompleted: 17
-    },
-    {
-      id: '5',
-      name: 'Lisa Wang',
-      avatar: 'https://randomuser.me/api/portraits/women/50.jpg',
-      points: 1950,
-      rank: 5,
-      challengesCompleted: 15
-    }
-  ]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
   const [activeTab, setActiveTab] = useState<'challenges' | 'badges' | 'leaderboard'>('challenges');
   const [userPoints, setUserPoints] = useState(1250);

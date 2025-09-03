@@ -3,7 +3,10 @@ export interface IMedicationSchedule extends Document {
     userId: Schema.Types.ObjectId;
     medicationName: string;
     dosage: string;
+    frequency: string;
     scheduleTime: string;
+    source: 'manual' | 'doctor-suggestion';
+    suggestionId?: Schema.Types.ObjectId;
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;

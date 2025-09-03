@@ -28,6 +28,7 @@ import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import EnhancedQuizPage from "./pages/EnhancedQuizPage";
 import OnboardingPage from "./pages/Onboarding";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // Responsive window width hook (unused currently)
 // function useWindowWidth() {
@@ -254,17 +255,17 @@ export default function App() {
                 style={{ height: isAuthPage ? "auto" : "100%" }}
               >
                 <Routes location={location} key={location.pathname}>
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/medications" element={<MedicationsPage searchValue={searchValue} />} />
-                  <Route path="/challenges" element={<ChallengesPage searchValue={searchValue} />} />
-                  <Route path="/health-insights" element={<HealthInsightsPage searchValue={searchValue} />} />
-                  <Route path="/appointments" element={<AppointmentsPage searchValue={searchValue} />} />
-                  <Route path="/notifications" element={<NotificationsPage searchValue={searchValue} />} />
+                  <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                  <Route path="/medications" element={<ProtectedRoute><MedicationsPage searchValue={searchValue} /></ProtectedRoute>} />
+                  <Route path="/challenges" element={<ProtectedRoute><ChallengesPage searchValue={searchValue} /></ProtectedRoute>} />
+                  <Route path="/health-insights" element={<ProtectedRoute><HealthInsightsPage searchValue={searchValue} /></ProtectedRoute>} />
+                  <Route path="/appointments" element={<ProtectedRoute><AppointmentsPage searchValue={searchValue} /></ProtectedRoute>} />
+                  <Route path="/notifications" element={<ProtectedRoute><NotificationsPage searchValue={searchValue} /></ProtectedRoute>} />
                   <Route path="/" element={<OnboardingPage />} />
                   <Route path="/signup" element={<SignupPage />} />
                   <Route path="/login" element={<LoginPage />} />
-                  <Route path="/quiz" element={<EnhancedQuizPage />} />
-                  <Route path="/dashboard-quiz" element={<EnhancedQuizPage />} />
+                  <Route path="/quiz" element={<ProtectedRoute><EnhancedQuizPage /></ProtectedRoute>} />
+                  <Route path="/dashboard-quiz" element={<ProtectedRoute><EnhancedQuizPage /></ProtectedRoute>} />
                   <Route path="/health-questionnaire" element={<Navigate to="/quiz" replace />} />
                   <Route path="*" element={<Navigate to="/login" replace />} />
         

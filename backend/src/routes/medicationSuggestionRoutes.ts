@@ -15,6 +15,9 @@ router.post("/suggest", authenticateToken, suggestMedication);
 // GET /api/medication/suggestions
 router.get("/suggestions", authenticateToken, getMedicationSuggestions);
 
+// GET /api/medication/pending (alias for suggestions for quiz compatibility)
+router.get("/pending", authenticateToken, getMedicationSuggestions);
+
 // POST /api/medication/accept
 router.post("/accept", authenticateToken, acceptMedicationSuggestion);
 

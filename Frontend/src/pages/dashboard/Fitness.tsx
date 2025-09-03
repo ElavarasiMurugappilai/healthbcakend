@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface FitnessProps {
   setShowFitnessModal: (show: boolean) => void;
@@ -138,6 +138,9 @@ const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = fa
                 <DialogTitle className="text-xl font-bold text-gray-800">
                   🏃‍♂️ Fitness Dashboard
                 </DialogTitle>
+                <DialogDescription>
+                  View your fitness progress, goals, and workout statistics
+                </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-6">

@@ -6,6 +6,8 @@ import { Icons } from "@/components/ui/icons";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { Check, X, Pill } from "lucide-react";
 
 type CareTeamMember = {
   _id?: string;
@@ -19,6 +21,23 @@ type CareTeamMember = {
   messages?: string[];
   rating?: number;
   experience?: number;
+};
+
+type MedicationSuggestion = {
+  _id: string;
+  doctorId: {
+    _id: string;
+    name: string;
+    specialization: string;
+    photo?: string;
+  };
+  medicationName: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+  respondedAt?: string;
 };
 
 interface MyCareTeamProps {
@@ -41,18 +60,26 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
   const [chatMember, setChatMember] = useState<CareTeamMember | null>(null);
   const [showAllModal, setShowAllModal] = useState(false);
   const [selectedDoctors, setSelectedDoctors] = useState<CareTeamMember[]>([]);
+  const [medicationSuggestions, setMedicationSuggestions] = useState<MedicationSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch selected doctors from backend
+  // Fetch selected doctors and medication suggestions from backend
   useEffect(() => {
-    const fetchSelectedDoctors = async () => {
+    const fetchData = async () => {
       try {
-        const response = await API.get('/doctors/selected');
-        if (response.data.success) {
-          setSelectedDoctors(response.data.data.selectedDoctors || []);
+        // Fetch selected doctors
+        const doctorsResponse = await API.get('/doctors/selected');
+        if (doctorsResponse.data.success) {
+          setSelectedDoctors(doctorsResponse.data.data.selectedDoctors || []);
+        }
+
+        // Fetch medication suggestions
+        const suggestionsResponse = await API.get('/care-team/suggestions');
+        if (suggestionsResponse.data.success) {
+          setMedicationSuggestions(suggestionsResponse.data.data || []);
         }
       } catch (error) {
-        console.error('Failed to fetch selected doctors:', error);
+        console.error('Failed to fetch data:', error);
         // Fallback to prop data if API fails
         setSelectedDoctors(propSelectedDoctors || []);
       } finally {
@@ -60,8 +87,42 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
       }
     };
 
-    fetchSelectedDoctors();
+    fetchData();
   }, [propSelectedDoctors]);
+
+  // Handle medication suggestion acceptance
+  const handleAcceptSuggestion = async (suggestionId: string) => {
+    try {
+      const response = await API.patch(`/medications/suggestions/${suggestionId}/accept`);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        // Update local state
+        setMedicationSuggestions(prev => 
+          prev.map(s => s._id === suggestionId ? { ...s, status: 'accepted', respondedAt: new Date().toISOString() } : s)
+        );
+      }
+    } catch (error) {
+      console.error('Error accepting medication:', error);
+      toast.error('Failed to accept medication');
+    }
+  };
+
+  // Handle medication suggestion rejection
+  const handleRejectSuggestion = async (suggestionId: string, reason?: string) => {
+    try {
+      const response = await API.patch(`/medications/suggestions/${suggestionId}/reject`, { reason });
+      if (response.data.success) {
+        toast.success(response.data.message);
+        // Update local state
+        setMedicationSuggestions(prev => 
+          prev.map(s => s._id === suggestionId ? { ...s, status: 'rejected', respondedAt: new Date().toISOString() } : s)
+        );
+      }
+    } catch (error) {
+      console.error('Error rejecting medication:', error);
+      toast.error('Failed to reject medication');
+    }
+  };
 
   // When chatMember is set, mark as read
   useEffect(() => {
@@ -206,15 +267,90 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
                   <div className="text-xs text-muted-foreground">{chatMember.role || chatMember.specialization}</div>
                 </div>
               </div>
-              <div className="max-h-40 overflow-y-auto space-y-2">
-                {chatMember.messages && chatMember.messages.length > 0 ? (
-                  chatMember.messages.map((msg, idx) => (
-                    <div key={idx} className="bg-blue-100 text-blue-800 rounded px-3 py-2 text-sm">
-                      {msg}
+              <div className="max-h-96 overflow-y-auto space-y-3">
+                {medicationSuggestions
+                  .filter(suggestion => suggestion.doctorId._id === chatMember._id)
+                  .map((suggestion) => (
+                    <div key={suggestion._id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Pill className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="bg-white dark:bg-gray-700 rounded-lg p-3 shadow-sm">
+                            <div className="font-medium text-sm mb-2">Medication Suggestion</div>
+                            <div className="space-y-1 text-sm">
+                              <div><strong>Medication:</strong> {suggestion.medicationName}</div>
+                              <div><strong>Dosage:</strong> {suggestion.dosage}</div>
+                              <div><strong>Frequency:</strong> {suggestion.frequency}</div>
+                              <div><strong>Duration:</strong> {suggestion.duration}</div>
+                            </div>
+                            <div className="text-xs text-gray-500 mt-2">
+                              {new Date(suggestion.createdAt).toLocaleDateString()} at {new Date(suggestion.createdAt).toLocaleTimeString()}
+                            </div>
+                          </div>
+                          
+                          {/* Action Buttons */}
+                          {suggestion.status === 'pending' && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                onClick={() => handleRejectSuggestion(suggestion._id)}
+                              >
+                                <X className="w-4 h-4 mr-1" />
+                                Reject
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={() => handleAcceptSuggestion(suggestion._id)}
+                              >
+                                <Check className="w-4 h-4 mr-1" />
+                                Accept
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {/* Status Badge */}
+                          {suggestion.status !== 'pending' && (
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant={suggestion.status === 'accepted' ? 'default' : 'secondary'}
+                                className={suggestion.status === 'accepted' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                              >
+                                {suggestion.status === 'accepted' ? '✅ Accepted' : '❌ Rejected'}
+                              </Badge>
+                              {suggestion.respondedAt && (
+                                <span className="text-xs text-gray-500">
+                                  {new Date(suggestion.respondedAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))
-                ) : (
-                  <div className="text-muted-foreground text-sm">No messages yet.</div>
+                }
+                
+                {/* Regular Messages */}
+                {chatMember.messages && chatMember.messages.length > 0 && (
+                  <div className="space-y-2">
+                    {chatMember.messages.map((msg, idx) => (
+                      <div key={idx} className="bg-blue-100 text-blue-800 rounded px-3 py-2 text-sm">
+                        {msg}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {medicationSuggestions.filter(s => s.doctorId._id === chatMember._id).length === 0 && 
+                 (!chatMember.messages || chatMember.messages.length === 0) && (
+                  <div className="text-muted-foreground text-sm text-center py-4">
+                    No medication suggestions or messages yet.
+                  </div>
                 )}
               </div>
             </div>

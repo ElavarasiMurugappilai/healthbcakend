@@ -11,17 +11,21 @@ import measurementsRoutes from "./routes/measurements";
 import fitnessGoalRoutes from "./routes/fitnessGoalRoutes";
 import fitnessRoutes from "./routes/fitness";
 import doctorsRoutes from './routes/doctors';
-import medicationsRoutes from './routes/medications';
 import personalDoctorsRoutes from './routes/personal-doctors';
 import careTeamRoutes from "./routes/careTeamRoutes";
-import medicationSuggestionRoutes from "./routes/medicationSuggestionRoutes";
+import medicationRoutes from "./routes/medicationRoutes";
+import medicationsRoutes from "./routes/medications";
+import medicationSuggestionsRoutes from "./routes/medicationSuggestions";
 import systemDoctorsRoutes from "./routes/doctors";
-import medicationAcceptanceRoutes from "./routes/medications";
 import appointmentsRoutes from "./routes/appointments";
 import challengesRoutes from "./routes/challenges";
 import healthInsightsRoutes from "./routes/health-insights";
+import healthMetricsRoutes from "./routes/healthMetrics";
 import notificationsRoutes from "./routes/notifications";
 import { seedSystemDoctors } from "./utils/seedDoctors";
+import { seedMedicationSuggestions } from "./utils/seedMedications";
+import { seedChallenges } from "./utils/seedChallenges";
+import { seedHealthData } from "./utils/seedHealthData";
 
 // Load environment variables
 dotenv.config();
@@ -54,6 +58,9 @@ const connectDB = async (retryCount = 0): Promise<void> => {
     
     // Seed system doctors after successful DB connection
     await seedSystemDoctors();
+    await seedMedicationSuggestions();
+    await seedChallenges();
+    await seedHealthData();
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error("❌ MongoDB Connection Failed:", errorMessage);
@@ -87,6 +94,8 @@ const allowedOrigins: string[] = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:5174",
+  "http://localhost:5175",
+  "http://127.0.0.1:50935", // Browser preview proxy
   process.env.FRONTEND_URL || "", // fallback empty string
 ].filter(Boolean) as string[];
 
@@ -154,14 +163,15 @@ app.use("/api/goals", fitnessGoalRoutes);
 app.use("/api/fitness", fitnessRoutes);
 app.use("/api/doctors", doctorsRoutes);
 app.use("/api/doctors", personalDoctorsRoutes);
-app.use("/api/medications", medicationsRoutes);
 app.use("/api/care-team", careTeamRoutes);
-app.use("/api/medication", medicationSuggestionRoutes);
+app.use("/api/care-team", medicationSuggestionsRoutes);
+app.use("/api/medication", medicationRoutes);
+app.use("/api/medications", medicationsRoutes);
 app.use("/api/doctors", systemDoctorsRoutes);
-app.use("/api/medications", medicationAcceptanceRoutes);
 app.use("/api/appointments", appointmentsRoutes);
 app.use("/api/challenges", challengesRoutes);
 app.use("/api/health-insights", healthInsightsRoutes);
+app.use("/api/health-metrics", healthMetricsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 
 // Unknown API endpoint handler
@@ -177,6 +187,26 @@ app.use("/api/*", (req, res) => {
       "/api/profile/quiz",
       "/api/profile",
       "/api/measurements",
+      "/api/goals",
+      "/api/fitness",
+      "/api/doctors/system",
+      "/api/doctors/selected",
+      "/api/care-team",
+      "/api/medication/suggest",
+      "/api/medication/suggestions", 
+      "/api/medication/pending",
+      "/api/medication/accept",
+      "/api/medications/user",
+      "/api/medications/history",
+      "/api/medications/today",
+      "/api/medications/schedule",
+      "/api/appointments",
+      "/api/challenges",
+      "/api/health-insights",
+      "/api/health-metrics/metrics",
+      "/api/health-metrics/trends",
+      "/api/health-metrics/insights",
+      "/api/notifications",
     ],
   });
 });
@@ -212,22 +242,29 @@ app.use(
   }
 );
 
-/* ---------------------- Graceful Shutdown & Errors ------------------------- */
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log("\n🎉 =================================");
-  console.log("🚀 Server Status: ONLINE");
-  console.log(`🌐 Server URL: http://localhost:${PORT}`);
-  console.log(`📊 Health Check: http://localhost:${PORT}/health`);
-  console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
-  console.log(
-    `🗄️  Database: ${
-      mongoose.connection.readyState === 1 ? "Connected" : "Connecting..."
-    }`
-  );
-  console.log(`⚙️  Environment: ${process.env.NODE_ENV || "development"}`);
+/* ---------------------------- Server Startup ------------------------------ */
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 MongoDB: ${process.env.MONGO_URI ? 'Connected' : 'Not configured'}`);
+  console.log(`🔐 JWT: ${process.env.JWT_SECRET ? 'Configured' : 'Not configured'}`);
+  console.log(`\n📋 Available API Endpoints:`);
+  console.log(`   Authentication: /api/auth/*`);
+  console.log(`   Profile & Quiz: /api/profile/*`);
+  console.log(`   Health Metrics: /api/health-metrics/*`);
+  console.log(`   Care Team: /api/care-team/*`);
+  console.log(`   Medications: /api/medication/*`);
+  console.log(`   Doctors: /api/doctors/*`);
+  console.log(`   Appointments: /api/appointments/*`);
+  console.log(`   Challenges: /api/challenges/*`);
+  console.log(`   Health Insights: /api/health-insights/*`);
+  console.log(`   Notifications: /api/notifications/*`);
+  console.log(`   Goals & Fitness: /api/goals/* & /api/fitness/*`);
+  console.log(`\n✅ Health Monitoring Backend Complete`);
   console.log("🎉 =================================\n");
 });
 
+/* ---------------------- Graceful Shutdown & Errors ------------------------- */
 // Graceful shutdown handler
 const shutdown = (signal: string) => {
   console.log(`📴 ${signal} received, shutting down...`);

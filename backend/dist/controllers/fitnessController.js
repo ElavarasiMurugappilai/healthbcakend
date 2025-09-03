@@ -95,13 +95,14 @@ const getFitnessGoals = async (req, res) => {
             userId,
             date: { $gte: new Date(today), $lt: new Date(today + 'T23:59:59') }
         });
+        const currentProgress = {
+            steps: todayLog?.steps || 0,
+            calories: todayLog?.calories || 0,
+            workout: weeklyStats.totalWorkouts,
+            water: todayLog?.waterIntake || 0
+        };
         if (todayLog) {
-            fitnessGoal.progress = {
-                steps: todayLog.steps,
-                calories: todayLog.calories,
-                workout: weeklyStats.totalWorkouts,
-                water: todayLog.waterIntake
-            };
+            fitnessGoal.progress = currentProgress;
         }
         fitnessGoal.weeklyStats = {
             ...weeklyStats,
@@ -109,9 +110,42 @@ const getFitnessGoals = async (req, res) => {
         };
         await fitnessGoal.save();
         const insights = generateInsights(fitnessGoal, weeklyStats);
+        const getGoalDisplayText = (goalType) => {
+            const goalMap = {
+                'lose_weight': 'Weight Loss',
+                'build_strength': 'Build Strength',
+                'improve_endurance': 'Improve Endurance',
+                'general_fitness': 'General Fitness',
+                'maintain_weight': 'Maintain Weight'
+            };
+            return goalMap[goalType] || 'General Fitness';
+        };
+        const getActivityLevelText = (level) => {
+            const levelMap = {
+                'beginner': 'Beginner',
+                'intermediate': 'Moderate Activity',
+                'advanced': 'High Activity'
+            };
+            return levelMap[level] || 'Moderate Activity';
+        };
         res.status(200).json({
             success: true,
             data: {
+                goal: {
+                    type: getGoalDisplayText(fitnessGoal.primaryFitnessGoal),
+                    activityLevel: getActivityLevelText(fitnessGoal.workoutDifficulty),
+                    targets: {
+                        steps: fitnessGoal.stepsTarget,
+                        calories: fitnessGoal.caloriesTarget,
+                        workouts: fitnessGoal.workoutTarget
+                    }
+                },
+                currentProgress: {
+                    steps: currentProgress.steps,
+                    calories: currentProgress.calories,
+                    workouts: currentProgress.workout
+                },
+                weeklyData: weeklyStats,
                 ...fitnessGoal.toObject(),
                 insights
             }

@@ -38,7 +38,14 @@ const MedicationScheduleSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     medicationName: { type: String, required: true },
     dosage: { type: String, required: true },
+    frequency: { type: String, required: true },
     scheduleTime: { type: String, required: true },
+    source: {
+        type: String,
+        enum: ['manual', 'doctor-suggestion'],
+        default: 'manual'
+    },
+    suggestionId: { type: mongoose_1.Schema.Types.ObjectId, ref: "MedicationSuggestion" },
     isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 MedicationScheduleSchema.index({ userId: 1, isActive: 1 });

@@ -39,9 +39,15 @@ const MedicationSuggestionSchema = new mongoose_1.Schema({
     doctorId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Doctor", required: true },
     medicationName: { type: String, required: true },
     dosage: { type: String, required: true },
-    instructions: { type: String, required: true },
-    accepted: { type: Boolean, default: false },
+    frequency: { type: String, required: true },
+    duration: { type: String, required: true },
+    status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected'],
+        default: 'pending'
+    },
+    respondedAt: { type: Date }
 }, { timestamps: true });
-MedicationSuggestionSchema.index({ userId: 1, accepted: 1 });
+MedicationSuggestionSchema.index({ userId: 1, status: 1 });
 exports.default = mongoose_1.default.model("MedicationSuggestion", MedicationSuggestionSchema);
 //# sourceMappingURL=MedicationSuggestion.js.map

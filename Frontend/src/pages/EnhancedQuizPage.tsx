@@ -25,8 +25,6 @@ interface QuizData {
   stepTarget: number;
   selectedDoctors: any[];
   personalDoctors: any[];
-  pendingMedications: any[];
-  acceptedMedications: any[];
   selectedCards: string[];
 }
 
@@ -40,14 +38,6 @@ interface Doctor {
   isSystemApproved: boolean;
 }
 
-interface Medication {
-  _id: string;
-  name: string;
-  dosage: string;
-  frequency: string;
-  suggestedBy: string;
-  reason?: string;
-}
 
 const QUIZ_STORAGE_KEY = "healthapp.quiz.data";
 
@@ -56,7 +46,6 @@ const EnhancedQuizPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [pendingMedications, setPendingMedications] = useState<Medication[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
   const [personalDoctorName, setPersonalDoctorName] = useState('');
   const [personalDoctorSpecialization, setPersonalDoctorSpecialization] = useState('');
@@ -72,48 +61,12 @@ const EnhancedQuizPage = () => {
     stepTarget: 8000,
     selectedDoctors: [],
     personalDoctors: [],
-    pendingMedications: [],
-    acceptedMedications: [],
     selectedCards: ["fitness", "bloodGlucose"],
   });
 
   // Use global state and setter
   const { setGlobalState } = useGlobalState();
 
-  // Handle medication acceptance
-  const handleMedicationAccept = async (medication: Medication) => {
-    try {
-      const response = await API.post('/medications/accept', { medication });
-      if (response.data.success) {
-        toast.success('Medication accepted and added to schedule');
-        // Remove from pending medications
-        setPendingMedications(prev => prev.filter(med => med._id !== medication._id));
-        // Add to accepted medications in form data
-        updateFormData('acceptedMedications', [...formData.acceptedMedications, medication]);
-      }
-    } catch (error) {
-      console.error('Error accepting medication:', error);
-      toast.error('Failed to accept medication');
-    }
-  };
-
-  // Handle medication decline
-  const handleMedicationDecline = async (medication: Medication) => {
-    try {
-      const response = await API.post('/medications/decline', { 
-        medicationId: medication._id,
-        reason: 'User declined'
-      });
-      if (response.data.success) {
-        toast.success('Medication declined');
-        // Remove from pending medications
-        setPendingMedications(prev => prev.filter(med => med._id !== medication._id));
-      }
-    } catch (error) {
-      console.error('Error declining medication:', error);
-      toast.error('Failed to decline medication');
-    }
-  };
 
   // Handle adding personal doctor
   const handleAddPersonalDoctor = async () => {
@@ -149,8 +102,7 @@ const EnhancedQuizPage = () => {
     { id: 1, title: "Personal Profile", icon: User, description: "Basic information and preferences" },
     { id: 2, title: "Fitness & Health Goals", icon: Target, description: "Set your health objectives" },
     { id: 3, title: "Health Tracking & Doctors", icon: Users, description: "Connect with healthcare providers" },
-    { id: 4, title: "Medication Management", icon: Pill, description: "Manage your medications" },
-    { id: 5, title: "Dashboard Selection", icon: Activity, description: "Choose your dashboard cards" },
+    { id: 4, title: "Dashboard Selection", icon: Activity, description: "Choose your dashboard cards" },
   ];
 
   const fitnessGoals = [
@@ -245,16 +197,6 @@ const EnhancedQuizPage = () => {
           toast.error('Failed to load system doctors, using default options');
         }
 
-        // Fetch pending medications with fallback
-        try {
-          const medicationsResponse = await API.get('/medications/pending');
-          if (medicationsResponse.data.success) {
-            setPendingMedications(medicationsResponse.data.data);
-          }
-        } catch (error) {
-          console.error('Failed to fetch pending medications:', error);
-          setPendingMedications([]); // Empty array fallback
-        }
 
         setAuthChecked(true);
       } catch (error) {
@@ -650,50 +592,6 @@ const EnhancedQuizPage = () => {
     </div>
   );
 
-  const MedicationsStep = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="font-medium mb-4">Pending Medication Suggestions</h3>
-        {pendingMedications.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">No pending medication suggestions.</p>
-        ) : (
-          <div className="space-y-4">
-            {pendingMedications.map((medication: Medication) => (
-              <Card key={medication._id} className="p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-medium">{medication.name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {medication.dosage} - {medication.frequency}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">Suggested by: {medication.suggestedBy}</p>
-                    {medication.reason && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{medication.reason}</p>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleMedicationDecline(medication)}
-                    >
-                      Decline
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => handleMedicationAccept(medication)}
-                    >
-                      Accept
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   const DashboardSelectionStep = ({ formData, updateFormData }: any) => (
     <div className="space-y-6">
@@ -740,7 +638,6 @@ const EnhancedQuizPage = () => {
     PersonalProfileStep,
     FitnessGoalsStep,
     DoctorsStep,
-    MedicationsStep,
     DashboardSelectionStep,
   ];
 
