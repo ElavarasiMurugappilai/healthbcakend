@@ -1,36 +1,14 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
-// Dummy data
-const today = new Date();
-const yyyy = today.getFullYear();
-const mm = String(today.getMonth() + 1).padStart(2, '0');
-const allAppointments = [
-  { id: 1, date: `${yyyy}-${mm}-05`, doctor: "Dr. Smith", mode: "In-person", time: "10:00", status: "Completed" },
-  { id: 2, date: `${yyyy}-${mm}-05`, doctor: "Dr. Lee", mode: "Telehealth", time: "14:00", status: "Upcoming" },
-  { id: 3, date: `${yyyy}-${mm}-10`, doctor: "Dr. Patel", mode: "In-person", time: "09:00", status: "Upcoming" },
-  { id: 15, date: `${yyyy}-${mm}-10`, doctor: "Dr. Lee", mode: "Telehealth", time: "14:00", status: "Upcoming" },
-  { id: 16, date: `${yyyy}-${mm}-10`, doctor: "Dr. Patel", mode: "In-person", time: "09:00", status: "Upcoming" },
-  { id: 4, date: `${yyyy}-${mm}-15`, doctor: "Dr. Gomez", mode: "Telehealth", time: "11:00", status: "No-Show" },
-  { id: 5, date: `${yyyy}-${mm}-20`, doctor: "Dr. Brown", mode: "In-person", time: "13:00", status: "Completed" },
-  { id: 6, date: `${yyyy}-${mm}-25`, doctor: "Dr. Green", mode: "Telehealth", time: "16:00", status: "Upcoming" },
-  { id: 7, date: `${yyyy}-${mm}-28`, doctor: "Dr. White", mode: "In-person", time: "08:30", status: "Upcoming" },
-  { id: 8, date: `${yyyy}-${mm}-16`, doctor: "Dr. Nancy", mode: "Telehealth", time: "08:30", status: "Upcoming" },
-  { id: 9, date: `${yyyy}-${mm}-17`, doctor: "Dr. Mike", mode: "In-person", time: "08:30", status: "Upcoming" },
-  { id: 10, date: `${yyyy}-${mm}-18`, doctor: "Dr. suba", mode: "In-person", time: "08:30", status: "Upcoming" },
-  { id: 11, date: `${yyyy}-${mm}-08`, doctor: "Dr. Raayan", mode: "Telehealth", time: "08:30", status: "Upcoming" },
-  { id: 12, date: `${yyyy}-${mm}-22`, doctor: "Dr. Kavya", mode: "In-person", time: "08:30", status: "Upcoming" },
-  { id: 13, date: `${yyyy}-${mm}-24`, doctor: "Dr. Nisanth", mode: "Telehealth", time: "08:30", status: "Completed" },
-  { id: 14, date: `${yyyy}-${mm}-22`, doctor: "Dr. Ramana", mode: "Telehealth", time: "08:30", status: "Upcoming" },
-];
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import API from "@/api";
 
 const appointmentTypes = ["All", "In-person", "Telehealth"];
 
@@ -287,7 +265,7 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
                 type="date" 
                 value={form.date} 
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white"
               />
             </div>
 
@@ -301,7 +279,7 @@ function BookingModal({ open, onClose, onBook }: { open: boolean; onClose: () =>
                 type="time" 
                 value={form.time} 
                 onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white"
               />
             </div>
 
@@ -470,7 +448,7 @@ function RescheduleModal({
                 type="date" 
                 value={form.date} 
                 onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white"
               />
             </div>
 
@@ -484,7 +462,7 @@ function RescheduleModal({
                 type="time" 
                 value={form.time} 
                 onChange={e => setForm(f => ({ ...f, time: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent dark:bg-gray-700 dark:text-white bg-white"
               />
             </div>
 
@@ -643,17 +621,19 @@ interface AppointmentsPageProps {
 }
 
 export default function AppointmentPage({ searchValue }: AppointmentsPageProps) {
-  const today = new Date();
-  const [month, setMonth] = useState(today.getMonth());
-  const [year, setYear] = useState(today.getFullYear());
-  const [appointments, setAppointments] = useState<Appointment[]>(allAppointments);
-  const [selectedDate, setSelectedDate] = useState(`${today.getFullYear()}-07-10`);
+  const currentDate = new Date();
+  const [month, setMonth] = useState(currentDate.getMonth());
+  const [year, setYear] = useState(currentDate.getFullYear());
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [selectedDate, setSelectedDate] = useState(`${currentDate.getFullYear()}-07-10`);
   const [filterType, setFilterType] = useState("All");
   const [showBookModal, setShowBookModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showReschedule, setShowReschedule] = useState<Appointment | null>(null);
   const [cancelledCount, setCancelledCount] = useState(0);
-  const [completedCount, setCompletedCount] = useState(0);
+  const [completedCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const stats = {
     total: appointments.filter(a => a.status === "Upcoming").length,
@@ -662,25 +642,97 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
     cancelled: cancelledCount,
   };
 
-  const handleCancel = (id: number | string) => {
-    setAppointments(prev => prev.filter(a => a.id !== id));
-    if (typeof id === 'number') {
+  // Fetch appointments from API
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await API.get('/appointments');
+      setAppointments(response.data);
+    } catch (err: unknown) {
+      console.error('Failed to fetch appointments:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load appointments';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load appointments on component mount
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  // Handle appointment actions
+  const handleJoin = (appointment: Appointment) => {
+    console.log("Joining appointment:", appointment);
+    // Here you would typically open a video call or redirect to telehealth platform
+  };
+
+  const handleComplete = async (appointment: Appointment) => {
+    try {
+      await API.patch(`/appointments/${appointment.id}`, { status: 'Completed' });
+      setAppointments(prev => 
+        prev.map(a => 
+          a.id === appointment.id 
+            ? { ...a, status: "Completed" as const }
+            : a
+        )
+      );
+    } catch (err: unknown) {
+      console.error('Failed to complete appointment:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update appointment';
+      setError(errorMessage);
+    }
+  };
+
+  const handleCancel = async (appointmentId: string | number) => {
+    try {
+      await API.delete(`/appointments/${appointmentId}`);
+      setAppointments(prev => 
+        prev.map(a => 
+          a.id === appointmentId 
+            ? { ...a, status: "Cancelled" as const }
+            : a
+        )
+      );
       setCancelledCount(c => c + 1);
+    } catch (err: unknown) {
+      console.error('Failed to cancel appointment:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to cancel appointment';
+      setError(errorMessage);
     }
   };
 
-  const handleJoin = (appt: Appointment) => {
-    if (!appt.isDefault) {
-      setAppointments(prev => prev.filter(a => a.id !== appt.id));
-      alert(`Joining telehealth session with ${appt.doctor} at ${appt.time}`);
-      setCompletedCount(c => c + 1);
+  const handleBookAppointment = async (appointmentData: Omit<Appointment, 'id'>) => {
+    try {
+      const response = await API.post('/appointments/book', appointmentData);
+      setAppointments(prev => [...prev, response.data]);
+      return response.data;
+    } catch (err: unknown) {
+      console.error('Failed to book appointment:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to book appointment';
+      setError(errorMessage);
+      throw err;
     }
   };
 
-  const handleComplete = (appt: Appointment) => {
-    if (!appt.isDefault) {
-      setAppointments(prev => prev.filter(a => a.id !== appt.id));
-      setCompletedCount(c => c + 1);
+  const handleRescheduleAppointment = async (appointmentId: string | number, rescheduleData: Partial<Appointment>) => {
+    try {
+      const response = await API.patch(`/appointments/${appointmentId}`, rescheduleData);
+      setAppointments(prev => 
+        prev.map(a => 
+          a.id === appointmentId 
+            ? { ...a, ...response.data }
+            : a
+        )
+      );
+      return response.data;
+    } catch (err: unknown) {
+      console.error('Failed to reschedule appointment:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reschedule appointment';
+      setError(errorMessage);
+      throw err;
     }
   };
 
@@ -759,7 +811,7 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
 
   // Split appointments into upcoming and history
   const history = appointments.filter(a => ["Completed", "No-Show", "Cancelled"].includes(a.status));
-  const upcoming = appointments.filter(a => a.status === "Upcoming");
+
 
   return (
     <motion.div 
@@ -864,11 +916,28 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
                 Appointments on{" "}
                 <span className="font-mono text-blue-600">{selectedDate}</span>
               </CardTitle>
+              {error && (
+                <div className="text-red-500 text-sm mt-2">
+                  {error}
+                </div>
+              )}
             </CardHeader>
           </motion.div>
           <CardContent className="flex-1 flex flex-col overflow-hidden">
             <AnimatePresence mode="wait">
-              {appointmentsToShow.length === 0 ? (
+              {loading ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-gray-400 dark:text-gray-500 text-center py-8 sm:py-12 flex-1 flex items-center justify-center"
+                >
+                  <div className="text-sm sm:text-base">
+                    Loading appointments...
+                  </div>
+                </motion.div>
+              ) : appointmentsToShow.length === 0 ? (
                 <motion.div
                   key="no-appointments"
                   initial={{ opacity: 0, y: 20 }}
@@ -1023,16 +1092,28 @@ export default function AppointmentPage({ searchValue }: AppointmentsPageProps) 
           </CardContent>
         </Card>
       </motion.div>
-      <BookingModal open={showBookModal} onClose={() => setShowBookModal(false)} onBook={appt => setAppointments(prev => [...prev, appt])} />
-      <HistoryModal open={showHistoryModal} onClose={() => setShowHistoryModal(false)} history={history} />
+      <BookingModal 
+        open={showBookModal} 
+        onClose={() => setShowBookModal(false)} 
+        onBook={handleBookAppointment} 
+      />
+      <HistoryModal 
+        open={showHistoryModal} 
+        onClose={() => setShowHistoryModal(false)} 
+        history={history} 
+      />
       {showReschedule && (
         <RescheduleModal
           open={!!showReschedule}
           onClose={() => setShowReschedule(null)}
           appointment={showReschedule}
-          onReschedule={appt => {
-            setAppointments(prev => prev.map(a => a.id === showReschedule.id ? { ...a, ...appt } : a));
-            setShowReschedule(null);
+          onReschedule={async (rescheduleData) => {
+            try {
+              await handleRescheduleAppointment(showReschedule.id, rescheduleData);
+              setShowReschedule(null);
+            } catch (error) {
+              console.error(error);
+            }
           }}
         />
       )}

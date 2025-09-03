@@ -17,6 +17,10 @@ import careTeamRoutes from "./routes/careTeamRoutes";
 import medicationSuggestionRoutes from "./routes/medicationSuggestionRoutes";
 import systemDoctorsRoutes from "./routes/doctors";
 import medicationAcceptanceRoutes from "./routes/medications";
+import appointmentsRoutes from "./routes/appointments";
+import challengesRoutes from "./routes/challenges";
+import healthInsightsRoutes from "./routes/health-insights";
+import notificationsRoutes from "./routes/notifications";
 import { seedSystemDoctors } from "./utils/seedDoctors";
 
 // Load environment variables
@@ -155,6 +159,10 @@ app.use("/api/care-team", careTeamRoutes);
 app.use("/api/medication", medicationSuggestionRoutes);
 app.use("/api/doctors", systemDoctorsRoutes);
 app.use("/api/medications", medicationAcceptanceRoutes);
+app.use("/api/appointments", appointmentsRoutes);
+app.use("/api/challenges", challengesRoutes);
+app.use("/api/health-insights", healthInsightsRoutes);
+app.use("/api/notifications", notificationsRoutes);
 
 // Unknown API endpoint handler
 app.use("/api/*", (req, res) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Goals from "./challenges/Goals";
 import BadgesTab from "./challenges/Badges";
 import LeaderboardTab from "./challenges/Leaderboard";
@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AnimatePresence, motion } from "framer-motion";
+import API from "@/api";
 
 type Challenge = {
   id: string;
@@ -350,116 +351,55 @@ const ChallengeModal: React.FC<{
 };
 
 const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
-  const [challenges, setChallenges] = useState<Challenge[]>([
-    {
-      id: '1',
-      title: 'Daily Steps Goal',
-      description: 'Walk 5,000 steps today ',
-      type: 'daily',
-      target: 5000,
-      current: 3200,
-      unit: 'steps',
-      icon: <Icons.activity size={24} />,
-      color: 'bg-blue-500',
-      points: 50,
-      isActive: true,
-      startDate: '2024-01-20',
-      endDate: '2024-01-20',
-      participants: 1247,
-      difficulty: 'easy',
-      tip: '💡 Try taking the stairs instead of the elevator!'
-    },
-    {
-      id: '2',
-      title: 'Weekly Workout Streak',
-      description: 'Complete 5 workouts this week ',
-      type: 'weekly',
-      target: 5,
-      current: 3,
-      unit: 'workouts',
-      icon: <Icons.zap size={24} />,
-      color: 'bg-green-500',
-      points: 200,
-      isActive: true,
-      startDate: '2024-01-15',
-      endDate: '2024-01-21',
-      participants: 892,
-      difficulty: 'medium',
-      tip: '💡 Mix cardio and strength training for best results!'
-    },
-    {
-      id: '3',
-      title: 'Hydration Master',
-      description: 'Drink 8 glasses of water daily ',
-      type: 'daily',
-      target: 8,
-      current: 6,
-      unit: 'glasses',
-      icon: <Icons.heart size={24} />,
-      color: 'bg-cyan-500',
-      points: 30,
-      isActive: true,
-      startDate: '2024-01-20',
-      endDate: '2024-01-20',
-      participants: 2156,
-      difficulty: 'easy',
-      tip: '💡 Set reminders on your phone to stay hydrated!'
-    },
-    {
-      id: '4',
-      title: 'Sleep Well Challenge',
-      description: 'Get 8 hours of quality sleep',
-      type: 'weekly',
-      target: 7,
-      current: 4,
-      unit: 'days',
-      icon: <Icons.star size={24} />,
-      color: 'bg-purple-500',
-      points: 150,
-      isActive: true,
-      startDate: '2024-01-15',
-      endDate: '2024-01-21',
-      participants: 567,
-      difficulty: 'hard',
-      tip: '💡 Avoid screens for better sleep!'
-    },
-    {
-      id: '5',
-      title: 'Mindful Minutes',
-      description: ' meditation daily',
-      type: 'daily',
-      target: 10,
-      current: 7,
-      unit: 'minutes',
-      icon: <Icons.target size={24} />,
-      color: 'bg-indigo-500',
-      points: 40,
-      isActive: false,
-      startDate: '2024-01-20',
-      endDate: '2024-01-20',
-      participants: 743,
-      difficulty: 'medium',
-      tip: '💡 Find a quiet space and focus on your breath!'
-    },
-    {
-      id: '6',
-      title: 'Monthly Reading Goal',
-      description: 'Read 4 books this month ',
-      type: 'monthly',
-      target: 4,
-      current: 2,
-      unit: 'books',
-      icon: <Icons.trophy size={24} />,
-      color: 'bg-orange-500',
-      points: 300,
-      isActive: true,
-      startDate: '2024-01-01',
-      endDate: '2024-01-31',
-      participants: 234,
-      difficulty: 'hard',
-      tip: '💡 Carry a book with you to read during commutes!'
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch challenges from API
+  const fetchChallenges = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await API.get('/challenges');
+      // Map API response to include icons and colors
+      const challengesWithIcons = response.data.map((challenge: any) => ({
+        ...challenge,
+        icon: getIconForChallenge(challenge.type),
+        color: getColorForChallenge(challenge.type)
+      }));
+      setChallenges(challengesWithIcons);
+    } catch (err: unknown) {
+      console.error('Failed to fetch challenges:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load challenges';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  // Helper functions for icons and colors
+  const getIconForChallenge = (type: string) => {
+    switch (type) {
+      case 'daily': return <Icons.activity size={24} />;
+      case 'weekly': return <Icons.zap size={24} />;
+      case 'monthly': return <Icons.trophy size={24} />;
+      default: return <Icons.target size={24} />;
+    }
+  };
+
+  const getColorForChallenge = (type: string) => {
+    switch (type) {
+      case 'daily': return 'bg-blue-500';
+      case 'weekly': return 'bg-green-500';
+      case 'monthly': return 'bg-orange-500';
+      default: return 'bg-purple-500';
+    }
+  };
+
+  // Load challenges on component mount
+  useEffect(() => {
+    fetchChallenges();
+  }, []);
 
   const [badges, setBadges] = useState<Badge[]>([
     {
@@ -551,31 +491,52 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleJoinChallenge = (challengeId: string) => {
-    setChallenges(prev => prev.map(challenge => 
-      challenge.id === challengeId 
-        ? { ...challenge, isActive: true, participants: challenge.participants + 1 }
-        : challenge
-    ));
-    showToast('Challenge joined successfully! 🎉');
+  const handleJoinChallenge = async (challengeId: string) => {
+    try {
+      await API.post(`/challenges/${challengeId}/join`);
+      setChallenges(prev => prev.map(challenge => 
+        challenge.id === challengeId 
+          ? { ...challenge, isActive: true, participants: challenge.participants + 1 }
+          : challenge
+      ));
+      showToast('Challenge joined successfully! 🎉');
+    } catch (err: unknown) {
+      console.error('Failed to join challenge:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to join challenge';
+      setError(errorMessage);
+    }
   };
 
-  const handleLeaveChallenge = (challengeId: string) => {
-    setChallenges(prev => prev.map(challenge => 
-      challenge.id === challengeId 
-        ? { ...challenge, isActive: false, participants: Math.max(0, challenge.participants - 1) }
-        : challenge
-    ));
-    showToast('Challenge left successfully! 👋');
+  const handleLeaveChallenge = async (challengeId: string) => {
+    try {
+      await API.post(`/challenges/${challengeId}/leave`);
+      setChallenges(prev => prev.map(challenge => 
+        challenge.id === challengeId 
+          ? { ...challenge, isActive: false, participants: Math.max(0, challenge.participants - 1) }
+          : challenge
+      ));
+      showToast('Challenge left successfully! 👋');
+    } catch (err: unknown) {
+      console.error('Failed to leave challenge:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to leave challenge';
+      setError(errorMessage);
+    }
   };
 
-  const handleUpdateProgress = (challengeId: string, newProgress: number) => {
-    setChallenges(prev => prev.map(challenge => 
-      challenge.id === challengeId 
-        ? { ...challenge, current: Math.min(challenge.target, newProgress) }
-        : challenge
-    ));
-    showToast('Progress updated successfully! 📈');
+  const handleUpdateProgress = async (challengeId: string, newProgress: number) => {
+    try {
+      await API.patch(`/challenges/${challengeId}/progress`, { progress: newProgress });
+      setChallenges(prev => prev.map(challenge => 
+        challenge.id === challengeId 
+          ? { ...challenge, current: Math.min(challenge.target, newProgress) }
+          : challenge
+      ));
+      showToast('Progress updated successfully! 📈');
+    } catch (err: unknown) {
+      console.error('Failed to update progress:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update progress';
+      setError(errorMessage);
+    }
   };
 
   const showToast = (message: string) => {
@@ -647,21 +608,32 @@ const ChallengesPage: React.FC<ChallengesPageProps> = ({ searchValue }) => {
           </TabsList>
 
           <TabsContent value="challenges" className="tabs-content space-y-6 mt-6">
-            {/* Challenges Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence>
-                {filteredChallenges.map((challenge) => (
-                  <ChallengeCard
-                    key={challenge.id}
-                    challenge={challenge}
-                    onJoin={handleJoinChallenge}
-                    onLeave={handleLeaveChallenge}
-                    onUpdateProgress={handleUpdateProgress}
-                    onCardClick={handleCardClick}
-                  />
-                ))}
-              </AnimatePresence>
-            </div>
+            {error && (
+              <div className="text-red-500 text-center p-4 bg-red-50 rounded-lg">
+                {error}
+              </div>
+            )}
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="text-muted-foreground">Loading challenges...</div>
+              </div>
+            ) : (
+              /* Challenges Grid */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence>
+                  {filteredChallenges.map((challenge) => (
+                    <ChallengeCard
+                      key={challenge.id}
+                      challenge={challenge}
+                      onJoin={handleJoinChallenge}
+                      onLeave={handleLeaveChallenge}
+                      onUpdateProgress={handleUpdateProgress}
+                      onCardClick={handleCardClick}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="badges" className="tabs-content space-y-6 mt-6">

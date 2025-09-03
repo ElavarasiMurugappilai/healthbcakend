@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import API from "@/api";
-import { toast } from "sonner";
-import { Plus } from "lucide-react"; 
-import { useGlobalState } from "@/context/globalState"; // Adjust based on the actual location
-
-// FIX: Remove or correct the import if the file does not exist
+import { motion, AnimatePresence } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface FitnessProps {
   setShowFitnessModal: (show: boolean) => void;
@@ -15,239 +10,190 @@ interface FitnessProps {
 }
 
 const Fitness: React.FC<FitnessProps> = ({ setShowFitnessModal, isFullWidth = false }) => {
+  // Animation state
   const [progress, setProgress] = useState(0);
-  const [completedWorkouts, setCompletedWorkouts] = useState(0);
-  const [targetWorkouts, setTargetWorkouts] = useState(5);
-  const [loading, setLoading] = useState(true);
   const totalLength = 251; // Circumference for r=40
 
-  // Destructure setGlobalState from useGlobalState
-  const { setGlobalState } = useGlobalState();
+  const [showModal, setShowModal] = useState(false);
+  const [completed, setCompleted] = useState(4);
 
-  // Fetch workout logs from backend
+  // Calculate progress percentage based on completed workouts
+  const targetWorkouts = 5;
+  const progressPercentage = Math.round((completed / targetWorkouts) * 100);
+
+  // Animation effect for progress circle
   useEffect(() => {
-    const fetchWorkoutLogs = async () => {
-      try {
-        const response = await API.get("/fitness/logs");
-        console.log("API Response:", response.data);
-        const logs = response.data.logs || [];
-        const target = response.data.targetWorkouts || 5;
-        
-        console.log("Logs count:", logs.length, "Target:", target);
-        setCompletedWorkouts(logs.length);
-        setTargetWorkouts(target);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch workout logs:", error);
-        // Set some default values so card still shows
-        setCompletedWorkouts(0);
-        setTargetWorkouts(5);
-        setLoading(false);
-      }
-    };
-    
-    fetchWorkoutLogs();
-  }, []);
+    const timer = setTimeout(() => {
+      setProgress(progressPercentage);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [progressPercentage]);
 
-  // Fetch fitness goal from backend
-  useEffect(() => {
-    const fetchFitnessGoal = async () => {
-      try {
-        const response = await API.get('/goals');
-        const goal = response.data.fitnessGoal;
-
-        // Use setGlobalState to update the global state
-        setGlobalState((prevState: any) => ({
-          ...prevState,
-          fitnessGoal: goal,
-        }));
-      } catch (error) {
-        console.error('Failed to fetch fitness goal:', error);
-      }
-    };
-
-    fetchFitnessGoal();
-  }, []);
-
-  // Calculate and animate progress
-  useEffect(() => {
-    const targetProgress = Math.round((completedWorkouts / targetWorkouts) * 100);
-    
-    if (targetProgress !== progress) {
-      let current = progress;
-      const animateProgress = () => {
-        if (current < targetProgress) {
-          current += 1;
-          setProgress(current);
-          if (current < targetProgress) {
-            setTimeout(animateProgress, 12);
-          }
-        }
-      };
-      animateProgress();
-    }
-  }, [completedWorkouts, targetWorkouts]); // Removed 'progress' from dependencies
-
-  // Log new workout
-  const handleLogWorkout = async () => {
-    try {
-      const response = await API.post("/fitness/logs", {
-        type: "workout",
-        date: new Date().toISOString(),
-        duration: 30 // default duration
-      });
-      
-      console.log("Workout logged:", response.data);
-      
-      // Immediately update local state
-      setCompletedWorkouts(prev => prev + 1);
-      
-      // Also refetch data to ensure sync
-      const refreshResponse = await API.get("/fitness/logs");
-      const logs = refreshResponse.data.logs || [];
-      setCompletedWorkouts(logs.length);
-      
-      toast.success("Workout logged! 🎉");
-    } catch (error) {
-      console.error("Failed to log workout:", error);
-      toast.error("Failed to log workout");
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className={`${isFullWidth ? 'w-full' : 'flex-1 lg:flex-1'} min-w-0 mb-2 lg:mb-0`}>
-        <Card className="w-full h-80 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 border-0">
-          <CardContent className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-  
   return (
-    <div className={`${isFullWidth ? 'w-full' : 'flex-1 lg:flex-1'} min-w-0 mb-2 lg:mb-0`}>
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6 }}
+    <>
+      <Card 
+        className={`${isFullWidth ? 'col-span-2' : ''} h-fit cursor-pointer hover:shadow-lg transition-shadow duration-200 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 border-0 overflow-hidden relative`}
+        onClick={() => setShowModal(true)}
       >
-        <Card
-          className="w-full h-80 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 border-0"
-          onClick={() => setShowFitnessModal(true)}
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-medium">Fitness Goals</CardTitle>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs p-2 text-white hover:bg-white/20"
-                onClick={e => {
-                  e.stopPropagation();
-                  handleLogWorkout();
-                }}
-              >
-                <Plus size={16} />
-              </Button>
-              <Button
-                variant="link"
-                className="text-xs p-0 text-white/80 hover:text-white"
-                onClick={e => {
-                  e.stopPropagation();
-                }}
-              >
-                See all
-              </Button>
-            </div>
-          </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center h-full">
-          <div className={`relative ${isFullWidth ? 'w-40 h-40' : 'w-32 h-32'}`}>
-            {/* Background and animated progress ring */}
-            <svg
-              className="absolute top-0 left-0 w-full h-full"
-              viewBox="0 0 100 100"
-            >
-              <defs>
-                {/* Circular Glow Filter */}
-                <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                  <feMerge> 
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-              {/* Background track */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="#1e293b"
-                strokeWidth="8"
-                fill="none"
-              />
-              
-              {/* Glow layer - follows the progress exactly */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="#00eaff"
-                strokeWidth="12"
-                fill="none"
-                strokeDasharray={`${(progress / 100) * totalLength} ${totalLength}`}
-                strokeLinecap="round"
-                transform="rotate(-90 50 50)"
-                style={{ 
-                  transition: "stroke-dasharray 0.2s linear",
-                  filter: "blur(3px)",
-                  opacity: 0.6
-                }}
-              />
-              
-              {/* Main progress ring */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="#00eaff"
-                strokeWidth="8"
-                fill="none"
-                strokeDasharray={`${(progress / 100) * totalLength} ${totalLength}`}
-                strokeLinecap="round"
-                transform="rotate(-90 50 50)"
-                style={{ transition: "stroke-dasharray 0.2s linear" }}
-              />
-            </svg>
-
-            {/* Animated percentage */}
-            <div
-              className={`absolute inset-0 flex items-center justify-center text-white font-bold ${
-                isFullWidth ? 'text-2xl' : 'text-xl'
-              }`}
-              style={{
-                textShadow: "0 0 8pxrgb(216, 252, 255), 0 0 16px #00eaff, 0 0 32px #00eaff"
+        {/* Background glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-blue-500/10 to-purple-500/20 blur-xl"></div>
+        
+        <CardHeader className="pb-2 relative z-10">
+          <CardTitle className="text-lg font-semibold text-white flex items-center justify-between">
+            Fitness Goals
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowFitnessModal(true);
               }}
+              className="text-cyan-400 hover:text-cyan-300 hover:bg-white/10"
             >
-              {progress}%
+              See all
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0 pb-6 relative z-10">
+          <div className="flex flex-col items-center space-y-6">
+            {/* Progress Circle */}
+            <div className="relative">
+              <div className="relative w-32 h-32">
+                {/* Outer glow ring */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400 to-blue-400 opacity-30 blur-md"></div>
+                
+                <svg className="w-32 h-32 transform -rotate-90 relative z-10" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="rgba(255,255,255,0.1)"
+                    strokeWidth="6"
+                    fill="transparent"
+                  />
+                  {/* Progress circle */}
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="url(#gradient)"
+                    strokeWidth="6"
+                    fill="transparent"
+                    strokeLinecap="round"
+                    initial={{ strokeDasharray: totalLength, strokeDashoffset: totalLength }}
+                    animate={{ 
+                      strokeDasharray: totalLength, 
+                      strokeDashoffset: totalLength - (totalLength * progress) / 100 
+                    }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    style={{
+                      filter: "drop-shadow(0 0 8px #00d4ff)"
+                    }}
+                  />
+                  {/* Gradient definition */}
+                  <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#00d4ff" />
+                      <stop offset="50%" stopColor="#0099cc" />
+                      <stop offset="100%" stopColor="#00d4ff" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                
+                {/* Center percentage */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div 
+                      className="text-3xl font-bold text-white"
+                      style={{
+                        textShadow: "0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff"
+                      }}
+                    >
+                      {Math.round(progress)}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Completion Text */}
+            <div className="text-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-full px-6 py-2 border border-white/20">
+                <span className="text-white/90 text-sm font-medium">
+                  Complete {targetWorkouts} Workouts {completed}/{targetWorkouts}
+                </span>
+              </div>
             </div>
           </div>
-
-          <Button
-            className="mt-6 w-full bg-white/10 hover:bg-white/20 text-white rounded-full border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105"
-            onClick={e => {
-              e.stopPropagation();
-              handleLogWorkout();
-            }}
-          >
-            Complete {targetWorkouts} Workouts {completedWorkouts}/{targetWorkouts}
-          </Button>
         </CardContent>
       </Card>
-      </motion.div>
-    </div>
+
+      {/* Detailed Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <Dialog open={showModal} onOpenChange={setShowModal}>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold text-gray-800">
+                  🏃‍♂️ Fitness Dashboard
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                {/* Progress Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-blue-600">6,500</div>
+                    <div className="text-sm text-gray-600">Steps Today</div>
+                    <div className="text-xs text-gray-500">Goal: 8,000</div>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-orange-600">1,800</div>
+                    <div className="text-sm text-gray-600">Calories Burned</div>
+                    <div className="text-xs text-gray-500">Goal: 2,000</div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-600">{completed}</div>
+                    <div className="text-sm text-gray-600">Workouts This Week</div>
+                    <div className="text-xs text-gray-500">Goal: {targetWorkouts}</div>
+                  </div>
+                </div>
+
+                {/* Workout Controls */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-3">Quick Actions</h3>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => setCompleted(prev => Math.min(prev + 1, targetWorkouts))}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      + Add Workout
+                    </Button>
+                    <Button 
+                      onClick={() => setCompleted(prev => Math.max(prev - 1, 0))}
+                      variant="outline"
+                    >
+                      - Remove Workout
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Insights */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2 text-blue-800">💡 Insights</h3>
+                  <ul className="space-y-1 text-sm text-blue-700">
+                    <li>• Great progress this week! You're {Math.round(progress)}% to your goal.</li>
+                    <li>• Try to increase your daily steps by 500 to reach your target.</li>
+                    <li>• Consider adding a morning workout to boost your energy.</li>
+                  </ul>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

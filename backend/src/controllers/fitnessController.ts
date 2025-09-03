@@ -115,20 +115,23 @@ export const getFitnessGoals = async (req: AuthRequest, res: Response) => {
       totalWater: acc.totalWater + log.waterIntake
     }), { totalSteps: 0, totalCalories: 0, totalWorkouts: 0, totalWater: 0 });
 
-    // Update progress with today's data
+    // Get today's log for current progress
     const today = new Date().toISOString().split('T')[0];
     const todayLog = await FitnessLog.findOne({
       userId,
       date: { $gte: new Date(today), $lt: new Date(today + 'T23:59:59') }
     });
 
+    // Current progress (today's data)
+    const currentProgress = {
+      steps: todayLog?.steps || 0,
+      calories: todayLog?.calories || 0,
+      workout: weeklyStats.totalWorkouts,
+      water: todayLog?.waterIntake || 0
+    };
+
     if (todayLog) {
-      fitnessGoal.progress = {
-        steps: todayLog.steps,
-        calories: todayLog.calories,
-        workout: weeklyStats.totalWorkouts,
-        water: todayLog.waterIntake
-      };
+      fitnessGoal.progress = currentProgress;
     }
 
     fitnessGoal.weeklyStats = {
@@ -141,9 +144,49 @@ export const getFitnessGoals = async (req: AuthRequest, res: Response) => {
     // Generate personalized insights
     const insights = generateInsights(fitnessGoal, weeklyStats);
 
+    // Format goal type for display
+    const getGoalDisplayText = (goalType: string) => {
+      const goalMap: { [key: string]: string } = {
+        'lose_weight': 'Weight Loss',
+        'build_strength': 'Build Strength',
+        'improve_endurance': 'Improve Endurance',
+        'general_fitness': 'General Fitness',
+        'maintain_weight': 'Maintain Weight'
+      };
+      return goalMap[goalType] || 'General Fitness';
+    };
+
+    const getActivityLevelText = (level: string) => {
+      const levelMap: { [key: string]: string } = {
+        'beginner': 'Beginner',
+        'intermediate': 'Moderate Activity',
+        'advanced': 'High Activity'
+      };
+      return levelMap[level] || 'Moderate Activity';
+    };
+
     res.status(200).json({
       success: true,
       data: {
+        // Goal information
+        goal: {
+          type: getGoalDisplayText(fitnessGoal.primaryFitnessGoal),
+          activityLevel: getActivityLevelText(fitnessGoal.workoutDifficulty),
+          targets: {
+            steps: fitnessGoal.stepsTarget,
+            calories: fitnessGoal.caloriesTarget,
+            workouts: fitnessGoal.workoutTarget
+          }
+        },
+        // Current progress (today's data + weekly workouts)
+        currentProgress: {
+          steps: currentProgress.steps,
+          calories: currentProgress.calories,
+          workouts: currentProgress.workout
+        },
+        // Weekly stats
+        weeklyData: weeklyStats,
+        // Full fitness goal object for backward compatibility
         ...fitnessGoal.toObject(),
         insights
       }
