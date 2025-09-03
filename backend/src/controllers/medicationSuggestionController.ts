@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import MedicationSuggestion from "../models/MedicationSuggestion";
 import MedicationSchedule from "../models/MedicationSchedule";
+import Notification from "../models/Notification";
 import mongoose from "mongoose";
 
 // POST /api/medication/suggest
@@ -73,63 +74,40 @@ export const getMedicationSuggestions = async (req: Request, res: Response) => {
 // POST /api/medication/accept
 export const acceptMedicationSuggestion = async (req: Request, res: Response) => {
   try {
-    const { suggestionId, scheduleTime } = req.body;
-    const userId = req.user?._id;
+    const suggestionId = req.params.id;
+    const userId = req.user._id; // from auth middleware
 
-    if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
-    }
-
-    if (!suggestionId || !scheduleTime) {
-      return res.status(400).json({ 
-        error: "suggestionId and scheduleTime are required" 
-      });
-    }
-
-    // Validate suggestionId
-    if (!mongoose.Types.ObjectId.isValid(suggestionId)) {
-      return res.status(400).json({ error: "Invalid suggestion ID" });
-    }
-
-    console.log(`📝 User ${userId} accepting medication suggestion ${suggestionId}`);
-
-    // Find and update the suggestion
+    // Find suggestion
     const suggestion = await MedicationSuggestion.findById(suggestionId);
-    if (!suggestion) {
-      return res.status(404).json({ error: "Medication suggestion not found" });
-    }
+    if (!suggestion) return res.status(404).json({ success: false, message: "Suggestion not found" });
 
-    if (suggestion.userId.toString() !== userId) {
-      return res.status(403).json({ error: "Not authorized to accept this suggestion" });
-    }
-
-    if (suggestion.accepted) {
-      return res.status(400).json({ error: "Medication suggestion already accepted" });
-    }
-
-    // Mark suggestion as accepted
-    suggestion.accepted = true;
+    // Update status
+    suggestion.status = "accepted";
+    suggestion.respondedAt = new Date();
     await suggestion.save();
 
-    // Create medication schedule entry
-    const scheduleEntry = new MedicationSchedule({
-      userId,
-      medicationName: suggestion.medicationName,
+    // Add to MedicationSchedule
+    await MedicationSchedule.create({
+      user: userId,
+      name: suggestion.medicationName,
       dosage: suggestion.dosage,
-      scheduleTime,
-      isActive: true
+      status: "Upcoming",
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     });
 
-    await scheduleEntry.save();
-
-    console.log(`✅ Medication ${suggestion.medicationName} accepted and scheduled`);
-    res.json({
-      suggestion,
-      schedule: scheduleEntry
+    // Create notification
+    await Notification.create({
+      user: userId,
+      type: "medication",
+      message: `Medication "${suggestion.medicationName}" added to your schedule.`,
+      read: false,
+      createdAt: new Date(),
     });
-  } catch (error) {
-    console.error("❌ Error accepting medication suggestion:", error);
-    res.status(500).json({ error: "Failed to accept medication suggestion" });
+
+    return res.json({ success: true, message: "Medication accepted and added to schedule." });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

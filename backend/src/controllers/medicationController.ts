@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import Medication from '../models/Medication';
 import MedicationSchedule from '../models/MedicationSchedule';
 import MedicationSuggestion from '../models/MedicationSuggestion';
+import MedicationHistory from '../models/MedicationHistory';
+import Notification from '../models/Notification';
 
 type AuthRequest = Request;
 
@@ -208,6 +210,15 @@ export const markMedicationTaken = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Audit trail
+    await MedicationHistory.create({
+      userId: req.user.id,
+      doctorId: schedule.doctorId, // If you store doctorId in MedicationSchedule, else null
+      medicationName: schedule.name,
+      action: 'taken',
+      timestamp: new Date(),
+    });
+
     res.json({
       success: true,
       message: 'Medication marked as taken',
@@ -248,6 +259,24 @@ export const markMedicationMissed = async (req: AuthRequest, res: Response) => {
         message: 'Medication schedule not found'
       });
     }
+
+    // Audit trail
+    await MedicationHistory.create({
+      userId: req.user.id,
+      doctorId: schedule.doctorId, // If you store doctorId in MedicationSchedule, else null
+      medicationName: schedule.name,
+      action: 'missed',
+      timestamp: new Date(),
+    });
+
+    // Notification for missed
+    await Notification.create({
+      userId: req.user.id,
+      type: 'medication_missed',
+      message: `You missed your medication: ${schedule.name}`,
+      refId: schedule._id,
+      isRead: false,
+    });
 
     res.json({
       success: true,
@@ -385,5 +414,67 @@ export const updateMedicationStatus = async (req: AuthRequest, res: Response) =>
       message: 'Failed to update medication status',
       error: error.message
     });
+  }
+};
+
+export const getSchedule = async (req: Request, res: Response) => {
+  try {
+    const meds = await MedicationSchedule.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    res.json({ success: true, data: meds });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch medication schedule' });
+  }
+};
+
+export const addMedication = async (req: Request, res: Response) => {
+  try {
+    const { name, dosage, qty, status, time } = req.body;
+    const med = await MedicationSchedule.create({
+      userId: req.user.id,
+      name,
+      dosage,
+      qty,
+      status: status || 'Upcoming',
+      time,
+    });
+    res.json({ success: true, message: 'Medication added.', data: med });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to add medication' });
+  }
+};
+
+export const updateStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const med = await MedicationSchedule.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      { status },
+      { new: true }
+    );
+    if (!med) return res.status(404).json({ success: false, message: "Medication not found" });
+
+    // Audit trail
+    await MedicationHistory.create({
+      userId: req.user.id,
+      doctorId: med.doctorId, // If you store doctorId in MedicationSchedule, else null
+      medicationName: med.name,
+      action: status === "Taken" ? "taken" : "missed",
+      timestamp: new Date(),
+    });
+
+    // Notification for missed
+    if (status === "Missed") {
+      await Notification.create({
+        userId: req.user.id,
+        type: "medication_missed",
+        message: `You missed your medication: ${med.name}`,
+        refId: med._id,
+        isRead: false,
+      });
+    }
+
+    res.json({ success: true, message: "Medication status updated.", data: med });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Failed to update status" });
   }
 };

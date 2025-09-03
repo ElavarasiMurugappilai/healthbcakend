@@ -44,6 +44,12 @@ interface MyCareTeamProps {
   selectedDoctors?: CareTeamMember[];
   setSelectedMember?: (member: CareTeamMember | null) => void;
   setShowCareTeamModal?: (show: boolean) => void;
+  onMedicationAccepted?: (medication: {
+    name: string;
+    dosage: string;
+    status: string;
+    time: string;
+  }) => void;
 }
 
 const MessageIcon = () => (
@@ -56,12 +62,14 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
   selectedDoctors: propSelectedDoctors,
   setSelectedMember,
   setShowCareTeamModal,
+  onMedicationAccepted, // <-- add this
 }) => {
   const [chatMember, setChatMember] = useState<CareTeamMember | null>(null);
   const [showAllModal, setShowAllModal] = useState(false);
   const [selectedDoctors, setSelectedDoctors] = useState<CareTeamMember[]>([]);
   const [medicationSuggestions, setMedicationSuggestions] = useState<MedicationSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chatNotification, setChatNotification] = useState<string | null>(null);
 
   // Fetch selected doctors and medication suggestions from backend
   useEffect(() => {
@@ -96,6 +104,20 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
       const response = await API.patch(`/medications/suggestions/${suggestionId}/accept`);
       if (response.data.success) {
         toast.success(response.data.message);
+
+        // Find the suggestion details
+        const suggestion = medicationSuggestions.find(s => s._id === suggestionId);
+        if (suggestion && onMedicationAccepted) {
+          onMedicationAccepted({
+            name: suggestion.medicationName,
+            dosage: suggestion.dosage,
+            status: "Upcoming",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          });
+          setChatNotification(`Medication "${suggestion.medicationName}" added to your schedule!`);
+          setTimeout(() => setChatNotification(null), 2000);
+        }
+
         // Update local state
         setMedicationSuggestions(prev => 
           prev.map(s => s._id === suggestionId ? { ...s, status: 'accepted', respondedAt: new Date().toISOString() } : s)
@@ -267,6 +289,11 @@ const MyCareTeam: React.FC<MyCareTeamProps> = ({
                   <div className="text-xs text-muted-foreground">{chatMember.role || chatMember.specialization}</div>
                 </div>
               </div>
+              {chatNotification && (
+                <div className="bg-green-500 text-white px-4 py-2 rounded mb-2 text-center animate-in slide-in-from-top">
+                  {chatNotification}
+                </div>
+              )}
               <div className="max-h-96 overflow-y-auto space-y-3">
                 {medicationSuggestions
                   .filter(suggestion => suggestion.doctorId._id === chatMember._id)

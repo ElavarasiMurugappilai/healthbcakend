@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import api from "@/api"; // <--- make sure api.ts has axios instance
+import NotificationBell from "../components/NotificationBell";
 
 // Shape of profile coming from backend
 interface Profile {
   userId: string;
+  
   fitnessGoals?: string;
   exercise?: string;
   stepGoal?: number[];
@@ -58,6 +60,7 @@ const DashboardPage: React.FC = () => {
     rating?: number;
     experience?: number;
   }[]>([]);
+  const [notifications, setNotifications] = useState([]);
 
   // State for filters/search
   const [statusFilter, setStatusFilter] = useState("any");
@@ -215,6 +218,52 @@ const DashboardPage: React.FC = () => {
     setProfile({ ...profile, medications: updated });
   };
 
+  // Add medication to schedule when accepted from chat
+  const handleMedicationAccepted = async (medication: {
+    name: string;
+    dosage: string;
+    status: string;
+    time: string;
+  }) => {
+    try {
+      await api.post("/medications/add", {
+        ...medication,
+        userId: user?.email,
+      });
+
+      // Refetch profile to update medications
+      const res = await api.get("/profile/me", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (res.data.profile) {
+        setProfile(res.data.profile); // <-- This updates the MedicationSchedule card
+      }
+
+      setToast("Medication added to your schedule!");
+      setTimeout(() => setToast(""), 2000);
+    } catch (err) {
+      setToast("Failed to add medication.");
+      setTimeout(() => setToast(""), 2000);
+    }
+  };
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await api.get("/notifications", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setNotifications(res.data.notifications || []);
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
   // Skeleton loader
   const DashboardSkeleton = () => (
     <div className="space-y-6">
@@ -246,6 +295,10 @@ const DashboardPage: React.FC = () => {
 
   return (
     <>
+      <header>
+        {/* ...other header content... */}
+        <NotificationBell />
+      </header>
       <Welcome user={user} profile={profile || undefined} setShowScheduleModal={setShowScheduleModal} />
 
       {loading ? (
@@ -264,7 +317,12 @@ const DashboardPage: React.FC = () => {
 
           <section className="flex flex-col lg:flex-row gap-2 w-full mb-6">
             {user?.selectedCards?.includes("careTeam") && (
-              <MyCareTeam selectedDoctors={selectedDoctorObjects} setSelectedMember={() => {}} setShowCareTeamModal={() => {}} />
+              <MyCareTeam
+                selectedDoctors={selectedDoctorObjects}
+                setSelectedMember={() => {}}
+                setShowCareTeamModal={() => {}}
+                onMedicationAccepted={handleMedicationAccepted} // <-- pass callback
+              />
             )}
             {user?.selectedCards?.includes("medicationSchedule") && (
               <MedicationSchedule
