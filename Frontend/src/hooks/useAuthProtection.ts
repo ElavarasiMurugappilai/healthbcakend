@@ -14,6 +14,8 @@ export const useAuthProtection = (redirectTo: string = '/login') => {
 
   useEffect(() => {
     let mounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const checkAuth = async () => {
       try {
@@ -24,19 +26,40 @@ export const useAuthProtection = (redirectTo: string = '/login') => {
           hasToken: !!token,
           hasUser: !!userStr,
           currentPath: window.location.pathname,
+          tokenPreview: token ? `${token.substring(0, 20)}...` : 'none',
+          userPreview: userStr ? `${userStr.substring(0, 50)}...` : 'none',
+          retryCount
         });
 
         if (!token || !userStr) {
+          console.log('❌ Auth failed: Missing token or user data');
           throw new Error('No authentication data');
         }
 
         const user: User = JSON.parse(userStr);
+        console.log('🔍 Parsed user data:', { userId: user.id, email: user.email });
+
+        console.log('🔍 Checking token validity...');
         const isTokenValid = await checkTokenValidity();
+        console.log('🔍 Token validity result:', isTokenValid);
 
         if (!isTokenValid) {
-          throw new Error('Token invalid');
+          console.log('❌ Token validation failed');
+
+          // Retry logic for token validation failures
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`🔄 Retrying auth check (attempt ${retryCount}/${maxRetries})...`);
+            setTimeout(() => {
+              if (mounted) checkAuth();
+            }, 1000 * retryCount); // Exponential backoff
+            return;
+          }
+
+          throw new Error('Token invalid after retries');
         }
 
+        console.log('✅ Auth check successful');
         if (mounted) {
           setAuthState({
             isAuthenticated: true,
@@ -46,6 +69,7 @@ export const useAuthProtection = (redirectTo: string = '/login') => {
         }
       } catch (error) {
         console.error('❌ Auth protection failed:', error);
+        console.log('🔄 Clearing auth data and redirecting...');
 
         if (mounted) {
           localStorage.removeItem('token');
@@ -60,8 +84,12 @@ export const useAuthProtection = (redirectTo: string = '/login') => {
           });
 
           const currentPath = window.location.pathname;
+          console.log('📍 Current path during auth failure:', currentPath);
+
+          // Don't redirect if we're on login/signup pages
           if (!['/login', '/signup', '/'].includes(currentPath)) {
             toast.error('Session expired. Please log in again.');
+            console.log('🚀 Redirecting to:', redirectTo);
             navigate(redirectTo);
           }
         }

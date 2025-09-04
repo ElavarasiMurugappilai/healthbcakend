@@ -76,14 +76,10 @@ API.interceptors.response.use(
 
       const token = localStorage.getItem("token");
       const refreshToken = localStorage.getItem("refreshToken");
-      const currentPath = window.location.pathname;
 
       if (!token || !refreshToken) {
         console.log("❌ No valid tokens, redirecting to login");
-        // Don't call handleAuthFailure on quiz page - let quiz handle it
-        if (currentPath !== "/quiz") {
-          handleAuthFailure();
-        }
+        handleAuthFailure();
         return Promise.reject(error);
       }
 
@@ -104,10 +100,7 @@ API.interceptors.response.use(
         return API(originalRequest);
       } catch (refreshError) {
         console.error("❌ Refresh failed, forcing logout:", refreshError);
-        // Don't call handleAuthFailure on quiz page - let quiz handle it
-        if (currentPath !== "/quiz") {
-          handleAuthFailure();
-        }
+        handleAuthFailure();
         return Promise.reject(error);
       }
     }
@@ -130,12 +123,6 @@ function handleAuthFailure() {
   console.log("🧹 Clearing invalid auth data");
 
   const currentPath = window.location.pathname;
-  
-  // Don't clear tokens or redirect if user is on quiz page - let the quiz handle it
-  if (currentPath === "/quiz") {
-    console.log("⚠️ Auth failure on quiz page - not clearing tokens, letting quiz handle it");
-    return;
-  }
 
   if (!["/login", "/signup", "/"].includes(currentPath)) {
     localStorage.setItem("returnUrl", currentPath);
@@ -157,15 +144,40 @@ function handleAuthFailure() {
 export const checkTokenValidity = async (): Promise<boolean> => {
   try {
     const token = localStorage.getItem("token");
-    if (!token) return false;
+    if (!token) {
+      console.log("❌ No token found in localStorage");
+      return false;
+    }
 
+    console.log("🔍 Making token validation request to backend...");
     const response = await axios.get(`${API.defaults.baseURL}/auth/verify`, {
       headers: { Authorization: `Bearer ${token}` },
+      timeout: 5000, // 5 second timeout
+    });
+
+    console.log("✅ Token validation response:", {
+      status: response.status,
+      data: response.data,
+      valid: response.status === 200
     });
 
     return response.status === 200;
-  } catch (err) {
-    console.log("Token validation failed:", err);
+  } catch (err: any) {
+    console.log("❌ Token validation failed:", {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data,
+      url: err.config?.url,
+      isNetworkError: !err.response,
+      isTimeout: err.code === 'ECONNABORTED'
+    });
+
+    // For network errors or timeouts, don't immediately fail - could be temporary
+    if (!err.response || err.code === 'ECONNABORTED') {
+      console.log("⚠️ Network error during token validation, treating as valid for now");
+      return true; // Assume valid to prevent unnecessary logouts
+    }
+
     return false;
   }
 };

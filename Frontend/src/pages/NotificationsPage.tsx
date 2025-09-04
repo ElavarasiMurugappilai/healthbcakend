@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../api"; // Your authenticated Axios instance
-import toast from "../components/ui/use-toast"; // Sonner toast
+import { toast } from "../components/ui/use-toast"; // Sonner toast
 import { Card, CardHeader, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 

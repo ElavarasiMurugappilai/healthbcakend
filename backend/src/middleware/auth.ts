@@ -40,16 +40,16 @@ export const authenticateToken = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    console.log(` Auth middleware: ${req.method} ${req.originalUrl}`);
-    console.log(` Headers:`, {
+    console.log(`🔐 Auth middleware: ${req.method} ${req.originalUrl}`);
+    console.log(`📋 Headers:`, {
       authorization: req.headers.authorization ? 'present' : 'missing',
       authPreview: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'none'
     });
-    
+
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log(` Auth failed: No valid token provided`);
+      console.log(`❌ Auth failed: No valid token provided`);
       res.status(401).json({
         success: false,
         message: 'Access denied. No valid token provided.'
@@ -58,8 +58,9 @@ export const authenticateToken = async (
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    
+
     if (!token) {
+      console.log(`❌ Auth failed: Token is empty`);
       res.status(401).json({
         success: false,
         message: 'Access denied. Token is empty.'
@@ -67,13 +68,17 @@ export const authenticateToken = async (
       return;
     }
 
+    console.log(`🔍 Verifying JWT token...`);
     try {
       const decoded = verifyToken(token);
-      
+      console.log(`✅ JWT decoded successfully:`, { userId: decoded.userId, email: decoded.email });
+
       // Fetch user from database
+      console.log(`🔍 Fetching user from database: ${decoded.userId}`);
       const user = await User.findById(decoded.userId).select('-password');
-      
+
       if (!user) {
+        console.log(`❌ User not found in database: ${decoded.userId}`);
         res.status(401).json({
           success: false,
           message: 'Invalid token. User not found.'
@@ -81,8 +86,11 @@ export const authenticateToken = async (
         return;
       }
 
+      console.log(`✅ User found:`, { id: user._id, email: user.email, isVerified: user.isVerified });
+
       // Skip verification check in development mode
       if (!user.isVerified && process.env.NODE_ENV !== 'development') {
+        console.log(`❌ User not verified and not in development mode`);
         res.status(401).json({
           success: false,
           message: 'Account not verified. Please verify your email.'
@@ -91,8 +99,10 @@ export const authenticateToken = async (
       }
 
       req.user = user;
+      console.log(`🎯 Auth middleware passed, proceeding to next middleware`);
       next();
-    } catch (jwtError) {
+    } catch (jwtError: any) {
+      console.log(`❌ JWT verification failed:`, jwtError.message);
       if (jwtError instanceof jwt.TokenExpiredError) {
         res.status(401).json({
           success: false,
@@ -112,7 +122,7 @@ export const authenticateToken = async (
       return;
     }
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    console.error('❌ Auth middleware error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error during authentication.'

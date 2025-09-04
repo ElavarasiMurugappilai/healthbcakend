@@ -279,7 +279,7 @@ const EnhancedQuizPage = () => {
     setLoading(true);
     try {
       console.log("📤 Frontend sending quiz data:", JSON.stringify(formData, null, 2));
-      
+
       // Save profile and dashboard preferences
       const payload = {
         ...formData,
@@ -314,19 +314,32 @@ const EnhancedQuizPage = () => {
               stepTarget: formData.stepTarget
             };
             localStorage.setItem("user", JSON.stringify(updatedUser));
-            
+
             // Dispatch event to update dashboard
             window.dispatchEvent(new Event("user-updated"));
-            
+
             console.log("✅ Updated localStorage user with quiz data:", updatedUser);
           } catch (error) {
             console.error("❌ Error updating localStorage user:", error);
           }
         }
-        
+
+        console.log("🎯 Quiz submission successful, preparing to navigate to dashboard");
+        console.log("🔑 Current auth state before navigation:", {
+          token: localStorage.getItem('token') ? 'present' : 'missing',
+          user: localStorage.getItem('user') ? 'present' : 'missing',
+          currentPath: window.location.pathname
+        });
+
         toast.success("Quiz completed successfully!");
         localStorage.removeItem(QUIZ_STORAGE_KEY);
-        navigate("/dashboard");
+
+        // Add a small delay to ensure auth state is updated
+        console.log("⏳ Waiting for auth state to stabilize...");
+        setTimeout(() => {
+          console.log("🚀 Navigating to /dashboard...");
+          navigate("/dashboard");
+        }, 500);
       }
     } catch (error) {
       console.error("Error submitting quiz:", error);
@@ -361,22 +374,22 @@ const EnhancedQuizPage = () => {
 
   // Step Components
   const PersonalProfileStep = ({ formData, updateFormData }: any) => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <Label htmlFor="dateOfBirth">Date of Birth</Label>
+          <Label htmlFor="dateOfBirth" className="text-sm">Date of Birth</Label>
           <Input
             id="dateOfBirth"
             type="date"
             value={formData.dateOfBirth}
             onChange={(e) => updateFormData('dateOfBirth', e.target.value)}
-            className="mt-1"
+            className="mt-1 h-9 sm:h-10"
           />
         </div>
         <div>
-          <Label htmlFor="gender">Gender</Label>
+          <Label htmlFor="gender" className="text-sm">Gender</Label>
           <Select value={formData.gender} onValueChange={(value) => updateFormData('gender', value)}>
-            <SelectTrigger className="mt-1">
+            <SelectTrigger className="mt-1 h-9 sm:h-10">
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
             <SelectContent>
@@ -417,10 +430,10 @@ const EnhancedQuizPage = () => {
   );
 
   const FitnessGoalsStep = ({ formData, updateFormData }: any) => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <Label>Fitness Goal</Label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+        <Label className="text-sm">Fitness Goal</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-2">
           {fitnessGoals.map((goal) => (
             <Card
               key={goal.id}
@@ -431,10 +444,10 @@ const EnhancedQuizPage = () => {
               }`}
               onClick={() => updateFormData('fitnessGoal', goal.id)}
             >
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl mb-2">{goal.icon}</div>
-                <h3 className="font-medium">{goal.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{goal.description}</p>
+              <CardContent className="p-3 sm:p-4 text-center">
+                <div className="text-xl sm:text-2xl mb-2">{goal.icon}</div>
+                <h3 className="font-medium text-sm sm:text-base">{goal.title}</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{goal.description}</p>
               </CardContent>
             </Card>
           ))}
@@ -480,10 +493,10 @@ const EnhancedQuizPage = () => {
   );
 
   const DoctorsStep = ({ formData, updateFormData }: { formData: QuizData; updateFormData: (key: keyof QuizData, value: any) => void }) => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h3 className="font-medium mb-4">System Doctors</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="font-medium mb-3 sm:mb-4 text-sm sm:text-base">System Doctors</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {doctors.map((doctor) => (
             <Card
               key={doctor._id}
@@ -499,18 +512,18 @@ const EnhancedQuizPage = () => {
                 updateFormData('selectedDoctors', selected);
               }}
             >
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                    <Stethoscope className="w-6 h-6 text-blue-600" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                   </div>
-                  <div>
-                    <h4 className="font-medium">{doctor.name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{doctor.specialization}</p>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-medium text-sm sm:text-base truncate">{doctor.name}</h4>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">{doctor.specialization}</p>
                     {doctor.rating && (
                       <div className="flex items-center mt-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-sm ml-1">{doctor.rating}</span>
+                        <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 fill-current" />
+                        <span className="text-xs sm:text-sm ml-1">{doctor.rating}</span>
                       </div>
                     )}
                   </div>
@@ -594,11 +607,11 @@ const EnhancedQuizPage = () => {
 
 
   const DashboardSelectionStep = ({ formData, updateFormData }: any) => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h3 className="font-medium mb-4">Choose Dashboard Cards</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {dashboardCards.map((card) => {
+        <h3 className="font-medium mb-3 sm:mb-4 text-sm sm:text-base">Choose Dashboard Cards</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          {dashboardCards.map((card: any) => {
             const IconComponent = card.icon;
             return (
               <Card
@@ -610,19 +623,19 @@ const EnhancedQuizPage = () => {
                 }`}
                 onClick={() => {
                   const selected = formData.selectedCards.includes(card.id)
-                    ? formData.selectedCards.filter((id) => id !== card.id)
+                    ? formData.selectedCards.filter((id: any) => id !== card.id)
                     : [...formData.selectedCards, card.id];
                   updateFormData('selectedCards', selected);
                 }}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-blue-600" />
+                <CardContent className="p-3 sm:p-4">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                      <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                     </div>
-                    <div>
-                      <h4 className="font-medium">{card.title}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{card.description}</p>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium text-sm sm:text-base">{card.title}</h4>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{card.description}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -670,14 +683,14 @@ const EnhancedQuizPage = () => {
       })}
 
       {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-4 py-8 h-screen overflow-y-auto">
+      <div className="relative z-10 container mx-auto px-4 py-4 sm:py-8 min-h-screen overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
               Health Profile Setup
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 px-2">
               Let's personalize your health monitoring experience
             </p>
           </div>
@@ -694,12 +707,12 @@ const EnhancedQuizPage = () => {
           </div>
 
           {/* Step Navigation */}
-          <div className="flex justify-center mb-4 max-w-4xl mx-auto w-full">
-            <div className="flex space-x-2 overflow-x-auto pb-2">
+          <div className="flex justify-center mb-4 max-w-4xl mx-auto w-full px-2">
+            <div className="flex space-x-1 sm:space-x-2 overflow-x-auto pb-2 w-full justify-center">
               {quizSteps.map((step, index) => (
                 <div
                   key={index}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm whitespace-nowrap ${
+                  className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 sm:py-2 rounded-full text-xs sm:text-sm whitespace-nowrap flex-shrink-0 ${
                     index === currentStep
                       ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                       : index < currentStep
@@ -708,11 +721,11 @@ const EnhancedQuizPage = () => {
                   }`}
                 >
                   {index < currentStep ? (
-                    <Check size={16} />
+                    <Check size={14} />
                   ) : (
-                    <span className="w-4 h-4 rounded-full bg-current opacity-30" />
+                    <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-current opacity-30" />
                   )}
-                  <span className="hidden sm:inline">{step.title}</span>
+                  <span className="hidden xs:inline sm:inline">{step.title}</span>
                 </div>
               ))}
             </div>
@@ -729,12 +742,12 @@ const EnhancedQuizPage = () => {
                 transition={{ duration: 0.3 }}
               >
                 <Card className="mb-4 shadow-2xl border-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="mb-4">
-                      <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="mb-3 sm:mb-4">
+                      <h2 className="text-base sm:text-lg lg:text-xl font-semibold text-gray-900 dark:text-white mb-2">
                         {quizSteps[currentStep].title}
                       </h2>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                         {quizSteps[currentStep].description}
                       </p>
                     </div>
@@ -750,20 +763,20 @@ const EnhancedQuizPage = () => {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between items-center max-w-4xl mx-auto w-full px-4 sm:px-0 py-6">
+          <div className="flex justify-between items-center max-w-4xl mx-auto w-full px-2 sm:px-0 py-4 sm:py-6">
             <Button
               variant="outline"
               onClick={prevStep}
               disabled={currentStep === 0}
-              className="flex items-center gap-2 h-10 sm:h-11"
+              className="flex items-center gap-1 sm:gap-2 h-9 sm:h-10 px-3 sm:px-4"
             >
-              <ArrowLeft size={16} />
-              <span className="hidden sm:inline">Previous</span>
+              <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline sm:inline text-xs sm:text-sm">Previous</span>
             </Button>
 
-            <div className="text-center">
+            <div className="text-center flex-1 mx-2 sm:mx-4">
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                {currentStep + 1} of {quizSteps.length} steps
+                {currentStep + 1} of {quizSteps.length}
               </p>
             </div>
 
@@ -771,27 +784,27 @@ const EnhancedQuizPage = () => {
               <Button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 h-10 sm:h-11"
+                className="flex items-center gap-1 sm:gap-2 bg-green-600 hover:bg-green-700 h-9 sm:h-10 px-3 sm:px-4"
               >
                 {loading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span className="hidden sm:inline">Saving...</span>
+                    <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+                    <span className="hidden xs:inline sm:inline text-xs sm:text-sm">Saving...</span>
                   </>
                 ) : (
                   <>
-                    <Check size={16} />
-                    <span className="hidden sm:inline">Complete Setup</span>
+                    <Check size={14} className="sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline sm:inline text-xs sm:text-sm">Complete</span>
                   </>
                 )}
               </Button>
             ) : (
               <Button
                 onClick={nextStep}
-                className="flex items-center gap-2 h-10 sm:h-11"
+                className="flex items-center gap-1 sm:gap-2 h-9 sm:h-10 px-3 sm:px-4"
               >
-                <span className="hidden sm:inline">Next</span>
-                <ArrowRight size={16} />
+                <span className="hidden xs:inline sm:inline text-xs sm:text-sm">Next</span>
+                <ArrowRight size={14} className="sm:w-4 sm:h-4" />
               </Button>
             )}
           </div>
